@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import Link from '../src/Link';
-import { makeStyles } from '@material-ui/core/styles';
-import { Container, Typography, Box, MuiLink, Button, TextField } from '@material-ui/core';
+import theme from '../src/theme';
+import { Container, Typography, Box, MuiLink, Button, TextField, Grid } from '@material-ui/core';
 
 const PostLink = props => (
   <Link href="/summoner/[id]" as={`/summoner/${props.id}`}>
@@ -31,27 +32,38 @@ export default class Index extends React.Component {
 
   render() {
     return (
-      <Container maxWidth="sm" >
-        <Box my={4}>
+      <MuiThemeProvider theme={theme}>
+
+        <Grid
+          container
+          spacing={0}
+          direction="column"
+          alignItems="center"
+          justify="center"
+          style={{ minHeight: '100vh' }}
+        >
 
           <Typography variant="h1" component="h1" gutterBottom>
             lolProject
-        </Typography>
+          </Typography>
 
           <Link href="/about" color="secondary">
             Go to the about page
-        </Link>
+          </Link>
 
-          <form >
-            <label>Summoner Name:</label>
-            <input type="text" value={this.state.value} onChange={this.handleChange} />
-            <Button variant="outlined" color="primary">
-              <PostLink id={this.state.value} />
-            </Button>
-          </form>
+          <Box>
+            <form >
+              <label>Summoner Name:</label>
+              <input type="text" value={this.state.value} onChange={this.handleChange} />
+              <Button>
+                <PostLink id={this.state.value} />
+              </Button>
+            </form>
+          </Box>
 
-        </Box>
-      </Container>
+        </Grid>
+      </MuiThemeProvider>
+
     );
   }
 }

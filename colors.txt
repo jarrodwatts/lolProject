@@ -1,0 +1,4 @@
+#1e2022, Black
+#EDF2F4, darkGrey
+#c9d6df, grey
+#f0f5f9, white
