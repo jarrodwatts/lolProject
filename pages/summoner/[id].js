@@ -1,9 +1,37 @@
 import React, { Component } from 'react';
 import { useRouter } from 'next/router';
-import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Avatar } from '@material-ui/core';
+import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Avatar, GridList, GridListTile, Paper, } from '@material-ui/core';
 import fetch from 'isomorphic-unfetch';
+import { makeStyles } from '@material-ui/core/styles';
 
-const RIOT_API_KEY = "RGAPI-6e90627b-4817-4836-8d92-19ab94fc048c"
+const RIOT_API_KEY = "RGAPI-9a278514-9593-459e-8fd1-4900c6088aca"
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        flexGrow: 1,
+    },
+    paper: {
+        padding: theme.spacing(2),
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+    },
+
+    champRow: {
+        padding: theme.spacing(2),
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+
+    topSpacing: {
+        paddingTop: theme.spacing(2)
+    },
+
+}));
 
 function profileRenderHandler(profile) {
 
@@ -15,45 +43,7 @@ function matchesRenderHandler(matches) {
 
 function matchDetailsArrayRenderHandler(matchDetailsArray, puuid) {
 
-    return (
-        <Grid style={{ minWidth: '100%' }}>
 
-            {matchDetailsArray.map((item, key) => (
-
-                <Grid key={key} container direction="row" justify="flex-start" alignItems="center" style={{ padding: '16px', backgroundColor: '#202B43', minWidth: '100%', color: '#fff' }}>
-
-                    {/* Image */}
-                    <Avatar alt="profile-picture" src="/assets/champions/blitzcrank.png" />
-
-                    {/* Place and Type */}
-                    <Box style={{ backgroundColor: '#202B43', color: '#fff', paddingLeft: '16px' }}>
-                        <Typography variant="h6" component="h6">{formatPlacement(findPlacement(item, puuid))} Place</Typography>
-                        <Typography variant="h6" component="h6">Type</Typography>
-                    </Box>
-
-
-                    {/* Loop through and map units */
-                        item.info.participants[getParticipantsIndex(item, puuid)].units.map((unit, key) => (
-                            <Box key={key} style={{ paddingRight: '8px' }}
-                            >
-                                <Avatar
-                                    key={key}
-                                    alt={unit.character_id}
-                                    src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`}
-
-                                />
-                            </Box>
-                        ))
-
-                    }
-
-
-                </Grid>
-
-            ))}
-
-        </Grid>
-    )
 }
 
 
@@ -62,65 +52,54 @@ function Summoner({ profile, matches, matchDetailsArray }) {
     console.log(matches);
     console.log(matchDetailsArray);
 
+    const classes = useStyles();
+
     return (
-        //Main Background Grid
-        <Grid container style={{ minHeight: '100vh' }}
-            direction="column" alignItems="flex-start">
 
-            {/* Container that Centers things pushes them into the middle of the page */}
-            <Container maxWidth="lg">
+        // Main Container
+        <Container className={classes.topSpacing}>
 
-                <Grid container spacing={3} style={{ paddingTop: '16px' }}>
+            <Grid container spacing={3}>
 
-                    <Grid item xs={3}>
-                        {/* LogoNameRank */}
-                        <Grid container direction="row" alignItems="center" justify="space-around" style={{ padding: '16px', backgroundColor: '#202B43' }}>
-                            {/* <Grid container direction="row" alignItems="center" justify="space-around"> */}
-                            {/* TODO: Replace blitzcrank with profileIconId */}
-                            <Avatar alt="profile-picture" src="/assets/champions/blitzcrank.png" style={{ width: '25%', height: '25%' }} />
-                            {/* </Grid> */}
-
-                            <Grid container direction="column" alignItems="center" justify="center" style={{ width: '75%', backgroundColor: '#202B43' }} >
-                                <Typography variant="h6" component="h6" style={{ color: '#fff', padding: '16px' }}>{profile.name}</Typography>
-                                <Typography variant="h6" component="h6" style={{ color: '#fff', padding: '16px' }}>Rank</Typography>
-                            </Grid>
-                        </Grid>
-
-                        {/* Rank */}
-                        <Grid>
-                            <Typography variant="h3" component="h3" style={{ color: '#fff', padding: '16px' }}>Teamfight Tactics</Typography>
-                            <Typography variant="h3" component="h3" style={{ color: '#fff', padding: '16px' }}>O RANK</Typography>
-                        </Grid>
-
-                        {/* Placement Distribution */}
-                        <Grid>
-                            <Typography variant="h3" component="h3" style={{ color: '#fff', padding: '16px' }}>Teamfight Tactics</Typography>
-                            <Typography variant="h3" component="h3" style={{ color: '#fff', padding: '16px' }}>O RANK</Typography>
-                        </Grid>
-
-                    </Grid>
-
-                    {/* Match History */}
-                    <Grid container item xs={9} style={{ padding: '16px' }}>
-                        {/* <Typography variant="h2" component="h2" style={{ color: '#fff', padding: '16px' }}>Match History</Typography>
-                        <Typography variant="h2" component="h2" style={{ color: '#fff', padding: '16px' }}>Match History</Typography>
-                        <Typography variant="h2" component="h2" style={{ color: '#fff', padding: '16px' }}>Match History</Typography>
-                        <Typography variant="h2" component="h2" style={{ color: '#fff', padding: '16px' }}>Match History</Typography>
-                        <Typography variant="h2" component="h2" style={{ color: '#fff', padding: '16px' }}>Match History</Typography>
-                        <Typography variant="h2" component="h2" style={{ color: '#fff', padding: '16px' }}>Match History</Typography>
-                        <Typography variant="h2" component="h2" style={{ color: '#fff', padding: '16px' }}>Match History</Typography>
-                        <Typography variant="h2" component="h2" style={{ color: '#fff', padding: '16px' }}>Match History</Typography> */}
-
-                        {matchDetailsArrayRenderHandler(matchDetailsArray, profile.puuid)}
-
-
-                    </Grid>
-
-
+                {/* Left Column */}
+                <Grid item xs={3}>
+                    <Paper className={classes.paper}>1</Paper>
                 </Grid>
 
-            </Container>
-        </Grid>
+                {/* Right Column */}
+                <Grid container item xs={9} >
+
+                    {/* Map matches into A paper element */}
+                    {matchDetailsArray.map((match, key) => (
+
+                        <Paper key={key} style={{ display: 'flex', flexDirection: 'row', padding: '8px', justifyContent: 'center' }}>
+
+                            <Box style={{ width: '33%' }}>
+
+                            </Box>
+                            {/* <Grid className={classes.champRow}> */}
+                            {/* //Map units into row of avatars */}
+                            {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
+                                <Grid key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} />
+
+                                    <Box style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
+                                        <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
+                                        <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
+                                    </Box>
+                                </Grid>
+                            ))}
+                            {/* </Grid> */}
+
+                        </Paper>
+
+                    ))}
+                </Grid>
+            </Grid>
+
+
+        </Container>
     )
 }
 

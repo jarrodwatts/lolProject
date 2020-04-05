@@ -18,12 +18,12 @@ const theme = createMuiTheme({
       },
     },
 
-    MuiGrid: {
-      container: {
-        // background: 'linear-gradient(75deg, #4568DC 30%, #B06AB3 90%)',
-        background: '#131c2e',
-      }
-    },
+    // MuiGrid: {
+    //   container: {
+    //     // background: 'linear-gradient(75deg, #4568DC 30%, #B06AB3 90%)',
+    //     background: '#131c2e',
+    //   }
+    // },
 
     MuiInputBase: {
       input: {
