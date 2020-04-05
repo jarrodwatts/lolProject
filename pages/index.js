@@ -2,13 +2,10 @@ import React, { Component } from 'react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Link from '../src/Link';
 import theme from '../src/theme';
-import { Container, Typography, Box, MuiLink, Button, TextField, Grid } from '@material-ui/core';
-
-const PostLink = props => (
-  <Link href="/summoner/[id]" as={`/summoner/${props.id}`}>
-    Search
-  </Link>
-);
+import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Icon, Paper } from '@material-ui/core';
+import Header from '../Components/Header';
+import BigLogo from '../Components/BigLogo';
+import BigSearch from '../Components/BigSearch';
 
 export default class Index extends React.Component {
 
@@ -32,37 +29,25 @@ export default class Index extends React.Component {
 
   render() {
     return (
-      <MuiThemeProvider theme={theme}>
+      //Main Background Grid
+      <Grid container style={{ minHeight: '100vh' }}
+        direction="column" alignItems="flex-start">
 
-        <Grid
-          container
-          spacing={0}
-          direction="column"
-          alignItems="center"
-          justify="center"
-          style={{ minHeight: '100vh' }}
-        >
+        {/* Header Component Here */}
+        <Header />
+        {/* Container that Centers things pushes them into the middle of the page */}
+        <Container maxWidth="sm">
 
-          <Typography variant="h1" component="h1" gutterBottom>
-            lolProject
-          </Typography>
+          {/* Big Logo Component Here */}
+          <BigLogo />
 
-          <Link href="/about" color="secondary">
-            Go to the about page
-          </Link>
+          {/* Component with Search Bar, Region Selector, and Search Icon Here */}
+          <BigSearch />
+          
+          {/* Component with the Four Game Cards Here */}
 
-          <Box>
-            <form >
-              <label>Summoner Name:</label>
-              <input type="text" value={this.state.value} onChange={this.handleChange} />
-              <Button>
-                <PostLink id={this.state.value} />
-              </Button>
-            </form>
-          </Box>
-
-        </Grid>
-      </MuiThemeProvider>
+        </Container>
+      </Grid>
 
     );
   }

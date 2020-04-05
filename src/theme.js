@@ -8,7 +8,7 @@ const theme = createMuiTheme({
       // Name of the rule
       text: {
         // Some CSS
-        background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+        background: 'linear-gradient(45deg, #FFC371 30%, #FF5F6D 90%)',
         borderRadius: 3,
         border: 0,
         color: 'white',
@@ -20,7 +20,14 @@ const theme = createMuiTheme({
 
     MuiGrid: {
       container: {
-        background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+        // background: 'linear-gradient(75deg, #4568DC 30%, #B06AB3 90%)',
+        background: '#131c2e',
+      }
+    },
+
+    MuiInputBase: {
+      input: {
+        color: '#fff'
       }
     }
 
