@@ -4,7 +4,7 @@ import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Avatar, G
 import fetch from 'isomorphic-unfetch';
 import { makeStyles } from '@material-ui/core/styles';
 
-const RIOT_API_KEY = "RGAPI-9a278514-9593-459e-8fd1-4900c6088aca"
+const RIOT_API_KEY = "RGAPI-79795c5d-ca1e-4c46-bef0-393b38fa8dbf"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -23,8 +23,6 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         flexDirection: 'row',
         flexWrap: 'nowrap',
-        justifyContent: 'center',
-        alignItems: 'center'
     },
 
     topSpacing: {
@@ -47,10 +45,11 @@ function matchDetailsArrayRenderHandler(matchDetailsArray, puuid) {
 }
 
 
-function Summoner({ profile, matches, matchDetailsArray }) {
+function Summoner({ profile, matches, matchDetailsArray, league }) {
     console.log(profile);
     console.log(matches);
     console.log(matchDetailsArray);
+    console.log(league)
 
     const classes = useStyles();
 
@@ -59,40 +58,58 @@ function Summoner({ profile, matches, matchDetailsArray }) {
         // Main Container
         <Container className={classes.topSpacing}>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={2}>
 
                 {/* Left Column */}
-                <Grid item xs={3}>
-                    <Paper className={classes.paper}>1</Paper>
+                <Grid item container direction="column" xs={3} spacing={2}>
+
+                    <Grid item>
+                        <Paper className={classes.paper}>
+                            <Typography>{league[0].summonerName}</Typography>
+                        </Paper>
+                    </Grid>
+
+                    <Grid item>
+                        <Paper className={classes.paper}>
+                            <Typography>{league[0].tier} {league[0].rank}</Typography>
+                        </Paper>
+                    </Grid>
+
+                    <Grid item>
+                        <Paper className={classes.paper}>
+                            <Typography>Wins: {league[0].wins}</Typography>
+                        </Paper>
+                    </Grid>
                 </Grid>
 
                 {/* Right Column */}
-                <Grid container item xs={9} >
+                <Grid container item xs={8} spacing={1} >
 
                     {/* Map matches into A paper element */}
                     {matchDetailsArray.map((match, key) => (
+                        <Grid item>
+                            <Paper key={key} style={{ display: 'flex', flexDirection: 'row', padding: '8px', justifyContent: 'center' }}>
 
-                        <Paper key={key} style={{ display: 'flex', flexDirection: 'row', padding: '8px', justifyContent: 'center' }}>
+                                <Box style={{ width: '33%' }}>
 
-                            <Box style={{ width: '33%' }}>
+                                </Box>
+                                {/* <Grid className={classes.champRow}> */}
+                                {/* //Map units into row of avatars */}
+                                {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
+                                    <Grid key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: 'auto', }}>
+                                        <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} />
 
-                            </Box>
-                            {/* <Grid className={classes.champRow}> */}
-                            {/* //Map units into row of avatars */}
-                            {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
-                                <Grid key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} />
+                                        <Box style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                            <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
+                                            <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
+                                            <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
+                                        </Box>
+                                    </Grid>
+                                ))}
+                                {/* </Grid> */}
 
-                                    <Box style={{ display: 'flex', justifyContent: 'center' }}>
-                                        <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
-                                        <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
-                                        <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
-                                    </Box>
-                                </Grid>
-                            ))}
-                            {/* </Grid> */}
-
-                        </Paper>
+                            </Paper>
+                        </Grid>
 
                     ))}
                 </Grid>
@@ -113,7 +130,7 @@ export async function getServerSideProps(context) {
         `https://oc1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${id}` + '?api_key=' + RIOT_API_KEY
     );
     const profile = await resProfile.json();
-    console.log(`Fetched profile: ${profile.id}`);
+    //console.log(`Fetched profile: ${profile.id}`);
 
 
     //2. Get matches, using puuid
@@ -123,7 +140,7 @@ export async function getServerSideProps(context) {
         `https://americas.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids` + '?api_key=' + RIOT_API_KEY
     );
     const matches = await resMatches.json();
-    console.log(`Fetched matches: ${matches}`);
+    //console.log(`Fetched matches: ${matches}`);
 
 
     //3. Get match details, using match ID
@@ -131,7 +148,7 @@ export async function getServerSideProps(context) {
     let matchDetailsArray = [];
 
     // for (let i = 0; i < matches.length; i++) {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 5; i++) {
         let resMatchDetails = await fetch(
             `https://americas.api.riotgames.com/tft/match/v1/matches/${matches[i]}` + '?api_key=' + RIOT_API_KEY
 
@@ -141,14 +158,25 @@ export async function getServerSideProps(context) {
         matchDetailsArray.push(matchDetails)
     }
 
-    console.log(`Fetched match details: ${matchDetailsArray}`);
+    //console.log(`Fetched match details: ${matchDetailsArray}`);
+
+    //4. Get Profile Details, using encryptedSummonerId
+    /** Match Schema:  A lot */
+    //https://oc1.api.riotgames.com/tft/league/v1/entries/by-summoner/gJgBREkCeTdA6jBXWU7C5JZgBT6ZrnxYSe7vZCs2ggMp-OE
+    const encryptedSummonerId = profile.id;
+    const resLeague = await fetch(
+        `https://oc1.api.riotgames.com/tft/league/v1/entries/by-summoner/${encryptedSummonerId}` + '?api_key=' + RIOT_API_KEY
+    );
+    const league = await resleague[0].json();
+    console.log(`Fetched league: ${league}`);
 
 
     return {
         props: {
             profile,
             matches,
-            matchDetailsArray
+            matchDetailsArray,
+            league,
         }
     };
 }
