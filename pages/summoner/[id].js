@@ -4,7 +4,7 @@ import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Avatar, G
 import fetch from 'isomorphic-unfetch';
 import { makeStyles } from '@material-ui/core/styles';
 
-const RIOT_API_KEY = "RGAPI-79795c5d-ca1e-4c46-bef0-393b38fa8dbf"
+const RIOT_API_KEY = "RGAPI-a45a8776-549b-43be-a486-bda80da9e3bf"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -41,6 +41,71 @@ function matchesRenderHandler(matches) {
 
 function matchDetailsArrayRenderHandler(matchDetailsArray, puuid) {
 
+}
+
+function placementColorHandler(placement) {
+    switch (placement) {
+        case 1:
+            return (
+                <Paper elevation={3} style={{ backgroundColor: '#EBB352', color: '#fff' }}>
+                    <Typography>
+                        <b>1</b>
+                    </Typography>
+                </Paper>)
+
+        case 2:
+            return (
+                <Paper elevation={3} style={{ backgroundColor: '#A6ACB9', color: '#fff' }}>
+                    <Typography>
+                        <b>2</b>
+                    </Typography>
+                </Paper>)
+
+        case 3:
+            return (
+                <Paper elevation={3} style={{ backgroundColor: '#AE8967', color: '#fff' }}>
+                    <Typography>
+                        <b>3</b>
+                    </Typography>
+                </Paper>)
+
+        default:
+            return (
+                <Paper elevation={3} style={{ backgroundColor: '#eee', }}>
+                    <Typography>
+                        {placement}
+                    </Typography>
+                </Paper>)
+    }
+
+}
+
+function placementDistributionHandler(matchDetailsArray, profile) {
+    //Loop through each match and grab placement chuck into a placement array and map it
+    let placements = [];
+
+    for (let i = 0; i < matchDetailsArray.length; i++) {
+        placements.push(matchDetailsArray[i].info.participants[
+            getParticipantsIndex(matchDetailsArray[i], profile.puuid)
+        ].placement
+        )
+    }
+
+    console.log(placements)
+
+    return (
+        <Box>
+            <Typography style={{ paddingBottom: '8px' }}>Placement Distribution</Typography>
+            <Typography style={{ paddingBottom: '8px' }}>Average Place: <b>{average(placements)}</b></Typography>
+            <Grid container spacing={1} >
+                {placements.map((placement) => (
+                    <Grid item style={{ width: '20%', }}>
+                        {placementColorHandler(placement)}
+                    </Grid>
+                ))}
+            </Grid>
+        </Box>
+    )
 
 }
 
@@ -58,40 +123,50 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
         // Main Container
         <Container className={classes.topSpacing}>
 
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
 
                 {/* Left Column */}
-                <Grid item container direction="column" xs={3} spacing={2}>
+                <Grid item container direction="column" xs={3} spacing={1} style={{ maxWidth: '25%' }}>
 
                     <Grid item>
                         <Paper className={classes.paper}>
-                            <Typography>{league[0].summonerName}</Typography>
+                            <Typography >{league[0].summonerName}</Typography>
                         </Paper>
                     </Grid>
 
                     <Grid item>
                         <Paper className={classes.paper}>
-                            <Typography>{league[0].tier} {league[0].rank}</Typography>
+                            <img
+                                style={{ width: '50%' }}
+                                src={`/assets/rankedEmblems/Emblem_${capitalizeFirstLetter(league[0].tier.toLocaleLowerCase())}.png`}></img>
+                            <Typography variant="subtitle2" color="primary">{league[0].tier} {league[0].rank}</Typography>
                         </Paper>
                     </Grid>
 
                     <Grid item>
                         <Paper className={classes.paper}>
-                            <Typography>Wins: {league[0].wins}</Typography>
+                            <Typography>Season Wins: <b>{league[0].wins}</b></Typography>
                         </Paper>
                     </Grid>
+
+                    <Grid item>
+                        <Paper className={classes.paper}>
+                            {placementDistributionHandler(matchDetailsArray, profile)}
+                        </Paper>
+                    </Grid>
+
                 </Grid>
 
                 {/* Right Column */}
-                <Grid container item xs={8} spacing={1} >
+                <Grid container item xs={9} spacing={1} >
 
                     {/* Map matches into A paper element */}
                     {matchDetailsArray.map((match, key) => (
                         <Grid item>
                             <Paper key={key} style={{ display: 'flex', flexDirection: 'row', padding: '8px', justifyContent: 'center' }}>
 
-                                <Box style={{ width: '33%' }}>
-
+                                <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: 'auto', }}>
+                                    <Typography variant="subtitle2"></Typography>
                                 </Box>
                                 {/* <Grid className={classes.champRow}> */}
                                 {/* //Map units into row of avatars */}
@@ -148,7 +223,7 @@ export async function getServerSideProps(context) {
     let matchDetailsArray = [];
 
     // for (let i = 0; i < matches.length; i++) {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 20; i++) {
         let resMatchDetails = await fetch(
             `https://americas.api.riotgames.com/tft/match/v1/matches/${matches[i]}` + '?api_key=' + RIOT_API_KEY
 
@@ -167,7 +242,7 @@ export async function getServerSideProps(context) {
     const resLeague = await fetch(
         `https://oc1.api.riotgames.com/tft/league/v1/entries/by-summoner/${encryptedSummonerId}` + '?api_key=' + RIOT_API_KEY
     );
-    const league = await resleague[0].json();
+    const league = await resLeague.json();
     console.log(`Fetched league: ${league}`);
 
 
@@ -199,12 +274,20 @@ function findPlacement(item, puuid) {
     }
 }
 
-function getParticipantsIndex(item, puuid) {
-    for (let i = 0; i < item.info.participants.length; i++) {
-        if (item.info.participants[i].puuid == puuid) {
+function getParticipantsIndex(match, puuid) {
+    for (let i = 0; i < match.info.participants.length; i++) {
+        if (match.info.participants[i].puuid == puuid) {
             return i;
         }
     }
+}
+
+function average(nums) {
+    return nums.reduce((a, b) => (a + b)) / nums.length;
+}
+
+function capitalizeFirstLetter(string) {
+    return string[0].toUpperCase() + string.slice(1);
 }
 
 function formatPlacement(placement) {
