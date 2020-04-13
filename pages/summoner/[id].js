@@ -4,7 +4,7 @@ import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Avatar, G
 import fetch from 'isomorphic-unfetch';
 import { makeStyles } from '@material-ui/core/styles';
 
-const RIOT_API_KEY = "RGAPI-a45a8776-549b-43be-a486-bda80da9e3bf"
+const RIOT_API_KEY = "RGAPI-2d856886-154c-4d86-a159-cf920b0b4937"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -87,15 +87,14 @@ function placementDistributionHandler(matchDetailsArray, profile) {
     for (let i = 0; i < matchDetailsArray.length; i++) {
         placements.push(matchDetailsArray[i].info.participants[
             getParticipantsIndex(matchDetailsArray[i], profile.puuid)
-        ].placement
-        )
+        ].placement)
     }
 
     console.log(placements)
 
     return (
         <Box>
-            <Typography style={{ paddingBottom: '8px' }}>Placement Distribution</Typography>
+            <Typography style={{ paddingBottom: '8px' }}><b>Placement Distribution</b></Typography>
             <Typography style={{ paddingBottom: '8px' }}>Average Place: <b>{average(placements)}</b></Typography>
             <Grid container spacing={1} >
                 {placements.map((placement) => (
@@ -108,6 +107,63 @@ function placementDistributionHandler(matchDetailsArray, profile) {
     )
 
 }
+
+function sortedChampsCalculator(matchDetailsArray, profile) {
+    let total = [];
+    for (let i = 0; i < matchDetailsArray.length; i++) {
+        //Within each match, find profile, loop through their units.
+        let thisPersonsTroops = matchDetailsArray[i].info.participants[getParticipantsIndex(matchDetailsArray[i], profile.puuid)].units
+        for (let x = 0; x < thisPersonsTroops.length; x++) {
+            total.push(thisPersonsTroops[x].character_id)
+        }
+    }
+    console.log(total)
+
+    const result = {};
+
+    for (let i = 0; i < total.length; ++i) { // loop over array
+
+        if (!result[total[i]]) {  // if no key for that number yet
+            result[total[i]] = 0;  // then make one
+        }
+
+        ++result[total[i]];     // increment the property for that number
+
+    }
+    console.log(result)
+
+    var sortedChampsArray = [];
+    for (var champ in result) {
+        sortedChampsArray.push([champ, result[champ]]);
+    }
+
+    sortedChampsArray.sort(function (a, b) {
+        return b[1] - a[1];
+    });
+
+    console.log(sortedChampsArray);
+
+    sortedChampsArray.length = 10; //reduce to top 10
+
+    //TODO: pass to renderer
+    return (
+        <Box>
+            <Typography style={{ paddingBottom: '8px' }}><b>Favourite Champions</b></Typography>
+            <Grid container spacing={1} >
+                {sortedChampsArray.map((champ) => (
+                    <Grid container direction="row" alignItems="center" item justify="space-between">
+                        <Box style={{ paddingRight: '8px' }}>
+                            <Avatar src={`/assets/champions/${sliceCharacterString(champ[0])}.png`} />
+                        </Box>
+                        <Typography><b>{capitalizeFirstLetter(sliceCharacterString(champ[0]))}</b></Typography>
+                        <Typography>{champ[1]} games</Typography>
+                    </Grid>
+                ))}
+            </Grid>
+        </Box>
+    )
+}
+
 
 
 function Summoner({ profile, matches, matchDetailsArray, league }) {
@@ -155,10 +211,16 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
                         </Paper>
                     </Grid>
 
+                    <Grid item>
+                        <Paper className={classes.paper}>
+                            {sortedChampsCalculator(matchDetailsArray, profile)}
+                        </Paper>
+                    </Grid>
+
                 </Grid>
 
                 {/* Right Column */}
-                <Grid container item xs={9} spacing={1} >
+                <Grid container item xs={9} direction="column" spacing={2}>
 
                     {/* Map matches into A paper element */}
                     {matchDetailsArray.map((match, key) => (
@@ -172,12 +234,12 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
                                 {/* //Map units into row of avatars */}
                                 {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
                                     <Grid key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: 'auto', }}>
-                                        <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} />
+                                        <Avatar src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`} />
 
                                         <Box style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                                            <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
-                                            <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
-                                            <Avatar src={`/assets/champions/${unit.character_id.substr(5).toLowerCase()}.png`} style={{ width: '15%', height: '15%' }} />
+                                            <Avatar src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`} style={{ width: '15%', height: '15%' }} />
+                                            <Avatar src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`} style={{ width: '15%', height: '15%' }} />
+                                            <Avatar src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`} style={{ width: '15%', height: '15%' }} />
                                         </Box>
                                     </Grid>
                                 ))}
@@ -306,5 +368,8 @@ function formatPlacement(placement) {
     }
 }
 
+function sliceCharacterString(string) {
+    return string.substr(5).toLowerCase()
+}
 
 export default Summoner
