@@ -29,6 +29,15 @@ const useStyles = makeStyles((theme) => ({
         paddingTop: theme.spacing(2)
     },
 
+    small: {
+        width: theme.spacing(3),
+        height: theme.spacing(3),
+    },
+    large: {
+        width: theme.spacing(4.5),
+        height: theme.spacing(4.5),
+    },
+
 }));
 
 function profileRenderHandler(profile) {
@@ -182,7 +191,7 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
             <Grid container spacing={3}>
 
                 {/* Left Column */}
-                <Grid item container direction="column" xs={3} spacing={1} style={{ maxWidth: '25%' }}>
+                <Grid item container direction="column" xs={3} spacing={1}>
 
                     <Grid item>
                         <Paper className={classes.paper}>
@@ -219,41 +228,73 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
 
                 </Grid>
 
+
+
                 {/* Right Column */}
-                <Grid container item xs={9} direction="column" spacing={2}>
+                <Grid container item xs={9} direction="column" spacing={1}>
 
-                    {/* Map matches into A paper element */}
                     {matchDetailsArray.map((match, key) => (
-                        <Grid item>
-                            <Paper key={key} style={{ display: 'flex', flexDirection: 'row', padding: '8px', justifyContent: 'center' }}>
+                        //Begin individual Match Papers
+                        <Grid item >
+                            <Paper style={{ padding: '8px' }}>
+                                <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
 
-                                <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: 'auto', }}>
-                                    <Typography variant="subtitle2"></Typography>
-                                </Box>
-                                {/* <Grid className={classes.champRow}> */}
-                                {/* //Map units into row of avatars */}
-                                {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
-                                    <Grid key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: 'auto', }}>
-                                        <Avatar src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`} />
+                                    <Grid item>
+                                        <Grid container direction="row">
+                                            {/* Strip of Color */}
+                                            <Grid item>
+                                                <Box style={{ backgroundColor: '#EBB352', width: '4px', color: '#EBB352', height: '100%' }}>|</Box>
+                                            </Grid>
 
-                                        <Box style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                                            <Avatar src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`} style={{ width: '15%', height: '15%' }} />
-                                            <Avatar src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`} style={{ width: '15%', height: '15%' }} />
-                                            <Avatar src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`} style={{ width: '15%', height: '15%' }} />
-                                        </Box>
+                                            {/* Companion image */}
+                                            <Grid item>
+                                                {/* temp blitz: TODO: replace with companion icon */}
+                                                <Avatar src={`/assets/champions/blitzcrank.png`} />
+                                            </Grid>
+                                        </Grid>
                                     </Grid>
-                                ))}
-                                {/* </Grid> */}
+
+                                    {/* Placement and Type */}
+                                    <Grid item>
+                                        <Typography>Placement</Typography>
+                                        <Typography>Type of Game</Typography>
+                                    </Grid>
+
+                                    {/* Synergies */}
+                                    <Grid item >
+                                        <Grid container direction="row">
+                                            <Grid item><Avatar className={classes.small} /></Grid>
+                                            <Grid item><Avatar className={classes.small} /></Grid>
+                                            <Grid item><Avatar className={classes.small} /></Grid>
+                                            <Grid item><Avatar className={classes.small} /></Grid>
+                                            <Grid item><Avatar className={classes.small} /></Grid>
+                                            <Grid item><Avatar className={classes.small} /></Grid>
+                                        </Grid>
+                                    </Grid>
+
+                                    {/* Champs */}
+                                    <Grid item >
+                                        <Grid container direction="row">
+                                            <Grid item><Avatar className={classes.large} /></Grid>
+                                            <Grid item><Avatar className={classes.large} /></Grid>
+                                            <Grid item><Avatar className={classes.large} /></Grid>
+                                            <Grid item><Avatar className={classes.large} /></Grid>
+                                            <Grid item><Avatar className={classes.large} /></Grid>
+                                            <Grid item><Avatar className={classes.large} /></Grid>
+                                        </Grid>
+                                    </Grid>
+
+                                </Grid>
 
                             </Paper>
                         </Grid>
-
                     ))}
+
                 </Grid>
             </Grid>
 
 
-        </Container>
+        </Container >
     )
 }
 
