@@ -4,16 +4,24 @@ import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Avatar, G
 import fetch from 'isomorphic-unfetch';
 import { makeStyles } from '@material-ui/core/styles';
 
-const RIOT_API_KEY = "RGAPI-2d856886-154c-4d86-a159-cf920b0b4937"
+const colours = {
+    yellow: '#F8E9A1',
+    red: '#F76C6C',
+    teal: '#A8D0E6',
+    blue: '#374785',
+    navy: '#24305E',
+}
+
+const RIOT_API_KEY = "RGAPI-df58ec2f-c4d4-4f2b-b13e-e4af015c562a"
 
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
     },
+
     paper: {
         padding: theme.spacing(2),
         textAlign: 'center',
-        color: theme.palette.text.secondary,
     },
 
     champRow: {
@@ -38,19 +46,14 @@ const useStyles = makeStyles((theme) => ({
         height: theme.spacing(4.5),
     },
 
+    black: {
+        backgroundColor: '#000'
+    },
+
+
+
+
 }));
-
-function profileRenderHandler(profile) {
-
-}
-
-function matchesRenderHandler(matches) {
-
-}
-
-function matchDetailsArrayRenderHandler(matchDetailsArray, puuid) {
-
-}
 
 function placementColorHandler(placement) {
     switch (placement) {
@@ -173,6 +176,43 @@ function sortedChampsCalculator(matchDetailsArray, profile) {
     )
 }
 
+function renderSynergy(trait, classes) {
+    switch (trait.style) {
+
+        case 0:
+            return
+
+        case 1:
+            return (
+                <Box>
+                    <Avatar
+                        src={`/assets/traits/${trait.name.toLocaleLowerCase()}.png`}
+                        className={classes.small} />
+                </Box>
+            )
+
+        case 2:
+            return (
+                <Box>
+                    <Avatar
+                        src={`/assets/traits/${trait.name.toLocaleLowerCase()}.png`}
+                        className={classes.small} />
+                </Box>
+            )
+
+        case 3:
+
+            return (
+                <Box>
+                    <Avatar
+                        src={`/assets/traits/${trait.name.toLocaleLowerCase()}.png`}
+                        className={classes.small} />
+                </Box>
+            )
+
+    }
+
+}
 
 
 function Summoner({ profile, matches, matchDetailsArray, league }) {
@@ -228,73 +268,80 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
 
                 </Grid>
 
-
-
                 {/* Right Column */}
                 <Grid container item xs={9} direction="column" spacing={1}>
 
                     {matchDetailsArray.map((match, key) => (
-                        //Begin individual Match Papers
-                        <Grid item >
-                            <Paper style={{ padding: '8px' }}>
-                                <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
+                        <Box style={{ paddingBottom: '16px' }}>
+                            <Typography variant="caption">{formatGameType(match.info)}</Typography>
 
-                                    <Grid item>
-                                        <Grid container direction="row">
-                                            {/* Strip of Color */}
-                                            <Grid item>
-                                                <Box style={{ backgroundColor: '#EBB352', width: '4px', color: '#EBB352', height: '100%' }}>|</Box>
+                            {/* Begin individual Match Papers */}
+                            <Grid item key={key}>
+                                <Paper className={classes.paper}>
+                                    <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
+
+                                        <Grid item>
+                                            <Grid container direction="row" alignItems="center">
+                                                {/* Strip of Color TODO: Make these dynamic */}
+                                                <Grid item>
+                                                    <Box style={{ backgroundColor: '#EBB352', width: '4px', color: '#EBB352', height: '100%' }}>|</Box>
+                                                </Grid>
+
+                                                {/* Companion image */}
+                                                <Grid item style={{ paddingLeft: '8px' }}>
+                                                    {/* temp blitz: TODO: replace with companion icon */}
+                                                    <Avatar src={`/assets/champions/blitzcrank.png`} />
+                                                </Grid>
+
+                                                {/* Placement and Type */}
+                                                <Grid item style={{ paddingLeft: '16px' }}>
+                                                    <Box>
+                                                        <Typography><b>{formatPlacement(findPlacement(match, profile.puuid))}</b></Typography>
+                                                    </Box>
+                                                </Grid>
+
+                                                {/* Synergies / Traits */}
+                                                <Grid item style={{ paddingLeft: '64px' }}>
+                                                    <Grid container direction="row">
+                                                        {match.info.participants[getParticipantsIndex(match, profile.puuid)].traits.map((trait, key) => (
+                                                            <Grid item key={key}>
+                                                                {renderSynergy(trait, classes)}
+                                                            </Grid>
+                                                        ))}
+                                                    </Grid>
+                                                </Grid>
+
                                             </Grid>
+                                        </Grid>
 
-                                            {/* Companion image */}
-                                            <Grid item>
-                                                {/* temp blitz: TODO: replace with companion icon */}
-                                                <Avatar src={`/assets/champions/blitzcrank.png`} />
+
+                                        {/* Champs */}
+                                        <Grid item >
+                                            <Grid container direction="row" alignItems="center">
+
+                                                {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
+                                                    <Grid item key={key}>
+                                                        <Avatar
+                                                            src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
+                                                            className={classes.large} />
+                                                    </Grid>
+                                                ))}
                                             </Grid>
                                         </Grid>
+
                                     </Grid>
 
-                                    {/* Placement and Type */}
-                                    <Grid item>
-                                        <Typography>Placement</Typography>
-                                        <Typography>Type of Game</Typography>
-                                    </Grid>
-
-                                    {/* Synergies */}
-                                    <Grid item >
-                                        <Grid container direction="row">
-                                            <Grid item><Avatar className={classes.small} /></Grid>
-                                            <Grid item><Avatar className={classes.small} /></Grid>
-                                            <Grid item><Avatar className={classes.small} /></Grid>
-                                            <Grid item><Avatar className={classes.small} /></Grid>
-                                            <Grid item><Avatar className={classes.small} /></Grid>
-                                            <Grid item><Avatar className={classes.small} /></Grid>
-                                        </Grid>
-                                    </Grid>
-
-                                    {/* Champs */}
-                                    <Grid item >
-                                        <Grid container direction="row">
-                                            <Grid item><Avatar className={classes.large} /></Grid>
-                                            <Grid item><Avatar className={classes.large} /></Grid>
-                                            <Grid item><Avatar className={classes.large} /></Grid>
-                                            <Grid item><Avatar className={classes.large} /></Grid>
-                                            <Grid item><Avatar className={classes.large} /></Grid>
-                                            <Grid item><Avatar className={classes.large} /></Grid>
-                                        </Grid>
-                                    </Grid>
-
-                                </Grid>
-
-                            </Paper>
-                        </Grid>
+                                </Paper>
+                            </Grid>
+                        </Box>
                     ))}
 
                 </Grid>
             </Grid>
 
 
-        </Container >
+
+        </Container>
     )
 }
 
@@ -406,6 +453,25 @@ function formatPlacement(placement) {
 
         default:
             return "" + placement + "th"
+    }
+}
+
+function formatGameType(gameInfo) {
+    switch (gameInfo.game_variation) {
+        case "TFT3_GameVariation_FourCostFirstCarousel":
+            return "Lilac Nebula"
+
+        case "TFT3_GameVariation_None":
+            return "No Galaxy"
+
+        case "TFT3_GameVariation_FreeNeekos":
+            return "Neekoverse"
+
+        case "TFT3_GameVariation_BigLittleLegends":
+            return "Medium Legends"
+
+        default:
+            "No Galaxy"
     }
 }
 
