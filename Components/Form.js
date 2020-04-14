@@ -1,13 +1,6 @@
 import React from 'react';
 import { Typography, Button, TextField, Grid, } from '@material-ui/core';
-import Link from '../src/Link';
 import Router from 'next/router';
-
-const PostLink = props => (
-    <Link href="/summoner/[id]" as={`/summoner/${props.id}`}>
-        <Button type="submit">Search</Button>
-    </Link>
-);
 
 export default class Form extends React.Component {
     constructor(props) {
@@ -33,9 +26,6 @@ export default class Form extends React.Component {
     render() {
         return (
             <Grid
-                //container
-                //alignItems="center"
-                //justify="center"
                 style={{
                     width: '100%',
                 }}>
@@ -58,7 +48,6 @@ export default class Form extends React.Component {
 
                         </Grid>
                         <Grid item xs={3}>
-                            {/* <PostLink type="submit" id={this.state.value} /> */}
                             <Button type="submit">Search</Button>
                         </Grid>
                     </Grid>

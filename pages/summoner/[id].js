@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { useRouter } from 'next/router';
-import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Avatar, GridList, GridListTile, Paper, } from '@material-ui/core';
+import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
 import fetch from 'isomorphic-unfetch';
 import { makeStyles } from '@material-ui/core/styles';
+import NavBar from '../../components/NavBar';
 
 const colours = {
     yellow: '#F8E9A1',
@@ -224,124 +224,124 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
     const classes = useStyles();
 
     return (
+        <div>
+            <NavBar />
 
-        // Main Container
-        <Container className={classes.topSpacing}>
+            {/* // Main Container */}
+            <Container className={classes.topSpacing}>
 
-            <Grid container spacing={3}>
+                <Grid container spacing={3}>
 
-                {/* Left Column */}
-                <Grid item container direction="column" xs={3} spacing={1}>
+                    {/* Left Column */}
+                    <Grid item container direction="column" xs={3} spacing={1}>
 
-                    <Grid item>
-                        <Paper className={classes.paper}>
-                            <Typography >{league[0].summonerName}</Typography>
-                        </Paper>
+                        <Grid item>
+                            <Paper className={classes.paper}>
+                                <Typography >{league[0].summonerName}</Typography>
+                            </Paper>
+                        </Grid>
+
+                        <Grid item>
+                            <Paper className={classes.paper}>
+                                <img
+                                    style={{ width: '50%' }}
+                                    src={`/assets/rankedEmblems/Emblem_${capitalizeFirstLetter(league[0].tier.toLocaleLowerCase())}.png`}></img>
+                                <Typography variant="subtitle2" color="primary">{league[0].tier} {league[0].rank}</Typography>
+                            </Paper>
+                        </Grid>
+
+                        <Grid item>
+                            <Paper className={classes.paper}>
+                                <Typography>Season Wins: <b>{league[0].wins}</b></Typography>
+                            </Paper>
+                        </Grid>
+
+                        <Grid item>
+                            <Paper className={classes.paper}>
+                                {placementDistributionHandler(matchDetailsArray, profile)}
+                            </Paper>
+                        </Grid>
+
+                        <Grid item>
+                            <Paper className={classes.paper}>
+                                {sortedChampsCalculator(matchDetailsArray, profile)}
+                            </Paper>
+                        </Grid>
+
                     </Grid>
 
-                    <Grid item>
-                        <Paper className={classes.paper}>
-                            <img
-                                style={{ width: '50%' }}
-                                src={`/assets/rankedEmblems/Emblem_${capitalizeFirstLetter(league[0].tier.toLocaleLowerCase())}.png`}></img>
-                            <Typography variant="subtitle2" color="primary">{league[0].tier} {league[0].rank}</Typography>
-                        </Paper>
-                    </Grid>
+                    {/* Right Column */}
+                    <Grid container item xs={9} direction="column" spacing={1}>
 
-                    <Grid item>
-                        <Paper className={classes.paper}>
-                            <Typography>Season Wins: <b>{league[0].wins}</b></Typography>
-                        </Paper>
-                    </Grid>
+                        {matchDetailsArray.map((match, key) => (
+                            <Box style={{ paddingBottom: '16px' }}>
+                                <Typography variant="caption">{formatGameType(match.info)}</Typography>
 
-                    <Grid item>
-                        <Paper className={classes.paper}>
-                            {placementDistributionHandler(matchDetailsArray, profile)}
-                        </Paper>
-                    </Grid>
+                                {/* Begin individual Match Papers */}
+                                <Grid item key={key}>
+                                    <Paper className={classes.paper}>
+                                        <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
 
-                    <Grid item>
-                        <Paper className={classes.paper}>
-                            {sortedChampsCalculator(matchDetailsArray, profile)}
-                        </Paper>
-                    </Grid>
-
-                </Grid>
-
-                {/* Right Column */}
-                <Grid container item xs={9} direction="column" spacing={1}>
-
-                    {matchDetailsArray.map((match, key) => (
-                        <Box style={{ paddingBottom: '16px' }}>
-                            <Typography variant="caption">{formatGameType(match.info)}</Typography>
-
-                            {/* Begin individual Match Papers */}
-                            <Grid item key={key}>
-                                <Paper className={classes.paper}>
-                                    <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
-
-                                        <Grid item>
-                                            <Grid container direction="row" alignItems="center">
-                                                {/* Strip of Color TODO: Make these dynamic */}
-                                                <Grid item>
-                                                    <Box style={{ backgroundColor: '#EBB352', width: '4px', color: '#EBB352', height: '100%' }}>|</Box>
-                                                </Grid>
-
-                                                {/* Companion image */}
-                                                <Grid item style={{ paddingLeft: '8px' }}>
-                                                    {/* temp blitz: TODO: replace with companion icon */}
-                                                    <Avatar src={`/assets/champions/blitzcrank.png`} />
-                                                </Grid>
-
-                                                {/* Placement and Type */}
-                                                <Grid item style={{ paddingLeft: '16px' }}>
-                                                    <Box>
-                                                        <Typography><b>{formatPlacement(findPlacement(match, profile.puuid))}</b></Typography>
-                                                    </Box>
-                                                </Grid>
-
-                                                {/* Synergies / Traits */}
-                                                <Grid item style={{ paddingLeft: '64px' }}>
-                                                    <Grid container direction="row">
-                                                        {match.info.participants[getParticipantsIndex(match, profile.puuid)].traits.map((trait, key) => (
-                                                            <Grid item key={key}>
-                                                                {renderSynergy(trait, classes)}
-                                                            </Grid>
-                                                        ))}
+                                            <Grid item>
+                                                <Grid container direction="row" alignItems="center">
+                                                    {/* Strip of Color TODO: Make these dynamic */}
+                                                    <Grid item>
+                                                        <Box style={{ backgroundColor: '#EBB352', width: '4px', color: '#EBB352', height: '100%' }}>|</Box>
                                                     </Grid>
-                                                </Grid>
 
+                                                    {/* Companion image */}
+                                                    <Grid item style={{ paddingLeft: '8px' }}>
+                                                        {/* temp blitz: TODO: replace with companion icon */}
+                                                        <Avatar src={`/assets/champions/blitzcrank.png`} />
+                                                    </Grid>
+
+                                                    {/* Placement and Type */}
+                                                    <Grid item style={{ paddingLeft: '16px' }}>
+                                                        <Box>
+                                                            <Typography><b>{formatPlacement(findPlacement(match, profile.puuid))}</b></Typography>
+                                                        </Box>
+                                                    </Grid>
+
+                                                    {/* Synergies / Traits */}
+                                                    <Grid item style={{ paddingLeft: '64px' }}>
+                                                        <Grid container direction="row">
+                                                            {match.info.participants[getParticipantsIndex(match, profile.puuid)].traits.map((trait, key) => (
+                                                                <Grid item key={key}>
+                                                                    {renderSynergy(trait, classes)}
+                                                                </Grid>
+                                                            ))}
+                                                        </Grid>
+                                                    </Grid>
+
+                                                </Grid>
                                             </Grid>
+
+
+                                            {/* Champs */}
+                                            <Grid item >
+                                                <Grid container direction="row" alignItems="center">
+
+                                                    {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
+                                                        <Grid item key={key}>
+                                                            <Avatar
+                                                                src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
+                                                                className={classes.large} />
+                                                        </Grid>
+                                                    ))}
+                                                </Grid>
+                                            </Grid>
+
                                         </Grid>
 
+                                    </Paper>
+                                </Grid>
+                            </Box>
+                        ))}
 
-                                        {/* Champs */}
-                                        <Grid item >
-                                            <Grid container direction="row" alignItems="center">
-
-                                                {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
-                                                    <Grid item key={key}>
-                                                        <Avatar
-                                                            src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
-                                                            className={classes.large} />
-                                                    </Grid>
-                                                ))}
-                                            </Grid>
-                                        </Grid>
-
-                                    </Grid>
-
-                                </Paper>
-                            </Grid>
-                        </Box>
-                    ))}
-
+                    </Grid>
                 </Grid>
-            </Grid>
-
-
-
-        </Container>
+            </Container>
+        </div>
     )
 }
 
