@@ -6,6 +6,7 @@ import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Icon, Pap
 import Header from '../components/Header';
 import BigLogo from '../components/BigLogo';
 import BigSearch from '../components/BigSearch';
+import NavBar from '../components/NavBar';
 
 export default class Index extends React.Component {
 
@@ -29,26 +30,28 @@ export default class Index extends React.Component {
 
   render() {
     return (
-      //Main Background Grid
-      <Grid container style={{ minHeight: '100vh' }}
-        direction="column" alignItems="flex-start">
+      <div>
+        <NavBar />
+        {/* //Main Background Grid */}
+        <Grid container style={{ minHeight: '100vh' }}
+          direction="column" alignItems="flex-start">
 
-        {/* Header Component Here */}
-        <Header />
-        {/* Container that Centers things pushes them into the middle of the page */}
-        <Container maxWidth="sm">
+          {/* Header Component Here */}
+          <Header />
+          {/* Container that Centers things pushes them into the middle of the page */}
+          <Container maxWidth="sm">
 
-          {/* Big Logo Component Here */}
-          <BigLogo />
+            {/* Big Logo Component Here */}
+            <BigLogo />
 
-          {/* Component with Search Bar, Region Selector, and Search Icon Here */}
-          <BigSearch />
-          
-          {/* Component with the Four Game Cards Here */}
+            {/* Component with Search Bar, Region Selector, and Search Icon Here */}
+            <BigSearch />
 
-        </Container>
-      </Grid>
+            {/* Component with the Four Game Cards Here */}
 
+          </Container>
+        </Grid>
+      </div>
     );
   }
 }

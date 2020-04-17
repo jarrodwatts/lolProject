@@ -12,7 +12,7 @@ const colours = {
     navy: '#24305E',
 }
 
-const RIOT_API_KEY = "RGAPI-df58ec2f-c4d4-4f2b-b13e-e4af015c562a"
+const RIOT_API_KEY = "RGAPI-25dc1565-a2d2-4d57-ba57-6ad3ee183131"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -229,7 +229,6 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
 
             {/* // Main Container */}
             <Container className={classes.topSpacing}>
-
                 <Grid container spacing={3}>
 
                     {/* Left Column */}
