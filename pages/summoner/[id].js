@@ -12,7 +12,7 @@ const colours = {
     navy: '#24305E',
 }
 
-const RIOT_API_KEY = "RGAPI-25dc1565-a2d2-4d57-ba57-6ad3ee183131"
+const RIOT_API_KEY = "RGAPI-ab6fe2c4-9d06-4763-b5e3-0c7ff535c19e"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -385,7 +385,6 @@ export async function getServerSideProps(context) {
     //console.log(`Fetched match details: ${matchDetailsArray}`);
 
     //4. Get Profile Details, using encryptedSummonerId
-    /** Match Schema:  A lot */
     //https://oc1.api.riotgames.com/tft/league/v1/entries/by-summoner/gJgBREkCeTdA6jBXWU7C5JZgBT6ZrnxYSe7vZCs2ggMp-OE
     const encryptedSummonerId = profile.id;
     const resLeague = await fetch(
