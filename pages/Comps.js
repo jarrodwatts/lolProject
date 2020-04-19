@@ -37,6 +37,38 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+function isArrayEqual(arr1, arr2) {
+
+    //Check if comps are the same length first before comparing
+    if (arr1.length == arr2.length) {
+
+        arr1 = arr1.sort(function (a, b) {
+            var x = a.character_id.toLowerCase();
+            var y = b.character_id.toLowerCase();
+            if (x < y) { return -1; }
+            if (x > y) { return 1; }
+            return 0;
+        });
+
+        arr2 = arr2.sort(function (a, b) {
+            var x = a.character_id.toLowerCase();
+            var y = b.character_id.toLowerCase();
+            if (x < y) { return -1; }
+            if (x > y) { return 1; }
+            return 0;
+        });
+
+        for (var i = 0; i < arr1.length; i++) {
+            if (arr1[i].character_id !== arr2[i].character_id)
+                return false;
+        }
+
+        return true;
+    }
+
+    else { return false; }
+}
+
 export default function Comps() {
 
     const classes = useStyles();
@@ -53,10 +85,11 @@ export default function Comps() {
 
         //1. For each match,
         for (let i = 0; i < filteredMatches.length; i++) {
+
             //2. Get each player's units array
             for (let x = 0; x < filteredMatches[i].info.participants.length; x++) {
-                //3. Sort the units array
 
+                //3. Sort the units array
                 let tempArr = filteredMatches[i].info.participants[x].units.sort(function (a, b) {
                     var x = a.character_id.toLowerCase();
                     var y = b.character_id.toLowerCase();
@@ -65,105 +98,207 @@ export default function Comps() {
                     return 0;
                 });
 
-                //let tempArr = filteredMatches[i].info.participants[x].units.sort(function (a, b) { return a.character_id - b.character_id });
+                //4. Grab the placement of this comp alongside it's units
+                let tempPlacement = filteredMatches[i].info.participants[x].placement;
 
-                //4. Push the units array to master array
-                masterArray.push(tempArr);
+                let tempObj = {
+                    comp: tempArr,
+                    placement: tempPlacement,
+                    winLoss: {
+                        win: 0,
+                        loss: 0
+                    }
+                }
+
+                //5. Push the units array to master array
+                masterArray.push(tempObj);
             }
         }
 
-        console.log(masterArray);
+        //6. Use masterArray to create a new reduced array with unique comps
+        let uniqueArray = [];
 
-        return (
-            <div>
-                <NavBar />
-                {/* Main Container */}
-                <Container className={classes.topSpacing}>
+        //debugger;
 
-                    <Grid container spacing={3} direction="column" >
-                        {/* Heading and subtitle */}
-                        <Grid container item direction="column" justify="center" alignItems="center">
-                            <Typography variant="h2">LOLPROJECT</Typography>
-                            <Typography variant="h5">Teamfight Tactics Compositions</Typography>
-                        </Grid>
+        for (let p = 0; p < masterArray.length; p++) {
+            for (let p = 0; p < 200; p++) {
+                let actionTaken = false;
 
-                        {/* Filters */}
-                        <Grid container item>
+                //Take a quick check to see if unique arrays length is 0 - this means there's nothing to compare and its the first iteration
+                if (uniqueArray.length == 0) {
+                    //Thus push it to be the first item of comparison
+                    let tempObj = {
+                        comp: masterArray[p].comp,
+                        placement: masterArray[p].placement,
+                        winLoss: {
+                            win: 0,
+                            loss: 0
+                        }
+                    }
+                    //Check for this games placemnet
+                    masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
+                    uniqueArray.push(tempObj)
+                }
 
-                        </Grid>
+                else {
+                    //Compare the current comp to each comp in uniqueArrays to see if it exists within uniqueArray.
+                    //debugger;
+                    let thisComp = masterArray[p].comp
 
-                        {/* Champions */}
-                        <Grid container item xs={12} direction="column" spacing={1}>
-                            {filteredMatches.map((match, key) => (
+                    //Make all the stuff except character Id's the same
+                    for (let q = 0; q < thisComp.length; q++) {
+                        thisComp[q].items = [];
+                        thisComp[q].rarity = 0;
+                        thisComp[q].tier = 0;
+                        thisComp[q].name = "";
+                    }
 
-                                <Box key={key} style={{ paddingBottom: '16px' }}>
+                    for (let n = 0; n < uniqueArray.length; n++) {
+                        let comparisonComp = uniqueArray[n].comp
 
-                                    {/* Begin individual Match Papers */}
-                                    <Grid item>
-                                        <Paper className={classes.paper}>
-                                            <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
+                        //Make all the stuff except character Id's the same for this too
+                        for (let t = 0; t < comparisonComp.length; t++) {
+                            comparisonComp[t].items = [];
+                            comparisonComp[t].rarity = 0;
+                            comparisonComp[t].tier = 0;
+                            comparisonComp[t].name = "";
+                        }
 
-                                                <Grid item>
-                                                    <Grid container direction="row" alignItems="center">
+                        //console.log("thisComp:", thisComp, "vs:", "comparisonComp:", comparisonComp)
+                        if (isArrayEqual(thisComp, comparisonComp)) {
+                            console.log(thisComp, " matched ", comparisonComp)
+                            //Comp already exists
+                            //Update that comp's win loss ratio in the unique array.
+                            //If they won the game, increment win, else increment loss
+                            masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
+                            //Note we've taken an action on this comp.
+                            actionTaken = true;
+                            //break the for loop
+                            n = uniqueArray.length;
+                        }
 
-                                                        {/* Companion image */}
-                                                        <Grid item style={{ paddingLeft: '8px' }}>
-                                                            {/* temp blitz: TODO: replace with companion icon */}
-                                                            <Avatar src={`/assets/champions/blitzcrank.png`} />
-                                                        </Grid>
+                        else {
+                            //Comp has not yet been added to uniqueArrays.
+                            //Add comp to unqiue array
+                            //Do nothing until the for loop breaks where we add the comp to unique arrays
+                        }
+                    }
 
-                                                        {/* Placement and Type */}
-                                                        <Grid item style={{ paddingLeft: '16px' }}>
-                                                            <Box>
-                                                                <Typography><b>placement</b></Typography>
-                                                            </Box>
-                                                        </Grid>
+                    //At the end of the loop, check if we've taken an action on this comp.
+                    //If not, it means it's unique and we need to add it to uniqueArray
+                    if (actionTaken == false) {
 
-                                                        {/* Synergies / Traits */}
-                                                        <Grid item style={{ paddingLeft: '64px' }}>
-                                                            <Typography>synergies</Typography>
-                                                            {/* <Grid container direction="row">
+                        let tempObj = {
+                            comp: masterArray[p].comp,
+                            placement: masterArray[p].placement,
+                            winLoss: {
+                                win: 0,
+                                loss: 0
+                            }
+                        }
+
+                        //Check for this games placemnet
+                        masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
+                        uniqueArray.push(tempObj)
+                        actionTaken = true;
+                    }
+                }
+
+            }
+
+            console.log("Master Array", masterArray);
+            console.log("Unique Array", uniqueArray);
+
+            return (
+                <div>
+                    <NavBar />
+                    {/* Main Container */}
+                    <Container className={classes.topSpacing}>
+
+                        <Grid container spacing={3} direction="column" >
+                            {/* Heading and subtitle */}
+                            <Grid container item direction="column" justify="center" alignItems="center">
+                                <Typography variant="h2">LOLPROJECT</Typography>
+                                <Typography variant="h5">Teamfight Tactics Compositions</Typography>
+                            </Grid>
+
+                            {/* Filters */}
+                            <Grid container item>
+
+                            </Grid>
+
+                            {/* Champions */}
+                            <Grid container item xs={12} direction="column" spacing={1}>
+                                {filteredMatches.map((match, key) => (
+
+                                    <Box key={key} style={{ paddingBottom: '16px' }}>
+
+                                        {/* Begin individual Match Papers */}
+                                        <Grid item>
+                                            <Paper className={classes.paper}>
+                                                <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
+
+                                                    <Grid item>
+                                                        <Grid container direction="row" alignItems="center">
+
+                                                            {/* Companion image */}
+                                                            <Grid item style={{ paddingLeft: '8px' }}>
+                                                                {/* temp blitz: TODO: replace with companion icon */}
+                                                                <Avatar src={`/assets/champions/blitzcrank.png`} />
+                                                            </Grid>
+
+                                                            {/* Placement and Type */}
+                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                <Box>
+                                                                    <Typography><b>placement</b></Typography>
+                                                                </Box>
+                                                            </Grid>
+
+                                                            {/* Synergies / Traits */}
+                                                            <Grid item style={{ paddingLeft: '64px' }}>
+                                                                <Typography>synergies</Typography>
+                                                                {/* <Grid container direction="row">
                                                                 {match.info.participants[getParticipantsIndex(match, profile.puuid)].traits.map((trait, key) => (
                                                                     <Grid item key={key}>
                                                                         {renderSynergy(trait, classes)}
                                                                     </Grid>
                                                                 ))}
                                                             </Grid> */}
+                                                            </Grid>
+
                                                         </Grid>
-
                                                     </Grid>
-                                                </Grid>
 
 
-                                                {/* Champs */}
-                                                <Grid item >
-                                                    <Grid container direction="row" alignItems="center">
-                                                        <Typography>Champs</Typography>
-                                                        {/* {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
+                                                    {/* Champs */}
+                                                    <Grid item >
+                                                        <Grid container direction="row" alignItems="center">
+                                                            <Typography>Champs</Typography>
+                                                            {/* {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
                                                             <Grid item key={key}>
                                                                 <Avatar
                                                                     src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
                                                                     className={classes.large} />
                                                             </Grid>
                                                         ))} */}
+                                                        </Grid>
                                                     </Grid>
+
                                                 </Grid>
 
-                                            </Grid>
+                                            </Paper>
+                                        </Grid>
+                                    </Box>
+                                ))}
 
-                                        </Paper>
-                                    </Grid>
-                                </Box>
-                            ))}
+                            </Grid>
+
+
 
                         </Grid>
-
-
-
-                    </Grid>
-                </Container>
-            </div>
-        )
+                    </Container>
+                </div>
+            )
+        }
     }
-
 }

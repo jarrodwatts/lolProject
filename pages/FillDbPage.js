@@ -12,7 +12,7 @@ const colours = {
     navy: '#24305E',
 }
 
-const RIOT_API_KEY = "RGAPI-ab6fe2c4-9d06-4763-b5e3-0c7ff535c19e"
+const RIOT_API_KEY = "RGAPI-8228f71c-77c1-494c-8d19-2e6b503ddeaf"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -83,7 +83,7 @@ export async function getServerSideProps(context) {
     //1. Grab all challengers
     console.log("Reached 1")
     const resChallengers = await fetch(
-        `https://oc1.api.riotgames.com/tft/league/v1/challenger` + '?api_key=' + RIOT_API_KEY
+        `https://oc1.api.riotgames.com/tft/league/v1/master` + '?api_key=' + RIOT_API_KEY
     );
     const challengersWithMetadata = await resChallengers.json();
     const challengers = challengersWithMetadata.entries;
