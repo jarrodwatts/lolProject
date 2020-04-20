@@ -69,6 +69,10 @@ function isArrayEqual(arr1, arr2) {
     else { return false; }
 }
 
+function sliceCharacterString(string) {
+    return string.substr(5).toLowerCase()
+}
+
 export default function Comps() {
 
     const classes = useStyles();
@@ -143,26 +147,11 @@ export default function Comps() {
                 else {
                     //Compare the current comp to each comp in uniqueArrays to see if it exists within uniqueArray.
                     //debugger;
-                    let thisComp = masterArray[p].comp
-
-                    //Make all the stuff except character Id's the same
-                    for (let q = 0; q < thisComp.length; q++) {
-                        thisComp[q].items = [];
-                        thisComp[q].rarity = 0;
-                        thisComp[q].tier = 0;
-                        thisComp[q].name = "";
-                    }
+                    let thisComp = masterArray[p].comp;
 
                     for (let n = 0; n < uniqueArray.length; n++) {
                         let comparisonComp = uniqueArray[n].comp
 
-                        //Make all the stuff except character Id's the same for this too
-                        for (let t = 0; t < comparisonComp.length; t++) {
-                            comparisonComp[t].items = [];
-                            comparisonComp[t].rarity = 0;
-                            comparisonComp[t].tier = 0;
-                            comparisonComp[t].name = "";
-                        }
 
                         //console.log("thisComp:", thisComp, "vs:", "comparisonComp:", comparisonComp)
                         if (isArrayEqual(thisComp, comparisonComp)) {
@@ -206,6 +195,14 @@ export default function Comps() {
 
             }
 
+            //7. Calculate a winrate for each unique comp
+            for (let i = 0; i < uniqueArray.length; i++) {
+                uniqueArray[i]["winRatio"] = uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss)
+            }
+
+            //8. Sort uniqueArray by win Rate
+            uniqueArray.sort((a, b) => parseFloat(b.winRatio) - parseFloat(a.winRatio));
+
             console.log("Master Array", masterArray);
             console.log("Unique Array", uniqueArray);
 
@@ -229,11 +226,11 @@ export default function Comps() {
 
                             {/* Champions */}
                             <Grid container item xs={12} direction="column" spacing={1}>
-                                {filteredMatches.map((match, key) => (
+                                {uniqueArray.map((composition, key) => (
 
                                     <Box key={key} style={{ paddingBottom: '16px' }}>
 
-                                        {/* Begin individual Match Papers */}
+                                        {/* Begin individual Composition Papers */}
                                         <Grid item>
                                             <Paper className={classes.paper}>
                                                 <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
@@ -250,21 +247,22 @@ export default function Comps() {
                                                             {/* Placement and Type */}
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
-                                                                    <Typography><b>placement</b></Typography>
+                                                                    <Typography variant="caption">Win Ratio</Typography>
+                                                                    <Typography><b>{composition.winRatio * 100 + "%"}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
                                                             {/* Synergies / Traits */}
-                                                            <Grid item style={{ paddingLeft: '64px' }}>
+                                                            {/* <Grid item style={{ paddingLeft: '64px' }}>
                                                                 <Typography>synergies</Typography>
-                                                                {/* <Grid container direction="row">
-                                                                {match.info.participants[getParticipantsIndex(match, profile.puuid)].traits.map((trait, key) => (
-                                                                    <Grid item key={key}>
-                                                                        {renderSynergy(trait, classes)}
-                                                                    </Grid>
-                                                                ))}
+                                                                <Grid container direction="row">
+                                                                    {match.info.participants[getParticipantsIndex(match, profile.puuid)].traits.map((trait, key) => (
+                                                                        <Grid item key={key}>
+                                                                            {renderSynergy(trait, classes)}
+                                                                        </Grid>
+                                                                    ))}
+                                                                </Grid>
                                                             </Grid> */}
-                                                            </Grid>
 
                                                         </Grid>
                                                     </Grid>
@@ -272,15 +270,15 @@ export default function Comps() {
 
                                                     {/* Champs */}
                                                     <Grid item >
+                                                        <Typography variant="caption">Team Composition</Typography>
                                                         <Grid container direction="row" alignItems="center">
-                                                            <Typography>Champs</Typography>
-                                                            {/* {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
-                                                            <Grid item key={key}>
-                                                                <Avatar
-                                                                    src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
-                                                                    className={classes.large} />
-                                                            </Grid>
-                                                        ))} */}
+                                                            {composition.comp.map((unit, key) => (
+                                                                <Grid item key={key}>
+                                                                    <Avatar
+                                                                        src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
+                                                                        className={classes.large} />
+                                                                </Grid>
+                                                            ))}
                                                         </Grid>
                                                     </Grid>
 
