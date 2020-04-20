@@ -12,7 +12,7 @@ const colours = {
     navy: '#24305E',
 }
 
-const RIOT_API_KEY = "RGAPI-8228f71c-77c1-494c-8d19-2e6b503ddeaf"
+const RIOT_API_KEY = "RGAPI-2bc4b5bd-414b-4079-833b-d04a4a9e14d7"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -44,6 +44,11 @@ const useStyles = makeStyles((theme) => ({
     large: {
         width: theme.spacing(4.5),
         height: theme.spacing(4.5),
+    },
+
+    itemSize: {
+        width: theme.spacing(1.5),
+        height: theme.spacing(1.5),
     },
 
     black: {
@@ -318,14 +323,58 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
 
                                             {/* Champs */}
                                             <Grid item >
-                                                <Grid container direction="row" alignItems="center">
+                                                <Grid container direction="row" alignItems="flex-start">
 
                                                     {match.info.participants[getParticipantsIndex(match, profile.puuid)].units.map((unit, key) => (
-                                                        <Grid item key={key}>
-                                                            <Avatar
-                                                                src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
-                                                                className={classes.large} />
+
+                                                        //I dont know why but if i delete the below grid it fucking goes vertically
+                                                        <Grid item>
+                                                            <Grid container direction="row" item key={key}>
+
+                                                                <Grid item>
+                                                                    <Avatar
+                                                                        src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
+                                                                        className={classes.large} />
+
+                                                                    {/* Begin horizontal item row... kill me now */}
+                                                                    <Grid container alignItems="center" justify="center" item>
+
+                                                                        {/* Check if the item exists ...if so render... if not ... render empty div */}
+
+                                                                        {unit.items[0] !== undefined ?
+                                                                            <Avatar
+                                                                                src={`/assets/items/${unit.items[0]}.png`}
+                                                                                className={classes.itemSize} /> :
+
+                                                                            <div />
+                                                                        }
+
+                                                                        {unit.items[1] !== undefined ?
+                                                                            <Avatar
+                                                                                src={`/assets/items/${unit.items[1 ]}.png`}
+                                                                                className={classes.itemSize} /> :
+
+                                                                            <div />
+                                                                        }
+
+                                                                        {unit.items[2] !== undefined ?
+                                                                            <Avatar
+                                                                                src={`/assets/items/${unit.items[2]}.png`}
+                                                                                className={classes.itemSize} /> :
+
+                                                                            <div />
+                                                                        }
+
+                                                                    </Grid>
+
+                                                                </Grid>
+
+
+
+                                                            </Grid>
+
                                                         </Grid>
+
                                                     ))}
                                                 </Grid>
                                             </Grid>
