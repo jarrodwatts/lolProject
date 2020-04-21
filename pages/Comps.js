@@ -123,14 +123,59 @@ export default function Comps() {
         let uniqueArray = [];
 
         //debugger;
-
+        console.log(masterArray.length);
         for (let p = 0; p < masterArray.length; p++) {
-            for (let p = 0; p < 200; p++) {
-                let actionTaken = false;
 
-                //Take a quick check to see if unique arrays length is 0 - this means there's nothing to compare and its the first iteration
-                if (uniqueArray.length == 0) {
-                    //Thus push it to be the first item of comparison
+            let actionTaken = false;
+
+            //Take a quick check to see if unique arrays length is 0 - this means there's nothing to compare and its the first iteration
+            if (uniqueArray.length == 0) {
+                //Thus push it to be the first item of comparison
+                let tempObj = {
+                    comp: masterArray[p].comp,
+                    placement: masterArray[p].placement,
+                    winLoss: {
+                        win: 0,
+                        loss: 0
+                    }
+                }
+                //Check for this games placemnet
+                masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
+                uniqueArray.push(tempObj)
+            }
+
+            else {
+                //Compare the current comp to each comp in uniqueArrays to see if it exists within uniqueArray.
+                //debugger;
+                let thisComp = masterArray[p].comp;
+
+                for (let n = 0; n < uniqueArray.length; n++) {
+                    let comparisonComp = uniqueArray[n].comp
+
+
+                    //console.log("thisComp:", thisComp, "vs:", "comparisonComp:", comparisonComp)
+                    if (isArrayEqual(thisComp, comparisonComp)) {
+                        //Comp already exists
+                        //Update that comp's win loss ratio in the unique array.
+                        //If they won the game, increment win, else increment loss
+                        masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
+                        //Note we've taken an action on this comp.
+                        actionTaken = true;
+                        //break the for loop
+                        n = uniqueArray.length;
+                    }
+
+                    else {
+                        //Comp has not yet been added to uniqueArrays.
+                        //Add comp to unqiue array
+                        //Do nothing until the for loop breaks where we add the comp to unique arrays
+                    }
+                }
+
+                //At the end of the loop, check if we've taken an action on this comp.
+                //If not, it means it's unique and we need to add it to uniqueArray
+                if (actionTaken == false) {
+
                     let tempObj = {
                         comp: masterArray[p].comp,
                         placement: masterArray[p].placement,
@@ -139,117 +184,78 @@ export default function Comps() {
                             loss: 0
                         }
                     }
+
                     //Check for this games placemnet
                     masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
                     uniqueArray.push(tempObj)
+                    actionTaken = true;
                 }
-
-                else {
-                    //Compare the current comp to each comp in uniqueArrays to see if it exists within uniqueArray.
-                    //debugger;
-                    let thisComp = masterArray[p].comp;
-
-                    for (let n = 0; n < uniqueArray.length; n++) {
-                        let comparisonComp = uniqueArray[n].comp
-
-
-                        //console.log("thisComp:", thisComp, "vs:", "comparisonComp:", comparisonComp)
-                        if (isArrayEqual(thisComp, comparisonComp)) {
-                            //Comp already exists
-                            //Update that comp's win loss ratio in the unique array.
-                            //If they won the game, increment win, else increment loss
-                            masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
-                            //Note we've taken an action on this comp.
-                            actionTaken = true;
-                            //break the for loop
-                            n = uniqueArray.length;
-                        }
-
-                        else {
-                            //Comp has not yet been added to uniqueArrays.
-                            //Add comp to unqiue array
-                            //Do nothing until the for loop breaks where we add the comp to unique arrays
-                        }
-                    }
-
-                    //At the end of the loop, check if we've taken an action on this comp.
-                    //If not, it means it's unique and we need to add it to uniqueArray
-                    if (actionTaken == false) {
-
-                        let tempObj = {
-                            comp: masterArray[p].comp,
-                            placement: masterArray[p].placement,
-                            winLoss: {
-                                win: 0,
-                                loss: 0
-                            }
-                        }
-
-                        //Check for this games placemnet
-                        masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
-                        uniqueArray.push(tempObj)
-                        actionTaken = true;
-                    }
-                }
-
             }
 
-            //7. Calculate a winrate for each unique comp
-            for (let i = 0; i < uniqueArray.length; i++) {
-                uniqueArray[i]["winRatio"] = uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss)
-            }
+        }
 
-            //8. Sort uniqueArray by win Rate
-            uniqueArray.sort((a, b) => parseFloat(b.winRatio) - parseFloat(a.winRatio));
+        //7. Calculate a winrate for each unique comp
+        for (let i = 0; i < uniqueArray.length; i++) {
+            uniqueArray[i]["winRatio"] = uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss)
+        }
 
-            return (
-                <div>
-                    <NavBar />
-                    {/* Main Container */}
-                    <Container className={classes.topSpacing}>
+        //8. Sort uniqueArray by win Rate
+        uniqueArray.sort((a, b) => parseFloat(b.winRatio) - parseFloat(a.winRatio));
 
-                        <Grid container spacing={3} direction="column" >
-                            {/* Heading and subtitle */}
-                            <Grid container item direction="column" justify="center" alignItems="center">
-                                <Typography variant="h2">LOLPROJECT</Typography>
-                                <Typography variant="h5">Teamfight Tactics Compositions</Typography>
-                            </Grid>
 
-                            {/* Filters */}
-                            <Grid container item>
+        console.log(masterArray)
+        console.log(uniqueArray)
 
-                            </Grid>
+        uniqueArray.length = 10;
 
-                            {/* Champions */}
-                            <Grid container item xs={12} direction="column" spacing={1}>
-                                {uniqueArray.map((composition, key) => (
+        return (
+            <div>
+                <NavBar />
+                {/* Main Container */}
+                <Container className={classes.topSpacing}>
 
-                                    <Box key={key} style={{ paddingBottom: '16px' }}>
+                    <Grid container spacing={3} direction="column" >
+                        {/* Heading and subtitle */}
+                        <Grid container item direction="column" justify="center" alignItems="center">
+                            <Typography variant="h2">LOLPROJECT</Typography>
+                            <Typography variant="h5">Teamfight Tactics Compositions</Typography>
+                        </Grid>
 
-                                        {/* Begin individual Composition Papers */}
-                                        <Grid item>
-                                            <Paper className={classes.paper}>
-                                                <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
+                        {/* Filters */}
+                        <Grid container item>
 
-                                                    <Grid item>
-                                                        <Grid container direction="row" alignItems="center">
+                        </Grid>
 
-                                                            {/* Companion image */}
-                                                            <Grid item style={{ paddingLeft: '8px' }}>
-                                                                {/* temp blitz: TODO: replace with companion icon */}
-                                                                <Avatar src={`/assets/champions/blitzcrank.png`} />
-                                                            </Grid>
+                        {/* Compositions */}
+                        <Grid container item xs={12} direction="column" spacing={1}>
+                            {uniqueArray.map((composition, key) => (
 
-                                                            {/* Placement and Type */}
-                                                            <Grid item style={{ paddingLeft: '16px' }}>
-                                                                <Box>
-                                                                    <Typography variant="caption">Win Ratio</Typography>
-                                                                    <Typography><b>{composition.winRatio * 100 + "%"}</b></Typography>
-                                                                </Box>
-                                                            </Grid>
+                                <Box key={key} style={{ paddingBottom: '16px' }}>
 
-                                                            {/* Synergies / Traits */}
-                                                            {/* <Grid item style={{ paddingLeft: '64px' }}>
+                                    {/* Begin individual Composition Papers */}
+                                    <Grid item>
+                                        <Paper className={classes.paper}>
+                                            <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
+
+                                                <Grid item>
+                                                    <Grid container direction="row" alignItems="center">
+
+                                                        {/* Companion image */}
+                                                        <Grid item style={{ paddingLeft: '8px' }}>
+                                                            {/* temp blitz: TODO: replace with companion icon */}
+                                                            <Avatar src={`/assets/champions/blitzcrank.png`} />
+                                                        </Grid>
+
+                                                        {/* Placement and Type */}
+                                                        <Grid item style={{ paddingLeft: '16px' }}>
+                                                            <Box>
+                                                                <Typography variant="caption">Win Ratio</Typography>
+                                                                <Typography><b>{composition.winRatio * 100 + "%"}</b></Typography>
+                                                            </Box>
+                                                        </Grid>
+
+                                                        {/* Synergies / Traits */}
+                                                        {/* <Grid item style={{ paddingLeft: '64px' }}>
                                                                 <Typography>synergies</Typography>
                                                                 <Grid container direction="row">
                                                                     {match.info.participants[getParticipantsIndex(match, profile.puuid)].traits.map((trait, key) => (
@@ -260,39 +266,38 @@ export default function Comps() {
                                                                 </Grid>
                                                             </Grid> */}
 
-                                                        </Grid>
                                                     </Grid>
-
-
-                                                    {/* Champs */}
-                                                    <Grid item >
-                                                        <Typography variant="caption">Team Composition</Typography>
-                                                        <Grid container direction="row" alignItems="center">
-                                                            {composition.comp.map((unit, key) => (
-                                                                <Grid item key={key}>
-                                                                    <Avatar
-                                                                        src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
-                                                                        className={classes.large} />
-                                                                </Grid>
-                                                            ))}
-                                                        </Grid>
-                                                    </Grid>
-
                                                 </Grid>
 
-                                            </Paper>
-                                        </Grid>
-                                    </Box>
-                                ))}
 
-                            </Grid>
+                                                {/* Champs */}
+                                                <Grid item >
+                                                    <Typography variant="caption">Team Composition</Typography>
+                                                    <Grid container direction="row" alignItems="center">
+                                                        {composition.comp.map((unit, key) => (
+                                                            <Grid item key={key}>
+                                                                <Avatar
+                                                                    src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
+                                                                    className={classes.large} />
+                                                            </Grid>
+                                                        ))}
+                                                    </Grid>
+                                                </Grid>
 
+                                            </Grid>
 
+                                        </Paper>
+                                    </Grid>
+                                </Box>
+                            ))}
 
                         </Grid>
-                    </Container>
-                </div>
-            )
-        }
+
+
+
+                    </Grid>
+                </Container>
+            </div>
+        )
     }
 }

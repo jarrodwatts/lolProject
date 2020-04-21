@@ -8,7 +8,6 @@ import NavBar from '../../components/NavBar';
 import ChampionsRow from '../../components/SummonerPage/SummonerName';
 import FavouriteChampions from '../../components/SummonerPage/FavouriteChampions';
 import Match from '../../components/SummonerPage/Match';
-import MatchPlacement from '../../components/SummonerPage/MatchPlacement';
 import PlacementDistribution from '../../components/SummonerPage/PlacementDistribution';
 import SeasonWins from '../../components/SummonerPage/SeasonWins';
 import SummonerName from '../../components/SummonerPage/SummonerName';

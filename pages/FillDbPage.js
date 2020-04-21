@@ -12,7 +12,7 @@ const colours = {
     navy: '#24305E',
 }
 
-const RIOT_API_KEY = "RGAPI-8228f71c-77c1-494c-8d19-2e6b503ddeaf"
+const RIOT_API_KEY = "RGAPI-d68db2f7-a8ee-4b91-a5f4-09cf7c26fb64"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -67,6 +67,10 @@ export default function FillDbPage({ matchDetails }) {
     )
 }
 
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function getServerSideProps(context) {
     //Fetch data from external API
 
@@ -83,7 +87,7 @@ export async function getServerSideProps(context) {
     //1. Grab all challengers
     console.log("Reached 1")
     const resChallengers = await fetch(
-        `https://oc1.api.riotgames.com/tft/league/v1/master` + '?api_key=' + RIOT_API_KEY
+        `https://oc1.api.riotgames.com/tft/league/v1/grandmaster` + '?api_key=' + RIOT_API_KEY
     );
     const challengersWithMetadata = await resChallengers.json();
     const challengers = challengersWithMetadata.entries;
@@ -94,7 +98,6 @@ export async function getServerSideProps(context) {
         challengerSummonerNames.push(challengers[i].summonerName)
     }
     //console.log(challengerSummonerNames)
-
 
     //TEMP: chop off challengerSummonerNames to ten
     challengerSummonerNames.length = 10;
@@ -122,7 +125,7 @@ export async function getServerSideProps(context) {
             matchIds.push(matchBatch[x]);
         }
 
-        ///matchIds.push(matchBatch);
+        await timeout(5000);
     }
 
     console.log(matchIds)
@@ -144,14 +147,16 @@ export async function getServerSideProps(context) {
 
             //6. Add shit to mongodb
             collection.insertOne(matchDetail)
-                .then(result => {
-                    setTimeout(function () { console.log(`Successfully inserted item with _id: ${result.insertedId}`) }, 5000)
+                .then(() => {
+                    //await timeout(3000);
                 })
                 .catch(err => {
+                    //await timeout(3000);
                     setTimeout(function () { console.error(`Failed to insert item: ${err}`) })
 
                 })
-        });
+        })
+        await timeout(6000);
 
     }
 
