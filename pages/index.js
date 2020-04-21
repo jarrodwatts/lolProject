@@ -3,9 +3,9 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import Link from '../src/Link';
 import theme from '../src/theme';
 import { Container, Typography, Box, MuiLink, Button, TextField, Grid, Icon, Paper } from '@material-ui/core';
-import Header from '../components/Header';
-import BigLogo from '../components/BigLogo';
-import BigSearch from '../components/BigSearch';
+import Header from '../components/Homepage/Header';
+import BigLogo from '../components/Homepage/BigLogo';
+import BigSearch from '../components/Homepage/BigSearch';
 import NavBar from '../components/NavBar';
 
 export default class Index extends React.Component {

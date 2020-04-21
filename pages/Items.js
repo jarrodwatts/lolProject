@@ -37,7 +37,6 @@ export default function Items() {
     return (
         <div>
             <NavBar />
-            {console.log(itemsArray)}
         </div>
     )
 }

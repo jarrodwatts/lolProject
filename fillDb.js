@@ -44,12 +44,11 @@ client.connect(err => {
                                     //Loop do all challengers x 20 games
                                     for (let i = 0; i < 20; i++) {
                                         matchIds.push(data[i]);
-                                        //console.log("length:", matchIds.length);
-
+                                        
                                         fetch(`https://americas.api.riotgames.com/tft/match/v1/matches/${data[i]}` + '?api_key=' + RIOT_API_KEY)
                                             .then((r) => r.json())
                                             .then((data) => {
-                                                //console.log("DATA:", data)
+                                                
                                                 matchDetails.push(data)
 
                                                 console.log("Summoner", x, ", Match", i, data);

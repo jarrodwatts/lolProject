@@ -155,7 +155,6 @@ export default function Comps() {
 
                         //console.log("thisComp:", thisComp, "vs:", "comparisonComp:", comparisonComp)
                         if (isArrayEqual(thisComp, comparisonComp)) {
-                            console.log(thisComp, " matched ", comparisonComp)
                             //Comp already exists
                             //Update that comp's win loss ratio in the unique array.
                             //If they won the game, increment win, else increment loss
@@ -202,9 +201,6 @@ export default function Comps() {
 
             //8. Sort uniqueArray by win Rate
             uniqueArray.sort((a, b) => parseFloat(b.winRatio) - parseFloat(a.winRatio));
-
-            console.log("Master Array", masterArray);
-            console.log("Unique Array", uniqueArray);
 
             return (
                 <div>
