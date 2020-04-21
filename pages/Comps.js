@@ -111,7 +111,8 @@ export default function Comps() {
                     winLoss: {
                         win: 0,
                         loss: 0
-                    }
+                    },
+                    matches: 1
                 }
 
                 //5. Push the units array to master array
@@ -137,7 +138,8 @@ export default function Comps() {
                     winLoss: {
                         win: 0,
                         loss: 0
-                    }
+                    },
+                    matches: masterArray[p].matches
                 }
                 //Check for this games placemnet
                 masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
@@ -159,6 +161,7 @@ export default function Comps() {
                         //Update that comp's win loss ratio in the unique array.
                         //If they won the game, increment win, else increment loss
                         masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
+                        uniqueArray[n].matches++
                         //Note we've taken an action on this comp.
                         actionTaken = true;
                         //break the for loop
@@ -182,7 +185,8 @@ export default function Comps() {
                         winLoss: {
                             win: 0,
                             loss: 0
-                        }
+                        },
+                        matches: 1
                     }
 
                     //Check for this games placemnet
@@ -200,13 +204,17 @@ export default function Comps() {
         }
 
         //8. Sort uniqueArray by win Rate
+
+        //Below is win Ratio
         uniqueArray.sort((a, b) => parseFloat(b.winRatio) - parseFloat(a.winRatio));
 
+        //Matches
+        //uniqueArray.sort((a, b) => parseFloat(b.matches) - parseFloat(a.matches));
 
         console.log(masterArray)
         console.log(uniqueArray)
 
-        uniqueArray.length = 10;
+        uniqueArray.length = 400;
 
         return (
             <div>
