@@ -157,7 +157,7 @@ export async function getServerSideProps(context) {
     let matchDetailsArray = [];
 
     // for (let i = 0; i < matches.length; i++) {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 10; i++) {
         let resMatchDetails = await fetch(
             `https://americas.api.riotgames.com/tft/match/v1/matches/${matches[i]}` + '?api_key=' + RIOT_API_KEY
 

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Typography, Paper, Box, Grid, Avatar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { render } from 'react-dom';
 
 function sortedChampsCalculator(matchDetailsArray, profile) {
     let total = [];
@@ -34,13 +33,12 @@ function sortedChampsCalculator(matchDetailsArray, profile) {
         return b[1] - a[1];
     });
 
-    sortedChampsArray.length = 8; //reduce to top 10
+    sortedChampsArray.length = 8; //reduce to top 8
 
     return (renderFavouriteChamps(sortedChampsArray))
 }
 
 function renderFavouriteChamps(sortedChampsArray) {
-    //TODO: pass to renderer
     return (
         <Box>
             <Typography style={{ paddingBottom: '8px' }}><b>Favourite Champions</b></Typography>
@@ -81,9 +79,6 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
     },
 }));
-
-
-
 
 export default function FavouriteChampions(props) {
     const classes = useStyles();

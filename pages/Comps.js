@@ -107,12 +107,13 @@ export default function Comps() {
 
                 let tempObj = {
                     comp: tempArr,
-                    placement: tempPlacement,
+                    placementsArray: [tempPlacement],
                     winLoss: {
                         win: 0,
                         loss: 0
                     },
-                    matches: 1
+                    matches: 1,
+                    placement: tempPlacement
                 }
 
                 //5. Push the units array to master array
@@ -123,8 +124,6 @@ export default function Comps() {
         //6. Use masterArray to create a new reduced array with unique comps
         let uniqueArray = [];
 
-        //debugger;
-        console.log(masterArray.length);
         for (let p = 0; p < masterArray.length; p++) {
 
             let actionTaken = false;
@@ -134,12 +133,14 @@ export default function Comps() {
                 //Thus push it to be the first item of comparison
                 let tempObj = {
                     comp: masterArray[p].comp,
-                    placement: masterArray[p].placement,
+                    placementsArray: [masterArray[p].placement],
                     winLoss: {
                         win: 0,
                         loss: 0
                     },
-                    matches: masterArray[p].matches
+                    matches: masterArray[p].matches,
+                    averagePlacement: masterArray[p].placement,
+
                 }
                 //Check for this games placemnet
                 masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
@@ -154,14 +155,22 @@ export default function Comps() {
                 for (let n = 0; n < uniqueArray.length; n++) {
                     let comparisonComp = uniqueArray[n].comp
 
-
                     //console.log("thisComp:", thisComp, "vs:", "comparisonComp:", comparisonComp)
                     if (isArrayEqual(thisComp, comparisonComp)) {
+
                         //Comp already exists
                         //Update that comp's win loss ratio in the unique array.
                         //If they won the game, increment win, else increment loss
                         masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
-                        uniqueArray[n].matches++
+                        uniqueArray[n].matches++;
+                        uniqueArray[n].placementsArray.push(masterArray[p].placement)
+                        let temp4 = (uniqueArray[n].placementsArray.reduce((a, b) => a + b)) / uniqueArray[n].matches;
+
+                        //if (temp4 == 0) { debugger; }
+
+                        uniqueArray[n].averagePlacement = (
+                            uniqueArray[n].placementsArray.reduce((a, b) => a + b) / uniqueArray[n].matches
+                        )
                         //Note we've taken an action on this comp.
                         actionTaken = true;
                         //break the for loop
@@ -181,17 +190,20 @@ export default function Comps() {
 
                     let tempObj = {
                         comp: masterArray[p].comp,
-                        placement: masterArray[p].placement,
+                        placementsArray: [masterArray[p].placement],
                         winLoss: {
                             win: 0,
                             loss: 0
                         },
-                        matches: 1
+                        matches: 1,
+                        averagePlacement: masterArray[p].placement,
                     }
 
                     //Check for this games placemnet
-                    masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
+                    masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++;
+
                     uniqueArray.push(tempObj)
+
                     actionTaken = true;
                 }
             }
@@ -205,16 +217,35 @@ export default function Comps() {
 
         //8. Sort uniqueArray by win Rate
 
-        //Below is win Ratio
-        uniqueArray.sort((a, b) => parseFloat(b.winRatio) - parseFloat(a.winRatio));
+        //Below is sort by: 
+        //Win Ratio
+        //uniqueArray.sort((a, b) => parseFloat(b.winRatio) - parseFloat(a.winRatio));
 
         //Matches
-        //uniqueArray.sort((a, b) => parseFloat(b.matches) - parseFloat(a.matches));
+        uniqueArray.sort((a, b) => parseFloat(b.matches) - parseFloat(a.matches));
+
+        //averagePlacement
+        //uniqueArray.sort((a, b) => parseFloat(a.averagePlacement) - parseFloat(b.averagePlacement));
 
         console.log(masterArray)
         console.log(uniqueArray)
 
-        uniqueArray.length = 400;
+        //cleaning out zeroes again
+        for (var i = uniqueArray.length - 1; i >= 0; i--) {
+            if (uniqueArray[i].averagePlacement == 0) {
+                uniqueArray.splice(i, 1);
+            }
+        }
+
+        //filter out "1-gamers"
+        for (var i = uniqueArray.length - 1; i >= 0; i--) {
+            if (uniqueArray[i].matches == 1) {
+                uniqueArray.splice(i, 1);
+            }
+        }
+
+
+        uniqueArray.length = 250;
 
         return (
             <div>
@@ -258,7 +289,39 @@ export default function Comps() {
                                                         <Grid item style={{ paddingLeft: '16px' }}>
                                                             <Box>
                                                                 <Typography variant="caption">Win Ratio</Typography>
-                                                                <Typography><b>{composition.winRatio * 100 + "%"}</b></Typography>
+                                                                <Typography><b>{composition.winRatio.toFixed(2) * 100 + "%"}</b></Typography>
+                                                            </Box>
+                                                        </Grid>
+
+                                                        {/* Matches */}
+                                                        <Grid item style={{ paddingLeft: '16px' }}>
+                                                            <Box>
+                                                                <Typography variant="caption">Matches</Typography>
+                                                                <Typography><b>{composition.matches}</b></Typography>
+                                                            </Box>
+                                                        </Grid>
+
+                                                        {/* Wins */}
+                                                        <Grid item style={{ paddingLeft: '16px' }}>
+                                                            <Box>
+                                                                <Typography variant="caption">Wins</Typography>
+                                                                <Typography><b>{composition.winLoss.win}</b></Typography>
+                                                            </Box>
+                                                        </Grid>
+
+                                                        {/* Losses */}
+                                                        <Grid item style={{ paddingLeft: '16px' }}>
+                                                            <Box>
+                                                                <Typography variant="caption">Losses</Typography>
+                                                                <Typography><b>{composition.winLoss.loss}</b></Typography>
+                                                            </Box>
+                                                        </Grid>
+
+                                                        {/* Losses */}
+                                                        <Grid item style={{ paddingLeft: '16px' }}>
+                                                            <Box>
+                                                                <Typography variant="caption">Average Placement</Typography>
+                                                                <Typography><b>{composition.averagePlacement}</b></Typography>
                                                             </Box>
                                                         </Grid>
 
@@ -300,8 +363,6 @@ export default function Comps() {
                             ))}
 
                         </Grid>
-
-
 
                     </Grid>
                 </Container>
