@@ -78,6 +78,43 @@ function sliceCharacterString(string) {
     return string.substr(5).toLowerCase()
 }
 
+function produceSimilarity(a, b) {
+    let matched = 0;
+    let total;
+    let tempA = a;
+    let tempB = b;
+    //Grab which ever one is longer for total
+
+    //If A is longer, compare each item of b to a
+    if (tempA.length > tempB.length) {
+        total = tempA.length;
+        for (let i = 0; i < tempA.length; i++) {
+            if (tempA.includes(tempB[i])) {
+                matched++
+            }
+        }
+    }
+
+    //If b is longer, compare each item of a to b
+    else {
+        total = tempB.length;
+        for (let i = 0; i < tempB.length; i++) {
+
+            let temp1 = tempA.map((champ => champ.character_id))
+            let temp2 = tempB.map((champ => champ.character_id))
+
+
+            //console.log(tempB.includes(tempA[i]))
+            if (temp2.includes(temp1[i])) {
+                matched++
+            }
+        }
+    }
+
+    return (matched / total) * 100
+
+}
+
 export default function Comps() {
 
     const classes = useStyles();
@@ -100,6 +137,9 @@ export default function Comps() {
 
                 //3. Sort the units array
                 let tempArr = filteredMatches[i].info.participants[x].units.sort(function (a, b) {
+                    // if (a.character_id == undefined) {
+                    //     debugger;
+                    // }
                     var x = a.character_id.toLowerCase();
                     var y = b.character_id.toLowerCase();
                     if (x < y) { return -1; }
@@ -130,8 +170,8 @@ export default function Comps() {
         //6. Use masterArray to create a new reduced array with unique comps
         let uniqueArray = [];
 
-        //for (let p = 0; p < masterArray.length; p++) {
-        for (let p = 0; p < 2000; p++) {
+        for (let p = 0; p < masterArray.length; p++) {
+        // for (let p = 0; p < 2000; p++) {
 
             let actionTaken = false;
 
@@ -157,7 +197,6 @@ export default function Comps() {
 
             else {
                 //Compare the current comp to each comp in uniqueArrays to see if it exists within uniqueArray.
-                //debugger;
                 let thisComp = masterArray[p].comp;
 
                 for (let n = 0; n < uniqueArray.length; n++) {
@@ -166,8 +205,7 @@ export default function Comps() {
                     //console.log("thisComp:", thisComp, "vs:", "comparisonComp:", comparisonComp)
                     if (isArrayEqual(thisComp, comparisonComp)) {
                         //Comp already exists
-                        
-                        
+
                         //If they won the game, increment win, else increment loss
                         masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
                         uniqueArray[n].matches++;
@@ -221,6 +259,79 @@ export default function Comps() {
             uniqueArray[i]["winRatio"] = uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss)
         }
 
+        //Workflow: Group unique comps.
+        let compGroupings = [];
+        let actionTaken = false;
+
+
+        for (let a = 0; a < uniqueArray.length; a++) {
+            actionTaken = false;
+            //console.log("The comp:", uniqueArray[a])
+            //debugger;
+            for (let c = 0; c < compGroupings.length; c++) {
+                //If compGrouping length is greater than 0
+                if (compGroupings.length > 0) {
+                    //Check if it's similar to an already existing comp grouping before comparing it with other comps in unique array
+                    for (let d = 0; d < compGroupings[c].comps.length; d++) {
+                        let percentageSimilarity = produceSimilarity(compGroupings[c].comps[d].comp, uniqueArray[a].comp);
+
+                        if (percentageSimilarity > 75) {
+                            //found a mathc in this compGrouping
+                            compGroupings[c].comps.push(uniqueArray[a])
+                            d = compGroupings[c].comps.length; //Break the loop
+                            actionTaken = true;
+                            //console.log("Action Taken: Added to ", compGroupings[c])
+                        }
+                    }
+                }
+
+            }
+
+
+            if (!actionTaken) {
+                //Compare this comp's composition with each other (remaining) composition, 
+                for (let b = a + 1; b < uniqueArray.length; b++) {
+                    //Assuming they're sorted...
+                    //Produce a percentage of how many elements are similar between a and b
+                    let percentageSimilarity = produceSimilarity(uniqueArray[a].comp, uniqueArray[b].comp);
+
+                    //If percentage is greater than 74%
+                    if (percentageSimilarity > 74) {
+                        //create a new temp object and push it to compGroupings (that contains these two compositions in this temp objects .comps [])
+                        let newCompGroup = {
+                            name: "temp comp name",
+                            comps: [
+                                uniqueArray[a], uniqueArray[b]
+                            ]
+                        }
+                        compGroupings.push(newCompGroup);
+                        actionTaken = true;
+                        b = uniqueArray.length//break the loop
+                        //console.log("Action Taken: Created new Grouping  ", newCompGroup, "And added it to", compGroupings)
+
+                    }
+
+                    else {
+                        //wait for the loop to finish and check if an action still hasn't been taken
+
+                    }
+
+                }
+
+                if (!actionTaken) {
+                    let newCompGroup = {
+                        name: "temp comp name",
+                        comps: [
+                            uniqueArray[a]
+                        ]
+                    }
+                    compGroupings.push(newCompGroup);
+                    //console.log("Action Taken: Created new comp group with just one comp:", uniqueArray[a], "And added it to", compGroupings)
+                }
+
+            }
+        }
+
         //8. Sort uniqueArray by win Rate
 
         //Below is sort by: 
@@ -233,8 +344,9 @@ export default function Comps() {
         //averagePlacement
         //uniqueArray.sort((a, b) => parseFloat(a.averagePlacement) - parseFloat(b.averagePlacement));
 
-        console.log(masterArray)
-        console.log(uniqueArray)
+        console.log("Master", masterArray)
+        console.log("Unique", uniqueArray)
+        console.log("Grouped", compGroupings);
 
         //cleaning out zeroes again
         for (var i = uniqueArray.length - 1; i >= 0; i--) {
