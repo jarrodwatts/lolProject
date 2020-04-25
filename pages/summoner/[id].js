@@ -22,7 +22,7 @@ const colours = {
     navy: '#24305E',
 }
 
-const RIOT_API_KEY = "RGAPI-d68db2f7-a8ee-4b91-a5f4-09cf7c26fb64"
+const RIOT_API_KEY = "RGAPI-2b2d17ae-4f6c-404f-af56-c5ba6b794f4e"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -69,6 +69,8 @@ const useStyles = makeStyles((theme) => ({
 
 function Summoner({ profile, matches, matchDetailsArray, league }) {
     const classes = useStyles();
+
+    console.log(matchDetailsArray)
 
     return (
         <div>
@@ -218,6 +220,8 @@ function formatGameType(gameInfo) {
 
         case "TFT3_GameVariation_None":
             return "Normal Game"
+
+        default: return "Normal Galaxy"
     }
 }
 

@@ -4,6 +4,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
+import TraitsRow from '../components/SummonerPage/TraitsRow';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 function fetcher(url) {
     return fetch(url).then(r => r.json());
@@ -79,8 +84,8 @@ export default function Comps() {
     const { data, error } = useSWR('/api/getMatches', fetcher);
     const matches = data;
 
-    if (error) return <div>failed to load</div>
-    if (!matches) return <div>loading...</div>
+    if (error) return <div>Failed to load</div>
+    if (!matches) return <div>Loading...</div>
 
     else {
 
@@ -107,6 +112,7 @@ export default function Comps() {
 
                 let tempObj = {
                     comp: tempArr,
+                    traits: filteredMatches[i].info.participants[x].traits,
                     placementsArray: [tempPlacement],
                     winLoss: {
                         win: 0,
@@ -124,7 +130,8 @@ export default function Comps() {
         //6. Use masterArray to create a new reduced array with unique comps
         let uniqueArray = [];
 
-        for (let p = 0; p < masterArray.length; p++) {
+        //for (let p = 0; p < masterArray.length; p++) {
+        for (let p = 0; p < 2000; p++) {
 
             let actionTaken = false;
 
@@ -133,6 +140,7 @@ export default function Comps() {
                 //Thus push it to be the first item of comparison
                 let tempObj = {
                     comp: masterArray[p].comp,
+                    traits: masterArray[p].traits,
                     placementsArray: [masterArray[p].placement],
                     winLoss: {
                         win: 0,
@@ -157,16 +165,13 @@ export default function Comps() {
 
                     //console.log("thisComp:", thisComp, "vs:", "comparisonComp:", comparisonComp)
                     if (isArrayEqual(thisComp, comparisonComp)) {
-
                         //Comp already exists
-                        //Update that comp's win loss ratio in the unique array.
+                        
+                        
                         //If they won the game, increment win, else increment loss
                         masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
                         uniqueArray[n].matches++;
                         uniqueArray[n].placementsArray.push(masterArray[p].placement)
-                        let temp4 = (uniqueArray[n].placementsArray.reduce((a, b) => a + b)) / uniqueArray[n].matches;
-
-                        //if (temp4 == 0) { debugger; }
 
                         uniqueArray[n].averagePlacement = (
                             uniqueArray[n].placementsArray.reduce((a, b) => a + b) / uniqueArray[n].matches
@@ -191,6 +196,7 @@ export default function Comps() {
                     let tempObj = {
                         comp: masterArray[p].comp,
                         placementsArray: [masterArray[p].placement],
+                        traits: masterArray[p].traits,
                         winLoss: {
                             win: 0,
                             loss: 0
@@ -237,15 +243,14 @@ export default function Comps() {
             }
         }
 
-        //filter out "1-gamers"
+        //filter out "games with less than 10 matches"
         for (var i = uniqueArray.length - 1; i >= 0; i--) {
-            if (uniqueArray[i].matches == 1) {
+            if (uniqueArray[i].matches < 10) {
                 uniqueArray.splice(i, 1);
             }
         }
 
-
-        uniqueArray.length = 250;
+        uniqueArray.length = 20;
 
         return (
             <div>
@@ -274,89 +279,110 @@ export default function Comps() {
                                     {/* Begin individual Composition Papers */}
                                     <Grid item>
                                         <Paper className={classes.paper}>
-                                            <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
+                                            <Grid container direction="column" spacing={2}>
+                                                <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
 
-                                                <Grid item>
-                                                    <Grid container direction="row" alignItems="center">
+                                                    <Grid item>
+                                                        <Grid container direction="row" alignItems="center">
 
-                                                        {/* Companion image */}
-                                                        <Grid item style={{ paddingLeft: '8px' }}>
-                                                            {/* temp blitz: TODO: replace with companion icon */}
-                                                            <Avatar src={`/assets/champions/blitzcrank.png`} />
-                                                        </Grid>
-
-                                                        {/* Placement and Type */}
-                                                        <Grid item style={{ paddingLeft: '16px' }}>
-                                                            <Box>
-                                                                <Typography variant="caption">Win Ratio</Typography>
-                                                                <Typography><b>{composition.winRatio.toFixed(2) * 100 + "%"}</b></Typography>
-                                                            </Box>
-                                                        </Grid>
-
-                                                        {/* Matches */}
-                                                        <Grid item style={{ paddingLeft: '16px' }}>
-                                                            <Box>
-                                                                <Typography variant="caption">Matches</Typography>
-                                                                <Typography><b>{composition.matches}</b></Typography>
-                                                            </Box>
-                                                        </Grid>
-
-                                                        {/* Wins */}
-                                                        <Grid item style={{ paddingLeft: '16px' }}>
-                                                            <Box>
-                                                                <Typography variant="caption">Wins</Typography>
-                                                                <Typography><b>{composition.winLoss.win}</b></Typography>
-                                                            </Box>
-                                                        </Grid>
-
-                                                        {/* Losses */}
-                                                        <Grid item style={{ paddingLeft: '16px' }}>
-                                                            <Box>
-                                                                <Typography variant="caption">Losses</Typography>
-                                                                <Typography><b>{composition.winLoss.loss}</b></Typography>
-                                                            </Box>
-                                                        </Grid>
-
-                                                        {/* Losses */}
-                                                        <Grid item style={{ paddingLeft: '16px' }}>
-                                                            <Box>
-                                                                <Typography variant="caption">Average Placement</Typography>
-                                                                <Typography><b>{composition.averagePlacement}</b></Typography>
-                                                            </Box>
-                                                        </Grid>
-
-                                                        {/* Synergies / Traits */}
-                                                        {/* <Grid item style={{ paddingLeft: '64px' }}>
-                                                                <Typography>synergies</Typography>
-                                                                <Grid container direction="row">
-                                                                    {match.info.participants[getParticipantsIndex(match, profile.puuid)].traits.map((trait, key) => (
-                                                                        <Grid item key={key}>
-                                                                            {renderSynergy(trait, classes)}
-                                                                        </Grid>
-                                                                    ))}
-                                                                </Grid>
-                                                            </Grid> */}
-
-                                                    </Grid>
-                                                </Grid>
-
-
-                                                {/* Champs */}
-                                                <Grid item >
-                                                    <Typography variant="caption">Team Composition</Typography>
-                                                    <Grid container direction="row" alignItems="center">
-                                                        {composition.comp.map((unit, key) => (
-                                                            <Grid item key={key}>
-                                                                <Avatar
-                                                                    src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
-                                                                    className={classes.large} />
+                                                            {/* Companion image */}
+                                                            <Grid item style={{ paddingLeft: '8px' }}>
+                                                                {/* temp blitz: TODO: replace with companion icon */}
+                                                                <Avatar src={`/assets/champions/blitzcrank.png`} />
                                                             </Grid>
-                                                        ))}
+
+                                                            {/* Placement and Type */}
+                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                <Box>
+                                                                    <Typography variant="caption">Win Ratio</Typography>
+                                                                    <Typography><b>{parseFloat(composition.winRatio.toFixed(2)) * 100 + "%"}</b></Typography>
+                                                                </Box>
+                                                            </Grid>
+
+                                                            {/* Matches */}
+                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                <Box>
+                                                                    <Typography variant="caption">Matches</Typography>
+                                                                    <Typography><b>{composition.matches}</b></Typography>
+                                                                </Box>
+                                                            </Grid>
+
+                                                            {/* Wins */}
+                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                <Box>
+                                                                    <Typography variant="caption">Wins</Typography>
+                                                                    <Typography><b>{composition.winLoss.win}</b></Typography>
+                                                                </Box>
+                                                            </Grid>
+
+                                                            {/* Losses */}
+                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                <Box>
+                                                                    <Typography variant="caption">Losses</Typography>
+                                                                    <Typography><b>{composition.winLoss.loss}</b></Typography>
+                                                                </Box>
+                                                            </Grid>
+
+                                                            {/* Losses */}
+                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                <Box>
+                                                                    <Typography variant="caption">Average Placement</Typography>
+                                                                    <Typography><b>{composition.averagePlacement.toFixed(2)}</b></Typography>
+                                                                </Box>
+                                                            </Grid>
+
+                                                            {/* Synergies / Traits */}
+                                                            <Grid item style={{ paddingLeft: '64px' }}>
+                                                                <Box>
+                                                                    <Typography variant="caption">Traits</Typography>
+                                                                    <Grid container direction="row">
+                                                                        {composition.traits.map((trait, key) => (
+                                                                            <Grid item key={key}>
+                                                                                <TraitsRow trait={trait} />
+                                                                            </Grid>
+                                                                        ))}
+                                                                    </Grid>
+                                                                </Box>
+                                                            </Grid>
+
+                                                        </Grid>
                                                     </Grid>
+
+
+                                                    {/* Champs */}
+                                                    <Grid item>
+                                                        <Typography variant="caption">Team Composition</Typography>
+                                                        <Grid container direction="row" alignItems="center" justify="center">
+                                                            {composition.comp.map((unit, key) => (
+                                                                <Grid item key={key}>
+                                                                    <Avatar
+                                                                        src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
+                                                                        className={classes.large} />
+                                                                </Grid>
+                                                            ))}
+                                                        </Grid>
+                                                    </Grid>
+
                                                 </Grid>
+
+                                                <ExpansionPanel>
+                                                    <ExpansionPanelSummary
+                                                        expandIcon={<ExpandMoreIcon />}
+                                                        aria-controls="panel1a-content"
+                                                        id="panel1a-header"
+                                                    >
+                                                        <Typography className={classes.heading}>View Team Comp <b>Variations</b></Typography>
+                                                    </ExpansionPanelSummary>
+
+                                                    <ExpansionPanelDetails>
+                                                        <Typography>
+                                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
+                                                            sit amet blandit leo lobortis eget.
+                                                        </Typography>
+                                                    </ExpansionPanelDetails>
+                                                </ExpansionPanel>
 
                                             </Grid>
-
                                         </Paper>
                                     </Grid>
                                 </Box>
