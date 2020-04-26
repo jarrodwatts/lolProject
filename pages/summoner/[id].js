@@ -22,7 +22,7 @@ const colours = {
     navy: '#24305E',
 }
 
-const RIOT_API_KEY = "RGAPI-2b2d17ae-4f6c-404f-af56-c5ba6b794f4e"
+const RIOT_API_KEY = "RGAPI-53e3eacf-93ca-4141-8b9e-40a1e7004eb9"
 
 const useStyles = makeStyles((theme) => ({
     root: {

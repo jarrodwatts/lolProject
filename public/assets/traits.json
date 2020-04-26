@@ -12,7 +12,12 @@
       },
       {
         "style": "gold",
-        "min": 6
+        "min": 6,
+        "max": 8
+      },
+      {
+        "style": "chromatic",
+        "min": 9
       }
     ]
   },
@@ -123,7 +128,12 @@
       },
       {
         "style": "gold",
-        "min": 6
+        "min": 6,
+        "max": 8
+      },
+      {
+        "style": "chromatic",
+        "min": 9
       }
     ]
   },
@@ -153,7 +163,12 @@
       },
       {
         "style": "gold",
-        "min": 4
+        "min": 4,
+        "max": 5,
+      },
+      {
+        "style": "chromatic",
+        "min": 6
       }
     ]
   },
@@ -228,7 +243,12 @@
       },
       {
         "style": "gold",
-        "min": 4
+        "min": 4,
+        "max": 5
+      },
+      {
+        "style": "chromatic",
+        "min": 6
       }
     ]
   },
@@ -245,7 +265,12 @@
       },
       {
         "style": "gold",
-        "min": 6
+        "min": 6,
+        "max": 8
+      },
+      {
+        "style": "chromatic",
+        "min": 9
       }
     ]
   },
@@ -279,7 +304,12 @@
       },
       {
         "style": "gold",
-        "min": 6
+        "min": 6,
+        "max": 7,
+      },
+      {
+        "style": "chromatic",
+        "min": 8
       }
     ]
   },

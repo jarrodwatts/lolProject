@@ -10,7 +10,8 @@ function renderSynergy(trait, classes) {
                 <Box>
                     <Avatar
                         src={`/assets/traits/${trait.name.toLocaleLowerCase()}.png`}
-                        className={classes.small} />
+                        className={classes.small}
+                    />
                 </Box>
             )
 
@@ -19,7 +20,8 @@ function renderSynergy(trait, classes) {
                 <Box>
                     <Avatar
                         src={`/assets/traits/${trait.name.toLocaleLowerCase()}.png`}
-                        className={classes.small} />
+                        className={classes.small}
+                    />
                 </Box>
             )
 
@@ -28,7 +30,9 @@ function renderSynergy(trait, classes) {
                 <Box>
                     <Avatar
                         src={`/assets/traits/${trait.name.toLocaleLowerCase()}.png`}
-                        className={classes.small} />
+                        className={classes.small}
+
+                    />
                 </Box>
             )
     }

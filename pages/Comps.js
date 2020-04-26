@@ -115,6 +115,65 @@ function produceSimilarity(a, b) {
 
 }
 
+function generateCompName(traitsArray) {
+    //Get the most satisfied traits names
+    let compString = "";
+    let compsAppended = 0;
+
+    for (let i = 0; i < traitsArray.length; i++) {
+        if (traitsArray[i].tier_current == traitsArray[i].tier_total && traitsArray[i].num_units > 2 || traitsArray[i].tier_current == traitsArray[i].tier_total && traitsArray[i].name == "Sniper") {
+            compsAppended++
+            //then check if it starts with SET and chop it accordingly
+            if (traitsArray[i].name.startsWith("Set")) {
+                compString += traitsArray[i].name.substr(5) + " ";
+            }
+            else {
+                compString += traitsArray[i].name + " ";
+            }
+
+        }
+    }
+
+    //If the comp still doesn't have a name then we gotta settle for second place
+    if (compsAppended < 3) {
+        for (let i = 0; i < traitsArray.length; i++) {
+            if (traitsArray[i].tier_current == (traitsArray[i].tier_total - 1) && traitsArray[i].tier_current != 0) {
+                compsAppended++
+                //then check if it starts with SET and chop it accordingly
+                if (traitsArray[i].name.startsWith("Set")) {
+                    compString += traitsArray[i].name.substr(5) + " ";
+                }
+                else {
+                    compString += traitsArray[i].name + " ";
+                }
+
+            }
+        }
+    }
+
+    //If the comp still doesn't have a name then we gotta settle for second place
+    if (compsAppended < 2) {
+        for (let i = 0; i < traitsArray.length; i++) {
+            if (compsAppended < 3) {
+                if (traitsArray[i].tier_current == (traitsArray[i].tier_total - 2) && traitsArray[i].tier_current != 0) {
+                    compsAppended++
+                    //then check if it starts with SET and chop it accordingly
+                    if (traitsArray[i].name.startsWith("Set")) {
+                        compString += traitsArray[i].name.substr(5) + " ";
+                    }
+                    else {
+                        compString += traitsArray[i].name + " ";
+                    }
+
+                }
+            }
+        }
+    }
+
+    return compString;
+
+}
+
 export default function Comps() {
 
     const classes = useStyles();
@@ -170,8 +229,8 @@ export default function Comps() {
         //6. Use masterArray to create a new reduced array with unique comps
         let uniqueArray = [];
 
-        for (let p = 0; p < masterArray.length; p++) {
-        // for (let p = 0; p < 2000; p++) {
+        //for (let p = 0; p < masterArray.length; p++) {
+        for (let p = 0; p < 2000; p++) {
 
             let actionTaken = false;
 
@@ -274,19 +333,20 @@ export default function Comps() {
                     //Check if it's similar to an already existing comp grouping before comparing it with other comps in unique array
                     for (let d = 0; d < compGroupings[c].comps.length; d++) {
                         let percentageSimilarity = produceSimilarity(compGroupings[c].comps[d].comp, uniqueArray[a].comp);
-
                         if (percentageSimilarity > 75) {
                             //found a mathc in this compGrouping
                             compGroupings[c].comps.push(uniqueArray[a])
-                            d = compGroupings[c].comps.length; //Break the loop
                             actionTaken = true;
                             //console.log("Action Taken: Added to ", compGroupings[c])
+                            //also cut off the loop so it doesn't get added to more than one comp..
+                            c = compGroupings.length;
+                            break; //Break the loop
+
                         }
                     }
+                    if (actionTaken) { break };
                 }
-
             }
-
 
             if (!actionTaken) {
                 //Compare this comp's composition with each other (remaining) composition, 
@@ -362,7 +422,30 @@ export default function Comps() {
             }
         }
 
-        uniqueArray.length = 20;
+        //For each compGrouping: remove each comp that only has 1
+        for (var i = compGroupings.length - 1; i >= 0; i--) {
+            for (var x = compGroupings[i].comps.length - 1; x >= 0; x--) {
+                if (compGroupings[i].comps[x].matches < 5) {
+                    compGroupings[i].comps.splice(x, 1);
+                }
+            }
+            //if there's no more comps in the compGroup discard this comp
+            if (compGroupings[i].comps.length == 0) {
+                compGroupings.splice(i, 1);
+            }
+        }
+
+        //Sort each compGrouping's comp by number of matches
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i].comps.sort((a, b) => b.matches - a.matches);
+        }
+
+        //Sort entire compGroupings array by number of comps 
+        compGroupings.sort((a, b) => b.comps.length - a.comps.length);
+
+        //uniqueArray.sort((a, b) => parseFloat(b.winRatio) - parseFloat(a.winRatio));
+
+        //compGroupings.length = 20;
 
         return (
             <div>
@@ -384,13 +467,16 @@ export default function Comps() {
 
                         {/* Compositions */}
                         <Grid container item xs={12} direction="column" spacing={1}>
-                            {uniqueArray.map((composition, key) => (
+                            {compGroupings.map((composition, key) => (
 
                                 <Box key={key} style={{ paddingBottom: '16px' }}>
 
                                     {/* Begin individual Composition Papers */}
                                     <Grid item>
                                         <Paper className={classes.paper}>
+                                            <Grid container direction="row" item justify="flex-start">
+                                                <Typography color="primary">{generateCompName(composition.comps[0].traits)}</Typography>
+                                            </Grid>
                                             <Grid container direction="column" spacing={2}>
                                                 <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
 
@@ -407,7 +493,7 @@ export default function Comps() {
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
                                                                     <Typography variant="caption">Win Ratio</Typography>
-                                                                    <Typography><b>{parseFloat(composition.winRatio.toFixed(2)) * 100 + "%"}</b></Typography>
+                                                                    <Typography><b>{parseFloat(composition.comps[0].winRatio.toFixed(2)) * 100 + "%"}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
@@ -415,7 +501,7 @@ export default function Comps() {
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
                                                                     <Typography variant="caption">Matches</Typography>
-                                                                    <Typography><b>{composition.matches}</b></Typography>
+                                                                    <Typography><b>{composition.comps[0].matches}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
@@ -423,7 +509,7 @@ export default function Comps() {
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
                                                                     <Typography variant="caption">Wins</Typography>
-                                                                    <Typography><b>{composition.winLoss.win}</b></Typography>
+                                                                    <Typography><b>{composition.comps[0].winLoss.win}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
@@ -431,7 +517,7 @@ export default function Comps() {
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
                                                                     <Typography variant="caption">Losses</Typography>
-                                                                    <Typography><b>{composition.winLoss.loss}</b></Typography>
+                                                                    <Typography><b>{composition.comps[0].winLoss.loss}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
@@ -439,7 +525,7 @@ export default function Comps() {
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
                                                                     <Typography variant="caption">Average Placement</Typography>
-                                                                    <Typography><b>{composition.averagePlacement.toFixed(2)}</b></Typography>
+                                                                    <Typography><b>{composition.comps[0].averagePlacement.toFixed(2)}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
@@ -448,7 +534,7 @@ export default function Comps() {
                                                                 <Box>
                                                                     <Typography variant="caption">Traits</Typography>
                                                                     <Grid container direction="row">
-                                                                        {composition.traits.map((trait, key) => (
+                                                                        {composition.comps[0].traits.map((trait, key) => (
                                                                             <Grid item key={key}>
                                                                                 <TraitsRow trait={trait} />
                                                                             </Grid>
@@ -465,7 +551,7 @@ export default function Comps() {
                                                     <Grid item>
                                                         <Typography variant="caption">Team Composition</Typography>
                                                         <Grid container direction="row" alignItems="center" justify="center">
-                                                            {composition.comp.map((unit, key) => (
+                                                            {composition.comps[0].comp.map((unit, key) => (
                                                                 <Grid item key={key}>
                                                                     <Avatar
                                                                         src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
@@ -477,22 +563,123 @@ export default function Comps() {
 
                                                 </Grid>
 
-                                                <ExpansionPanel>
-                                                    <ExpansionPanelSummary
-                                                        expandIcon={<ExpandMoreIcon />}
-                                                        aria-controls="panel1a-content"
-                                                        id="panel1a-header"
-                                                    >
-                                                        <Typography className={classes.heading}>View Team Comp <b>Variations</b></Typography>
-                                                    </ExpansionPanelSummary>
+                                                {composition.comps.length != 1 ?
+                                                    <ExpansionPanel>
+                                                        <ExpansionPanelSummary
+                                                            expandIcon={<ExpandMoreIcon />}
+                                                            aria-controls="panel1a-content"
+                                                            id="panel1a-header"
+                                                        >
+                                                            <Typography className={classes.heading}>View Team Comp <b>Variations</b></Typography>
+                                                        </ExpansionPanelSummary>
 
-                                                    <ExpansionPanelDetails>
-                                                        <Typography>
-                                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
-                                                            sit amet blandit leo lobortis eget.
-                                                        </Typography>
-                                                    </ExpansionPanelDetails>
-                                                </ExpansionPanel>
+                                                        <ExpansionPanelDetails>
+
+                                                            <Grid container item xs={12} direction="column" spacing={1}>
+                                                                {composition.comps.map((comp, key) => (
+                                                                    <Grid item key={key}>
+                                                                        <Paper className={classes.paper}>
+                                                                            <Grid container direction="column" spacing={2}>
+                                                                                <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
+                                                                                    <Grid item>
+                                                                                        <Grid container direction="row" alignItems="center">
+
+                                                                                            {/* Companion image */}
+                                                                                            <Grid item style={{ paddingLeft: '8px' }}>
+                                                                                                {/* temp blitz: TODO: replace with companion icon */}
+                                                                                                <Avatar src={`/assets/champions/blitzcrank.png`} />
+                                                                                            </Grid>
+
+                                                                                            {/* Placement and Type */}
+                                                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                                                <Box>
+                                                                                                    <Typography variant="caption">Win Ratio</Typography>
+                                                                                                    <Typography><b>{parseFloat(comp.winRatio.toFixed(2)) * 100 + "%"}</b></Typography>
+                                                                                                </Box>
+                                                                                            </Grid>
+
+                                                                                            {/* Matches */}
+                                                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                                                <Box>
+                                                                                                    <Typography variant="caption">Matches</Typography>
+                                                                                                    <Typography><b>{comp.matches}</b></Typography>
+                                                                                                </Box>
+                                                                                            </Grid>
+
+                                                                                            {/* Wins */}
+                                                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                                                <Box>
+                                                                                                    <Typography variant="caption">Wins</Typography>
+                                                                                                    <Typography><b>{comp.winLoss.win}</b></Typography>
+                                                                                                </Box>
+                                                                                            </Grid>
+
+                                                                                            {/* Losses */}
+                                                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                                                <Box>
+                                                                                                    <Typography variant="caption">Losses</Typography>
+                                                                                                    <Typography><b>{comp.winLoss.loss}</b></Typography>
+                                                                                                </Box>
+                                                                                            </Grid>
+
+                                                                                            {/* Losses */}
+                                                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                                                                <Box>
+                                                                                                    <Typography variant="caption">Average Placement</Typography>
+                                                                                                    <Typography><b>{comp.averagePlacement.toFixed(2)}</b></Typography>
+                                                                                                </Box>
+                                                                                            </Grid>
+
+                                                                                            {/* Synergies / Traits */}
+                                                                                            <Grid item style={{ paddingLeft: '64px' }}>
+                                                                                                <Box>
+                                                                                                    <Typography variant="caption">Traits</Typography>
+                                                                                                    <Grid container direction="row">
+                                                                                                        {comp.traits.map((trait, key) => (
+                                                                                                            <Grid item key={key}>
+                                                                                                                <TraitsRow trait={trait} />
+                                                                                                            </Grid>
+                                                                                                        ))}
+                                                                                                    </Grid>
+                                                                                                </Box>
+                                                                                            </Grid>
+
+                                                                                        </Grid>
+                                                                                    </Grid>
+
+                                                                                    {/* Champs */}
+                                                                                    <Grid item>
+                                                                                        <Typography variant="caption">Team Composition</Typography>
+                                                                                        <Grid container direction="row" alignItems="center" justify="center">
+                                                                                            {comp.comp.map((unit, key) => (
+                                                                                                <Grid item key={key}>
+                                                                                                    <Avatar
+                                                                                                        src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
+                                                                                                        className={classes.large} />
+                                                                                                </Grid>
+                                                                                            ))}
+                                                                                        </Grid>
+                                                                                    </Grid>
+
+                                                                                </Grid>
+
+                                                                            </Grid>
+                                                                        </Paper>
+                                                                    </Grid>
+
+                                                                )
+                                                                )}
+                                                            </Grid>
+
+
+
+
+                                                        </ExpansionPanelDetails>
+                                                    </ExpansionPanel>
+
+                                                    : <Grid></Grid>
+                                                }
+
 
                                             </Grid>
                                         </Paper>
