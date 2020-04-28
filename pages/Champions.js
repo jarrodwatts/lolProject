@@ -3,8 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import NavBar from '../components/NavBar';
 import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
 
-// import ChampionStats from '../public/assets/data/championStats.json';
-// import ChampionDetails from '../public/assets/data/championDetails.json';
+import ChampionStats from '../public/assets/data/championStats.json';
+import ChampionDetails from '../public/assets/data/championDetails.json';
 import ChampionsJson from '../public/assets/champions.json';
 
 const useStyles = makeStyles((theme) => ({
@@ -32,8 +32,13 @@ const useStyles = makeStyles((theme) => ({
 export default function Champions() {
 
     const championsArray = ChampionsJson;
+    const championStats = ChampionStats.items;
+    const championDetails = ChampionDetails.items
 
     const classes = useStyles();
+
+    console.log("championStats", championStats)
+    console.log("championDetails", championDetails)
 
     return (
         <div>
@@ -78,19 +83,10 @@ export default function Champions() {
 
 function renderChampCard(champ, classes) {
     return (
-        // <Card className={classes.root}>
-        //     <CardMedia
-        //         className={classes.media}
-        //         image={`/assets/champions/${sliceCharacterString(champ.championId)}.png`}
-        //         title="Paella dish"
-        //     />
-        //     <CardContent className={classes.content}>
-        //         <Grid container direction="row" alignItems="center" justify="center">
-        //             <Typography>{champ.name}</Typography>
-        //         </Grid>
-        //     </CardContent>
 
-        // </Card>
+
+
+
 
         <Grid container direction="column" style={{ position: 'relative' }}>
             <img

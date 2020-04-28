@@ -6,7 +6,7 @@ export default function BigLogo() {
     return (
         <div>
             {/* TODO: Temp Text replace with logo */}
-            <Typography variant="h1" component="h4" style={{ color: '#fff', padding: '16px' }}>
+            <Typography variant="h1" component="h4" style={{ padding: '16px' }}>
                 LOLPROJECT
             </Typography>
         </div>

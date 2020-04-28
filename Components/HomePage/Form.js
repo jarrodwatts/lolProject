@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Button, TextField, Grid, } from '@material-ui/core';
+import { Typography, Button, TextField, Grid, CircularProgress } from '@material-ui/core';
 import Router from 'next/router';
 
 export default class Form extends React.Component {
@@ -30,7 +30,8 @@ export default class Form extends React.Component {
                     width: '100%',
                 }}>
                 <form onSubmit={this.handleSubmit}>
-                    <Grid container spacing={3}>
+                    <Grid container direction="row" spacing={3}>
+
                         <Grid item xs={9}>
                             <TextField type="text"
                                 value={this.state.value}
@@ -44,12 +45,19 @@ export default class Form extends React.Component {
                                     color: '#fff',
                                     width: '100%'
                                 }}
-                            />
+                            >
+                            </TextField>
+                            
 
                         </Grid>
+
                         <Grid item xs={3}>
+                        
                             <Button type="submit">Search</Button>
+                            
                         </Grid>
+
+
                     </Grid>
                 </form>
             </Grid>

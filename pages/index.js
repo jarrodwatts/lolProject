@@ -32,25 +32,21 @@ export default class Index extends React.Component {
     return (
       <div>
         <NavBar />
-        {/* //Main Background Grid */}
-        <Grid container style={{ minHeight: '100vh' }}
-          direction="column" alignItems="flex-start">
 
-          {/* Header Component Here */}
-          <Header />
-          {/* Container that Centers things pushes them into the middle of the page */}
-          <Container maxWidth="sm">
+        {/* Container that Centers things pushes them into the middle of the page */}
+        <Container maxWidth="sm">
+          <Grid direction="row" container justify="center" alignItems="center" style={{height: '65vh'}}>
 
-            {/* Big Logo Component Here */}
-            <BigLogo />
+            <Grid item>
+              {/* Big Logo Component */}
+              <BigLogo />
+              {/* Component with Search Bar, Region Selector, and Search Icon */}
+              <BigSearch />
+            </Grid>
 
-            {/* Component with Search Bar, Region Selector, and Search Icon Here */}
-            <BigSearch />
+          </Grid>
+        </Container>
 
-            {/* Component with the Four Game Cards Here */}
-
-          </Container>
-        </Grid>
       </div>
     );
   }

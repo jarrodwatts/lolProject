@@ -36,12 +36,6 @@ const theme = createMuiTheme({
       },
     },
 
-    MuiInputBase: {
-      input: {
-        color: '#fff'
-      }
-    }
-
   },
   typography: { useNextVariants: true },
 });
