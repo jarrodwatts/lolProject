@@ -8,10 +8,6 @@ const fetch = require('node-fetch');
 
 const RIOT_API_KEY = "RGAPI-6fb4b56e-63e6-4857-9507-8459ef7136ca"
 
-console.log(
-    'helo'
-)
-
 // TODO: Replace the following with your app's Firebase project configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
@@ -28,49 +24,40 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 let db = firebase.firestore();
-let temp1;
-let temp2;
-
-const DATE_NOW = Date.now();
 
 async function main() {
-    //0. Connect to db Collection
-    let col = await db.collection('players').get();
-    console.log(col)
-
     //1. Grab a list of challengers
     let challengers = await grabChallengers();
-    console.log(challengers);
+    console.log("Grabbed Challengers")
 
     //2. Grab all their summonerNames so we can find out their puuid's
     let challengerSummonerNames = await createChallengerNamesArray(challengers);
-    console.log(challengerSummonerNames);
+    console.log("Grabbed Summoner Names")
 
     //3. Get All Puuids
     let playerPuuids = await grabPuuids(challengerSummonerNames);
-    console.log(playerPuuids);
+    console.log("Grabbed Summoner Puuids")
 
     //4. Ask the Matches API to grab these challenger's puuid's matches.
     let matchIds = await grabMatchIds(playerPuuids);
-    console.log(matchIds)
+    console.log("Grabbed MatchIds")
 
     //5. For each MatchId, ask the match Details API to give the matches detials
     let matches = await grabMatchDetails(matchIds);
-    console.log(matches);
-    
-    //6. Add 1 document per match to the collection   
-    // db.collection('matches').doc(Date.now().toString()).set(firebaseObj)
-    // .then(() => console.log("Added to Database successfully"))
-    // .catch((err) => console.error(err))
+    console.log("Grabbed Match Details")
 
+    //6. Add 1 document per match to the collection   
     for (let i = 0; i < matches.length; i++) {
-        db.collection('matches').add(
+        await db.collection('matches').add(
             {
-                matches: matches[i]
+                match: matches[i]
             })
             .then((ref) => console.log('Added document with ID: ', ref.id))
             .catch((err) => console.log(err))
     }
+
+    //7. Grouping algorithm on all matches -> Unique Comp Groupings
+    await groupCompsFromMatches(matches);
 
 }
 
@@ -82,7 +69,6 @@ async function grabChallengers() {
 
         const challengersWithMetadata = await resChallengers.json();
         const challengers = challengersWithMetadata.entries;
-        console.log("grabChallengers finished")
         return challengers;
     }
     catch (err) {
@@ -93,11 +79,10 @@ async function grabChallengers() {
 async function createChallengerNamesArray(challengers) {
     try {
         let challengerSummonerNames = [];
-        //for (let i = 0; i < challengers.length; i++) {
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < challengers.length; i++) {
+        //for (let i = 0; i < 1; i++) {
             challengerSummonerNames.push(challengers[i].summonerName)
         }
-        console.log("CreateChallengerNamesArrayfinished");
         return challengerSummonerNames;
 
     }
@@ -119,7 +104,6 @@ async function grabPuuids(challengerSummonerNames) {
             if (resPuuid.status == 200) {
                 //Response was OK
                 let profile = await resPuuid.json();
-                console.log(profile);
                 challengerPuuids.push(profile.puuid)
             }
 
@@ -135,7 +119,6 @@ async function grabPuuids(challengerSummonerNames) {
                     encodeURI(`https://oc1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${challengerSummonerNames[i]}` + '?api_key=' + RIOT_API_KEY)
                 )
                 let profile = await resPuuid.json();
-                console.log(profile);
                 challengerPuuids.push(profile.puuid)
             }
 
@@ -160,7 +143,6 @@ async function grabMatchIds(playerPuuids) {
             if (resMatches.status == 200) {
                 //Response was OK
                 let matchBatch = await resMatches.json();
-                console.log(matchBatch);
                 for (let x = 0; x < matchBatch.length; x++) {
                     matchIds.push(matchBatch[x])
                 }
@@ -178,7 +160,6 @@ async function grabMatchIds(playerPuuids) {
                     encodeURI(`https://americas.api.riotgames.com/tft/match/v1/matches/by-puuid/${playerPuuids[i]}/ids?count=20&` + 'api_key=' + RIOT_API_KEY)
                 )
                 let matchBatch = await resMatches.json();
-                console.log(matchBatch);
                 for (let x = 0; x < matchBatch.length; x++) {
                     matchIds.push(matchBatch[x])
                 }
@@ -207,7 +188,6 @@ async function grabMatchDetails(matchIds) {
             if (resMatchDetail.status == 200) {
                 //Response was OK
                 let matchDetail = await resMatchDetail.json();
-                console.log(matchDetail)
                 matches.push(matchDetail);
             }
 
@@ -223,11 +203,8 @@ async function grabMatchDetails(matchIds) {
                     encodeURI(`https://americas.api.riotgames.com/tft/match/v1/matches/${matchIds[i]}` + '?api_key=' + RIOT_API_KEY)
                 )
                 let matchDetail = await resMatchDetail.json();
-                console.log(matchDetail)
                 matches.push(matchDetail);
             }
-
-            //Write to Database
 
         }
         return matches;
@@ -239,8 +216,375 @@ async function grabMatchDetails(matchIds) {
     }
 }
 
+async function groupCompsFromMatches(matches) {
+    try {
+        //1. Create the MasterArray containing all Comps and their items
+        let masterArray = await createArrayOfAllComps(matches);
+        console.log("MasterArray completed")
+        //2. Create the Unique Array containing only unique comps + their winrates, and other attributes.
+        let uniqueArray = await createUniqueArrayOfComps(masterArray);
+        console.log("Unique Comps derived from Master.")
+        //3. Create the comp groupings with similarity algorithm
+        let compGroupings = await createCompGroupings(uniqueArray);
+        console.log("Comp Groupings completed.")
+        //4. Clean the results ready to pass to the API
+        let FINAL_RESULTS = await cleanResults(compGroupings);
+        console.log("Results cleaned.")
+        //5. Loop through each result and add it to the database.
+        for (let i = 0; i < FINAL_RESULTS.length; i++) {
+            await db.collection('comps').add(
+                {
+                    comp: FINAL_RESULTS[i]
+                })
+                .then((ref) => console.log('Added document with ID: ', ref.id))
+                .catch((err) => console.log(err))
+        }
+    }
+
+    catch (err) {
+        console.log(err);
+    }
+}
+
+async function createArrayOfAllComps(matches) {
+    let masterArray = [];
+
+    try {
+        for (let i = 0; i < matches.length; i++) {
+
+            try {
+                for (let x = 0; x < matches[i].info.participants.length; x++) {
+                    let tempArr = matches[i].info.participants[x].units.sort(function (a, b) {
+
+                        var otherX = a.character_id.toLowerCase();
+                        var otherY = b.character_id.toLowerCase();
+
+                        if (otherX < otherY) { return -1; }
+                        if (otherX > otherY) { return 1; }
+                        return 0;
+                    });
+
+
+                    let tempPlacement = matches[i].info.participants[x].placement;
+
+                    let tempObj = {
+                        comp: tempArr,
+                        traits: matches[i].info.participants[x].traits,
+                        placementsArray: [tempPlacement],
+                        winLoss: {
+                            win: 0,
+                            loss: 0
+                        },
+                        matches: 1,
+                        placement: tempPlacement
+                    }
+
+                    //5. Push the units array to master array
+                    masterArray.push(tempObj);
+                }
+            }
+
+            catch (error) { console.log(error) }
+        }
+
+        return masterArray;
+    }
+
+    catch (error) {
+        console.log(error)
+    }
+}
+
+async function createUniqueArrayOfComps(masterArray) {
+    let uniqueArray = [];
+    try {
+        for (let p = 0; p < masterArray.length; p++) {
+            let actionTaken = false;
+
+            if (uniqueArray.length == 0) {
+                let tempObj = {
+                    comp: masterArray[p].comp,
+                    traits: masterArray[p].traits,
+                    placementsArray: [masterArray[p].placement],
+                    winLoss: {
+                        win: 0,
+                        loss: 0
+                    },
+                    matches: masterArray[p].matches,
+                    averagePlacement: masterArray[p].placement,
+
+                }
+                masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
+                uniqueArray.push(tempObj)
+            }
+
+            else {
+                let thisComp = masterArray[p].comp;
+
+                for (let n = 0; n < uniqueArray.length; n++) {
+                    let comparisonComp = uniqueArray[n].comp
+
+                    if (isArrayEqual(thisComp, comparisonComp)) {
+                        masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
+                        uniqueArray[n].matches++;
+                        uniqueArray[n].placementsArray.push(masterArray[p].placement)
+
+                        uniqueArray[n].averagePlacement = (
+                            uniqueArray[n].placementsArray.reduce((a, b) => a + b) / uniqueArray[n].matches
+                        )
+                        actionTaken = true;
+                        n = uniqueArray.length;
+                    }
+                }
+
+                if (actionTaken == false) {
+                    let tempObj = {
+                        comp: masterArray[p].comp,
+                        placementsArray: [masterArray[p].placement],
+                        traits: masterArray[p].traits,
+                        winLoss: {
+                            win: 0,
+                            loss: 0
+                        },
+                        matches: 1,
+                        averagePlacement: masterArray[p].placement,
+                    }
+                    masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++;
+                    uniqueArray.push(tempObj)
+                    actionTaken = true;
+                }
+            }
+        }
+        //Calculate a winrate for each unique comp
+        for (let i = 0; i < uniqueArray.length; i++) {
+            uniqueArray[i]["winRatio"] = uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss)
+        }
+        return uniqueArray;
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+async function createCompGroupings(uniqueArray) {
+    try {
+        let compGroupings = [];
+        let actionTaken = false;
+
+        for (let a = 0; a < uniqueArray.length; a++) {
+            actionTaken = false;
+            for (let c = 0; c < compGroupings.length; c++) {
+                if (compGroupings.length > 0) {
+                    for (let d = 0; d < compGroupings[c].comps.length; d++) {
+                        let percentageSimilarity = produceSimilarity(compGroupings[c].comps[d].comp, uniqueArray[a].comp);
+                        if (percentageSimilarity > 75) {
+                            compGroupings[c].comps.push(uniqueArray[a])
+                            actionTaken = true;
+                            c = compGroupings.length;
+                            break;
+
+                        }
+                    }
+                }
+                if (actionTaken) { break };
+            }
+
+            if (!actionTaken) {
+                for (let b = a + 1; b < uniqueArray.length; b++) {
+                    let percentageSimilarity = produceSimilarity(uniqueArray[a].comp, uniqueArray[b].comp);
+                    if (percentageSimilarity > 74) {
+                        let newCompGroup = {
+                            name: "temp comp name",
+                            comps: [
+                                uniqueArray[a], uniqueArray[b]
+                            ]
+                        }
+                        compGroupings.push(newCompGroup);
+                        actionTaken = true;
+                        b = uniqueArray.length
+                    }
+                }
+
+                if (!actionTaken) {
+                    let newCompGroup = {
+                        name: "temp comp name",
+                        comps: [
+                            uniqueArray[a]
+                        ]
+                    }
+                    compGroupings.push(newCompGroup);
+                }
+            }
+        }
+        return compGroupings;
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+async function cleanResults(compGroupings) {
+    try {
+        //Clean out empty comps
+        for (var i = compGroupings.length - 1; i >= 0; i--) {
+            for (var x = compGroupings[i].comps.length - 1; x >= 0; x--) {
+                if (compGroupings[i].comps[x].matches < 5) {
+                    compGroupings[i].comps.splice(x, 1);
+                }
+            }
+            if (compGroupings[i].comps.length == 0) {
+                compGroupings.splice(i, 1);
+            }
+        }
+
+        //Sort each compGrouping's comp by number of matches
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i].comps.sort((a, b) => b.matches - a.matches);
+        }
+
+        //TO DO: THIS IS A TRASH WAY OF SORTING THEM... NEEDS TO BE TOTAL GAMES PLAYED 
+        //Sort entire compGroupings array by number of comps 
+        compGroupings.sort((a, b) => b.comps.length - a.comps.length);
+
+        return compGroupings;
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+function isArrayEqual(arr1, arr2) {
+
+    //Check if comps are the same length first before comparing
+    if (arr1.length == arr2.length) {
+
+        arr1 = arr1.sort(function (a, b) {
+            var x = a.character_id.toLowerCase();
+            var y = b.character_id.toLowerCase();
+            if (x < y) { return -1; }
+            if (x > y) { return 1; }
+            return 0;
+        });
+
+        arr2 = arr2.sort(function (a, b) {
+            var x = a.character_id.toLowerCase();
+            var y = b.character_id.toLowerCase();
+            if (x < y) { return -1; }
+            if (x > y) { return 1; }
+            return 0;
+        });
+
+        for (var i = 0; i < arr1.length; i++) {
+            if (arr1[i].character_id !== arr2[i].character_id)
+                return false;
+        }
+
+        return true;
+    }
+
+    else { return false; }
+}
+
+function produceSimilarity(a, b) {
+    let matched = 0;
+    let total;
+    let tempA = a;
+    let tempB = b;
+    //Grab which ever one is longer for total
+
+    //If A is longer, compare each item of b to a
+    if (tempA.length > tempB.length) {
+        total = tempA.length;
+        for (let i = 0; i < tempA.length; i++) {
+            if (tempA.includes(tempB[i])) {
+                matched++
+            }
+        }
+    }
+
+    //If b is longer, compare each item of a to b
+    else {
+        total = tempB.length;
+        for (let i = 0; i < tempB.length; i++) {
+
+            let temp1 = tempA.map((champ => champ.character_id))
+            let temp2 = tempB.map((champ => champ.character_id))
+
+
+            //console.log(tempB.includes(tempA[i]))
+            if (temp2.includes(temp1[i])) {
+                matched++
+            }
+        }
+    }
+
+    return (matched / total) * 100
+
+}
+
+function generateCompName(traitsArray) {
+    //Get the most satisfied traits names
+    let compString = "";
+    let compsAppended = 0;
+
+    for (let i = 0; i < traitsArray.length; i++) {
+        if (traitsArray[i].tier_current == traitsArray[i].tier_total && traitsArray[i].num_units > 2 || traitsArray[i].tier_current == traitsArray[i].tier_total && traitsArray[i].name == "Sniper") {
+            compsAppended++
+            //then check if it starts with SET and chop it accordingly
+            if (traitsArray[i].name.startsWith("Set")) {
+                compString += traitsArray[i].name.substr(5) + " ";
+            }
+            else {
+                compString += traitsArray[i].name + " ";
+            }
+
+        }
+    }
+
+    //If the comp still doesn't have a name then we gotta settle for second place
+    if (compsAppended < 3) {
+        for (let i = 0; i < traitsArray.length; i++) {
+            if (traitsArray[i].tier_current == (traitsArray[i].tier_total - 1) && traitsArray[i].tier_current != 0) {
+                compsAppended++
+                //then check if it starts with SET and chop it accordingly
+                if (traitsArray[i].name.startsWith("Set")) {
+                    compString += traitsArray[i].name.substr(5) + " ";
+                }
+                else {
+                    compString += traitsArray[i].name + " ";
+                }
+
+            }
+        }
+    }
+
+    //If the comp still doesn't have a name then we gotta settle for second place
+    if (compsAppended < 2) {
+        for (let i = 0; i < traitsArray.length; i++) {
+            if (compsAppended < 3) {
+                if (traitsArray[i].tier_current == (traitsArray[i].tier_total - 2) && traitsArray[i].tier_current != 0) {
+                    compsAppended++
+                    //then check if it starts with SET and chop it accordingly
+                    if (traitsArray[i].name.startsWith("Set")) {
+                        compString += traitsArray[i].name.substr(5) + " ";
+                    }
+                    else {
+                        compString += traitsArray[i].name + " ";
+                    }
+
+                }
+            }
+        }
+    }
+
+    return compString;
+
+}
+
+
 
 main();

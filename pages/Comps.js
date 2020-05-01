@@ -229,8 +229,8 @@ export default function Comps() {
         //6. Use masterArray to create a new reduced array with unique comps
         let uniqueArray = [];
 
-        //for (let p = 0; p < masterArray.length; p++) {
-        for (let p = 0; p < 2000; p++) {
+        for (let p = 0; p < masterArray.length; p++) {
+        // for (let p = 0; p < 2000; p++) {
 
             let actionTaken = false;
 
@@ -321,7 +321,6 @@ export default function Comps() {
         //Workflow: Group unique comps.
         let compGroupings = [];
         let actionTaken = false;
-
 
         for (let a = 0; a < uniqueArray.length; a++) {
             actionTaken = false;
