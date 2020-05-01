@@ -2,15 +2,15 @@ import React from 'react';
 import { Container, Typography, Box, Grid } from '@material-ui/core';
 import fetch from 'isomorphic-unfetch';
 import { makeStyles } from '@material-ui/core/styles';
-import NavBar from '../../components/NavBar';
 
 //Import Components
-import FavouriteChampions from '../../components/SummonerPage/FavouriteChampions';
-import Match from '../../components/SummonerPage/Match';
-import PlacementDistribution from '../../components/SummonerPage/PlacementDistribution';
-import SeasonWins from '../../components/SummonerPage/SeasonWins';
-import SummonerName from '../../components/SummonerPage/SummonerName';
-import SummonerRank from '../../components/SummonerPage/SummonerRank';
+import NavBar from '../../src/components/NavBar';
+import FavouriteChampions from '../../src/components/SummonerPage/FavouriteChampions';
+import Match from '../../src/components/SummonerPage/Match';
+import PlacementDistribution from '../../src/components/SummonerPage/PlacementDistribution';
+import SeasonWins from '../../src/components/SummonerPage/SeasonWins';
+import SummonerName from '../../src/components/SummonerPage/SummonerName';
+import SummonerRank from '../../src/components/SummonerPage/SummonerRank';
 
 const RIOT_API_KEY = "RGAPI-786f1e2c-956d-40b6-a794-a5434ddef448"
 

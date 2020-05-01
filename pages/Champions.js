@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import NavBar from '../components/NavBar';
+import NavBar from '../src/components/NavBar';
 import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
 
 import ChampionStats from '../public/assets/data/championStats.json';

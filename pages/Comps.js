@@ -1,12 +1,12 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
-import TraitsRow from '../components/SummonerPage/TraitsRow';
+import TraitsRow from '../src/components/SummonerPage/TraitsRow';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import NavBar from '../components/NavBar';
+import NavBar from '../src/components/NavBar';
 
 const useStyles = makeStyles((theme) => ({
     root: {
