@@ -1,4 +1,3 @@
-import NavBar from '../components/NavBar';
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
@@ -7,6 +6,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import NavBar from '../components/HomePage/NavBar';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -110,7 +110,6 @@ export default function Comps({ data }) {
     if (!compGroupings) return <div>Loading Comps...</div>
 
     else {
-        console.log(compGroupings)
         return (
             <div>
                 <NavBar />

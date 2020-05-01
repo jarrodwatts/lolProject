@@ -16,8 +16,6 @@ export default class Form extends React.Component {
     }
 
     handleSubmit(event) {
-        console.log('A name was submitted: ' + this.state.value);
-        console.log(event);
         //next.js navigation using router
         Router.push('/summoner/[id]', ('/summoner/' + this.state.value))
         event.preventDefault();

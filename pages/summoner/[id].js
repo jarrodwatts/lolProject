@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
-import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
+import React from 'react';
+import { Container, Typography, Box, Grid } from '@material-ui/core';
 import fetch from 'isomorphic-unfetch';
 import { makeStyles } from '@material-ui/core/styles';
-import NavBar from '../../components/NavBar';
+import NavBar from '../components/NavBar';
 
 //Import Components
 import FavouriteChampions from '../../components/SummonerPage/FavouriteChampions';
@@ -59,8 +59,6 @@ const useStyles = makeStyles((theme) => ({
 
 function Summoner({ profile, matches, matchDetailsArray, league }) {
     const classes = useStyles();
-
-    console.log(matchDetailsArray)
 
     return (
         <div>
