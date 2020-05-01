@@ -52,7 +52,7 @@ export default function Champions() {
 
                     {/* Heading and subtitle */}
                     <Grid container item direction="column" justify="center" alignItems="center">
-                        <Typography variant="h2">LOLPROJECT</Typography>
+                        <Typography variant="h2">TFTPROJECT</Typography>
                         <Typography variant="h5">Teamfight Tactics Champions</Typography>
                     </Grid>
 

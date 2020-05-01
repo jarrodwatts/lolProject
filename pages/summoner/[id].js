@@ -5,24 +5,14 @@ import { makeStyles } from '@material-ui/core/styles';
 import NavBar from '../../components/NavBar';
 
 //Import Components
-import ChampionsRow from '../../components/SummonerPage/SummonerName';
 import FavouriteChampions from '../../components/SummonerPage/FavouriteChampions';
 import Match from '../../components/SummonerPage/Match';
 import PlacementDistribution from '../../components/SummonerPage/PlacementDistribution';
 import SeasonWins from '../../components/SummonerPage/SeasonWins';
 import SummonerName from '../../components/SummonerPage/SummonerName';
 import SummonerRank from '../../components/SummonerPage/SummonerRank';
-import TraitsRow from '../../components/SummonerPage/TraitsRow';
 
-const colours = {
-    yellow: '#F8E9A1',
-    red: '#F76C6C',
-    teal: '#A8D0E6',
-    blue: '#374785',
-    navy: '#24305E',
-}
-
-const RIOT_API_KEY = "RGAPI-2a813be3-cd1a-41a6-a907-1fcce3f6ca07"
+const RIOT_API_KEY = "RGAPI-786f1e2c-956d-40b6-a794-a5434ddef448"
 
 const useStyles = makeStyles((theme) => ({
     root: {

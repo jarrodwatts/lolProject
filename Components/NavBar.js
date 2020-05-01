@@ -4,8 +4,6 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
 import Grid from '@material-ui/core/Grid';
 import Link from '../src/Link';
 
@@ -21,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function ButtonAppBar() {
+export default function NavBar() {
     const classes = useStyles();
 
     const menuItems = ['Comps', 'Champions', 'Items', 'Traits'];
@@ -34,7 +32,7 @@ export default function ButtonAppBar() {
                     <Grid container direction="row" alignItems="center" className={classes.title}>
                         <Typography variant="h6" >
                             <Link href="/" style={{ color: '#fff' }}>
-                                lolProject
+                                TFTProject
                             </Link>
                         </Typography>
 

@@ -6,7 +6,7 @@ require("firebase/auth");
 require("firebase/firestore");
 const fetch = require('node-fetch');
 
-const RIOT_API_KEY = "RGAPI-6fb4b56e-63e6-4857-9507-8459ef7136ca"
+const RIOT_API_KEY = "RGAPI-786f1e2c-956d-40b6-a794-a5434ddef448"
 
 // TODO: Replace the following with your app's Firebase project configuration
 const firebaseConfig = {
@@ -80,7 +80,7 @@ async function createChallengerNamesArray(challengers) {
     try {
         let challengerSummonerNames = [];
         for (let i = 0; i < challengers.length; i++) {
-        //for (let i = 0; i < 1; i++) {
+            //for (let i = 0; i < 1; i++) {
             challengerSummonerNames.push(challengers[i].summonerName)
         }
         return challengerSummonerNames;
@@ -357,7 +357,7 @@ async function createUniqueArrayOfComps(masterArray) {
         }
         //Calculate a winrate for each unique comp
         for (let i = 0; i < uniqueArray.length; i++) {
-            uniqueArray[i]["winRatio"] = uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss)
+            uniqueArray[i]["winRatio"] = (uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss)).toFixed(2)
         }
         return uniqueArray;
     }
@@ -425,10 +425,10 @@ async function createCompGroupings(uniqueArray) {
 
 async function cleanResults(compGroupings) {
     try {
-        //Clean out empty comps
+        //Clean out empty comps and comsp with less than 50 matches
         for (var i = compGroupings.length - 1; i >= 0; i--) {
             for (var x = compGroupings[i].comps.length - 1; x >= 0; x--) {
-                if (compGroupings[i].comps[x].matches < 5) {
+                if (compGroupings[i].comps[x].matches < 50) {
                     compGroupings[i].comps.splice(x, 1);
                 }
             }
@@ -437,14 +437,34 @@ async function cleanResults(compGroupings) {
             }
         }
 
-        //Sort each compGrouping's comp by number of matches
+        //Remove Duplicate children that are the same as the others...?
         for (let i = 0; i < compGroupings.length; i++) {
-            compGroupings[i].comps.sort((a, b) => b.matches - a.matches);
+
+            for (let x = 0; x < compGroupings[i].comps.length - 1; x++) {
+                if (compGroupings[i].comps.length != 1) {
+                    if (compGroupings[i].comps[x].averagePlacement == compGroupings[i].comps[x + 1].averagePlacement) {
+                        compGroupings[i].comps.splice(x, 1);
+                        console.log("spliced", compGroupings[i].comps[x], "on x:", x, " i:", i)
+                    }
+                }
+            }
+
         }
 
-        //TO DO: THIS IS A TRASH WAY OF SORTING THEM... NEEDS TO BE TOTAL GAMES PLAYED 
-        //Sort entire compGroupings array by number of comps 
-        compGroupings.sort((a, b) => b.comps.length - a.comps.length);
+        //Sort each compGrouping's comp by win ratio, lowest to highest
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i].comps.sort((a, b) => a.winRatio - b.winRatio);
+        }
+
+        //Add a field to each compGrouping that is total matches
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i]["totalMatches"] = sumMatches(compGroupings[i]);
+        }
+
+        //Sort entire compGroupings array by the first comps win ratio 
+        compGroupings.sort((a, b) =>
+            b.comps[0].winRatio - a.comps[0].winRatio
+        );
 
         return compGroupings;
     }
@@ -455,6 +475,15 @@ async function cleanResults(compGroupings) {
 
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function sumMatches(compGrouping) {
+    //for each comp grouping, sum up each children's matches and add them to a sum
+    sum = 0;
+    for (let i = 0; i < compGrouping.length; i++) {
+        sum += compGrouping.comps[i].matches
+    }
+    return sum;
 }
 
 function isArrayEqual(arr1, arr2) {
