@@ -6,7 +6,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import NavBar from '../components/HomePage/NavBar';
+import NavBar from '../components/NavBar';
 
 const useStyles = makeStyles((theme) => ({
     root: {

@@ -37,14 +37,12 @@ export default function Champions() {
 
     const classes = useStyles();
 
-    console.log("championStats", championStats)
-    console.log("championDetails", championDetails)
+    //console.log("championStats", championStats)
+    //console.log("championDetails", championDetails)
 
     return (
         <div>
             <NavBar />
-            {console.log("championsArray", championsArray)}
-
             {/* // Main Container */}
             <Container className={classes.topSpacing}>
 
@@ -106,7 +104,7 @@ function renderChampCard(champ, classes) {
             <Grid container item direction="row" style={{ position: 'absolute', bottom: '40px', left: '0px' }} justify="space-between">
                 <Box>
                     {champ.traits.map((trait, key) => (
-                        <Grid container item direction="row" key={key} style={{paddingLeft: '8px'}}>
+                        <Grid container item direction="row" key={key} style={{ paddingLeft: '8px' }}>
                             <Avatar
                                 src={`/assets/traits/${trait.toLocaleLowerCase()}.png`}
                                 className={classes.small} />
