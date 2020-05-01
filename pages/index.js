@@ -13,7 +13,7 @@ const BigSearch = dynamic(
 )
 
 const NavBar = dynamic(
-  () => import('../src/components/HomePage/NavBar'),
+  () => import('../src/components/NavBar'),
   { ssr: false }
 )
 
