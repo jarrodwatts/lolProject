@@ -1,11 +1,19 @@
 import React, { Component } from 'react';
 import { Container, Grid } from '@material-ui/core';
 import dynamic from 'next/dynamic'
-import BigSearch from '../src/components/Homepage/BigSearch';
-import NavBar from '../src/components/NavBar';
 
 const BigLogo = dynamic(
   () => import('../src/components/HomePage/BigLogo'),
+  { ssr: false }
+)
+
+const BigSearch = dynamic(
+  () => import('../src/components/HomePage/BigSearch'),
+  { ssr: false }
+)
+
+const NavBar = dynamic(
+  () => import('../src/components/HomePage/NavBar'),
   { ssr: false }
 )
 
