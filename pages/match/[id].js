@@ -75,7 +75,7 @@ export default function Match({ match }) {
                         options={{
                             title: 'Time Eliminated Of Each Player',
                             hAxis: {
-                                title: 'Time Eliminated',
+                                title: 'Time Eliminated (Minutes)',
                             },
                             vAxis: {
                                 title: 'Player',
