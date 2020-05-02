@@ -12,7 +12,10 @@ import SeasonWins from '../../src/components/SummonerPage/SeasonWins';
 import SummonerName from '../../src/components/SummonerPage/SummonerName';
 import SummonerRank from '../../src/components/SummonerPage/SummonerRank';
 
-const RIOT_API_KEY = "RGAPI-786f1e2c-956d-40b6-a794-a5434ddef448"
+import Router from 'next/router';
+
+
+const RIOT_API_KEY = "RGAPI-b5b58085-c08a-4c23-a2eb-76745c38d339"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -55,10 +58,23 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: '#000'
     },
 
+    matchHover: {
+        '&:hover': {
+            backgroundColor: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+            boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+            cursor: 'pointer',
+        }
+    },
+
 }));
+
+function navigateToMatch(match) {
+    Router.push('/match/[id]', ('/match/' + match.metadata.match_id))
+}
 
 function Summoner({ profile, matches, matchDetailsArray, league }) {
     const classes = useStyles();
+    console.log(matchDetailsArray)
 
     return (
         <div>
@@ -106,7 +122,10 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
                                 <Typography variant="caption">{formatGameType(match.info)}</Typography>
 
                                 {/* Begin individual Match Papers */}
-                                <Grid item>
+                                <Grid item
+                                    onClick={() => navigateToMatch(match)}
+                                    className={classes.matchHover}
+                                >
                                     <Match match={match} profile={profile} />
                                 </Grid>
                             </Box>
@@ -147,7 +166,7 @@ export async function getServerSideProps(context) {
     let matchDetailsArray = [];
 
     // for (let i = 0; i < matches.length; i++) {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 5; i++) {
         let resMatchDetails = await fetch(
             `https://americas.api.riotgames.com/tft/match/v1/matches/${matches[i]}` + '?api_key=' + RIOT_API_KEY
 
@@ -190,26 +209,31 @@ function formatUnixDate(date) {
 }
 
 function formatGameType(gameInfo) {
-    switch (gameInfo.game_variation) {
-        case "TFT3_GameVariation_BigLittleLegends":
-            return "Medium Legends"
+    try {
+        switch (gameInfo.game_variation) {
+            case "TFT3_GameVariation_BigLittleLegends":
+                return "Medium Legends"
 
-        case "TFT3_GameVariation_FourCostFirstCarousel":
-            return "Lilac Nebula"
+            case "TFT3_GameVariation_FourCostFirstCarousel":
+                return "Lilac Nebula"
 
-        case "TFT3_GameVariation_FreeNeekos":
-            return "The Neekoverse"
+            case "TFT3_GameVariation_FreeNeekos":
+                return "The Neekoverse"
 
-        case "TFT3_GameVariation_FreeRerolls":
-            return "Trade Sector"
+            case "TFT3_GameVariation_FreeRerolls":
+                return "Trade Sector"
 
-        case "TFT3_GameVariation_MidGameFoN":
-            return "Superdense Galaxy"
+            case "TFT3_GameVariation_MidGameFoN":
+                return "Superdense Galaxy"
 
-        case "TFT3_GameVariation_None":
-            return "Normal Game"
+            case "TFT3_GameVariation_None":
+                return "Normal Game"
 
-        default: return "Normal Galaxy"
+            default: return "Normal Game"
+        }
+    }
+    catch (err) {
+        return "Normal Game"
     }
 }
 

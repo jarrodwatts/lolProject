@@ -44,14 +44,57 @@ function findPlacement(item, puuid) {
     }
 }
 
+function renderChamp(unit, classes) {
+    let rarityColour = "#6c757d" //default grey
+
+    switch (unit.rarity) {
+        case 1: //2*
+            rarityColour = "#28a745"
+            break;
+
+        case 2: //3*
+            rarityColour = "#007bff"
+            break;
+
+        case 3: //4*
+            rarityColour = "#6f42c1"
+            break;
+
+        case 4: //5*
+            rarityColour = "#ffc107"
+            break;
+
+    }
+
+    //convert to rgb for shadow
+    let rarityColourRgb = rarityColour.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i
+        , (m, r, g, b) => '#' + r + r + g + g + b + b)
+        .substring(1).match(/.{2}/g)
+        .map(x => parseInt(x, 16))
+
+    return (
+        <Avatar
+            src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
+            className={classes.large}
+            style={{
+                border: 2,
+                borderStyle: 'solid',
+                borderColor: rarityColour,
+                boxShadow: `0 3px 5px 2px rgba(${rarityColourRgb[0]}, ${rarityColourRgb[1]}, ${rarityColourRgb[2]}, .4)`
+            }}
+
+        />
+    )
+}
+
 const useStyles = makeStyles((theme) => ({
     paper: {
         padding: theme.spacing(2),
         textAlign: 'center',
     },
     large: {
-        width: theme.spacing(4.5),
-        height: theme.spacing(4.5),
+        width: theme.spacing(5),
+        height: theme.spacing(5),
     },
 
 }));
@@ -115,9 +158,7 @@ export default function Match(props) {
                                         </Grid>
 
                                         {/* Champ Images  */}
-                                        <Avatar
-                                            src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
-                                            className={classes.large} />
+                                        {renderChamp(unit, classes)}
 
                                         {/* Items  */}
                                         <ChampionsItems unit={unit} />

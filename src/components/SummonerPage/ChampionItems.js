@@ -9,8 +9,8 @@ const useStyles = makeStyles((theme) => ({
     },
 
     itemSize: {
-        width: theme.spacing(1.5),
-        height: theme.spacing(1.5),
+        width: theme.spacing(1.65),
+        height: theme.spacing(1.65),
     },
 }));
 
