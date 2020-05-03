@@ -285,7 +285,7 @@ function renderFavouriteChamps(sortedTraitsArray) {
                     <Grid key={key} container direction="row" alignItems="center" item justify="space-between">
                         <Box style={{ paddingRight: '8px' }}>
                             {
-                                trait[0].startsWith("Set") ? <Avatar src={`/assets/traits/${trait[0].substr(5)}.png`} /> : <Avatar src={`/assets/traits/${trait[0]}.png`} />
+                                trait[0].startsWith("Set") ? <Avatar src={`/assets/traits/${trait[0].substr(5).toLocaleLowerCase()}.png`} /> : <Avatar src={`/assets/traits/${trait[0].toLocaleLowerCase()}.png`} />
                             }
                         </Box>
                         {
