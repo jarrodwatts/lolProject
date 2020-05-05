@@ -16,6 +16,7 @@
     "react": "latest",
     "react-dom": "latest",
     "react-google-charts": "^3.0.15",
+    "react-loading": "^2.0.3",
     "swr": "^0.2.0"
   },
   "scripts": {
