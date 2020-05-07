@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Grid } from '@material-ui/core';
 import dynamic from 'next/dynamic'
+import { makeStyles } from '@material-ui/core/styles';
 
 const BigLogo = dynamic(
   () => import('../src/components/HomePage/BigLogo'),
@@ -38,24 +39,19 @@ export default class Index extends React.Component {
   }
 
   render() {
+
     return (
       <div>
         <NavBar />
 
-        {/* Container that Centers things pushes them into the middle of the page */}
-        <Container maxWidth="sm">
-          <Grid direction="row" container justify="center" alignItems="center" style={{ height: '65vh' }}>
-
+          <Grid container spacing={3} justify="center" alignItems="center" style={{ height: '65vh', }}>
             <Grid item>
               {/* Big Logo Component */}
               <BigLogo />
               {/* Component with Search Bar, Region Selector, and Search Icon */}
               <BigSearch />
             </Grid>
-
           </Grid>
-        </Container>
-
       </div>
     );
   }

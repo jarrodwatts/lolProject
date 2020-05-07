@@ -5,7 +5,8 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import Link from '../Link'
+import Link from '../Link';
+import withWidth, { isWidthDown } from '@material-ui/core/withWidth';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -19,10 +20,11 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function NavBar() {
+function NavBar(props) {
     const classes = useStyles();
 
     const menuItems = ['Comps', 'Champions', 'Items', 'Traits'];
+
 
     return (
         <div className={classes.root} style={{ paddingBottom: '16px' }}>
@@ -36,13 +38,22 @@ export default function NavBar() {
                             </Link>
                         </Typography>
 
-                        {menuItems.map((item, key) => (
-                            <Typography key={key} variant="button" style={{ paddingLeft: '32px' }}>
-                                <Link href={"/" + item} style={{ color: '#fff' }}>
-                                    {item}
-                                </Link>
-                            </Typography>
-                        ))}
+                        {
+                            isWidthDown('xs', props.width) ?
+
+                                <div>small boi</div>
+                                :
+                                menuItems.map((item, key) => (
+                                    <Typography key={key} variant="button" style={{ paddingLeft: '32px' }}>
+                                        <Link href={"/" + item} style={{ color: '#fff' }}>
+                                            {item}
+                                        </Link>
+                                    </Typography>
+
+
+                                ))
+
+                        }
 
                     </Grid>
 
@@ -54,3 +65,5 @@ export default function NavBar() {
         </div>
     );
 }
+
+export default withWidth()(NavBar)

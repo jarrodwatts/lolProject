@@ -110,6 +110,7 @@ export default function Comps({ data }) {
     if (!compGroupings) return <div>Loading Comps...</div>
 
     else {
+        //console.log(compGroupings);
         return (
             <div>
                 <NavBar />
@@ -188,7 +189,7 @@ export default function Comps({ data }) {
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
                                                                     <Typography variant="caption">Average Placement</Typography>
-                                                                    <Typography><b>{composition.comps[0].averagePlacement.toFixed(2)}</b></Typography>
+                                                                    <Typography><b>{Math.round(composition.comps[0].averagePlacement * 100) / 100}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
@@ -289,7 +290,7 @@ export default function Comps({ data }) {
                                                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                                                 <Box>
                                                                                                     <Typography variant="caption">Average Placement</Typography>
-                                                                                                    <Typography><b>{comp.averagePlacement.toFixed(2)}</b></Typography>
+                                                                                                    <Typography><b>{Math.round(comp.averagePlacement * 100) / 100}</b></Typography>
                                                                                                 </Box>
                                                                                             </Grid>
 
@@ -359,7 +360,7 @@ export default function Comps({ data }) {
 export async function getServerSideProps() {
     const firebase = require("firebase");
     // Required for side-effects
-    require("firebase/firestore");
+    require("firebase/database");
     // Call an external API endpoint to get posts.
     if (!firebase.apps.length) {
         // Initialize Cloud Firestore through Firebase
@@ -376,18 +377,15 @@ export async function getServerSideProps() {
     }
 
     let comps = [];
+    debugger;
+    // Get a reference to the database service
+    var db = firebase.database();
 
-    let db = firebase.firestore();
-
-    await db.collection("comps").get()
-        .then((querySnapshot) => {
-            querySnapshot.forEach(function (doc) {
-                // doc.data() is never undefined for query doc snapshots
-                if (doc.data().comp != null) {
-                    comps.push(doc.data().comp)
-                }
-            });
-        });
+    await firebase.database().ref('/').once('value').then(function (snapshot) {
+        //console.log(snapshot.val());
+        comps = snapshot.val().comps.compGroupings;
+        // ...
+    });
 
     let data = comps;
     // By returning { props: posts }, the Blog component

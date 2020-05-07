@@ -23,18 +23,15 @@ export default class Form extends React.Component {
 
     render() {
         return (
-            <Grid
-                style={{
-                    width: '100%',
-                }}>
+            <div>
                 <form onSubmit={this.handleSubmit}>
-                    <Grid container direction="row" spacing={3}>
+                    <Grid container direction="row" alignItems="center" justify="center" spacing={3}>
 
-                        <Grid item xs={9}>
+                        <Grid item xs={7} md={7}>
                             <TextField type="text"
                                 value={this.state.value}
                                 onChange={this.handleChange}
-                                placeholder="Search Summoner Name"
+                                placeholder="Search Summoner"
                                 color="secondary"
                                 style={{
                                     paddingRight: '16px',
@@ -45,20 +42,15 @@ export default class Form extends React.Component {
                                 }}
                             >
                             </TextField>
-                            
 
                         </Grid>
 
-                        <Grid item xs={3}>
-                        
+                        <Grid item xs={5} md={5}>
                             <Button type="submit">Search</Button>
-                            
                         </Grid>
-
-
                     </Grid>
                 </form>
-            </Grid>
+            </div>
         );
     }
 }

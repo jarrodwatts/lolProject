@@ -3,12 +3,11 @@
 const firebase = require("firebase/app");
 // Add the Firebase products that you want to use
 require("firebase/auth");
-require("firebase/firestore");
+require("firebase/database");
 const fetch = require('node-fetch');
 
 const RIOT_API_KEY = "RGAPI-e2d6368c-15ac-4805-b428-2ba0972ff745"
 
-// TODO: Replace the following with your app's Firebase project configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
     authDomain: "lolproject-6938d.firebaseapp.com",
@@ -23,7 +22,7 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-let db = firebase.firestore();
+let db = firebase.database();
 
 async function main() {
     //1. Grab a list of challengers
@@ -98,7 +97,7 @@ async function grabPuuids(challengerSummonerNames) {
     try {
 
         for (let i = 0; i < challengerSummonerNames.length; i++) {
-            //for (let i = 0; i < 2; i++) {
+            //for (let i = 0; i < 1; i++) {
             let resPuuid = await fetch(
                 encodeURI(`https://oc1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${challengerSummonerNames[i]}` + '?api_key=' + RIOT_API_KEY)
             )
@@ -237,14 +236,14 @@ async function groupCompsFromMatches(matches) {
         console.log("Results cleaned.")
         console.log("Final Results:", FINAL_RESULTS);
         //5. Loop through each result and add it to the database.
-        for (let i = 0; i < FINAL_RESULTS.length; i++) {
-            await db.collection('comps').add(
-                {
-                    comp: FINAL_RESULTS[i]
-                })
-                .then((ref) => console.log('Added document with ID: ', ref.id))
-                .catch((err) => console.log(err))
-        }
+
+        //for (let i = 0; i < FINAL_RESULTS.length; i++) {
+        await firebase.database().ref('/comps').set({
+            compGroupings: FINAL_RESULTS
+        });
+
+        console.log("We Done");
+        //}
     }
 
     catch (err) {
@@ -425,12 +424,24 @@ async function createCompGroupings(uniqueArray) {
 
 async function cleanResults(compGroupings) {
     try {
+        //If a comp variation has less than 50 chop it
+        for (var i = compGroupings.length - 1; i >= 0; i--) {
+            for (var x = compGroupings[i].comps.length - 1; x >= 0; x--) {
+                if (compGroupings[i].comps[x].matches < 50) {
+                    compGroupings[i].comps.splice(x, 1);
+                }
+            }
+            if (compGroupings[i].comps.length == 0) {
+                compGroupings.splice(i, 1);
+            }
+        }
+
         //Add a field to each compGrouping that is total matches
         for (let i = 0; i < compGroupings.length; i++) {
             compGroupings[i]["totalMatches"] = sumMatches(compGroupings[i]);
         }
-        
-        //Clean out comps with less than 50 total matches
+
+        //Clean out comps with less than 50 TOTAL matches
         for (var i = compGroupings.length - 1; i >= 0; i--) {
             if (compGroupings[i].totalMatches < 50) {
                 compGroupings.splice(i, 1);
