@@ -91,53 +91,70 @@ async function main() {
 
                 //Get player Puuid's into MAIN_PLAYER_OBJECT.
                 for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
+                    //console.log("converting", serverTierDivisionPlayerInformation[i].summonerName, "to puuid")
                     let summonerPuuid = await convertNametoPuuid(serverTierDivisionPlayerInformation[i].summonerName, server)
                     playerPuuids.push(summonerPuuid)
+                    //console.log("Pushed ", serverTierDivisionPlayerInformation[i].summonerName, "to player puuids arr")
                 }
-
-                //Get Player Match Ids
-                // = For each Puuid in every region and tier, convert it to past 5 games
-
-                //Loop through each server
-                Object.keys(MAIN_PLAYER_OBJECT).forEach((serverName) => {
-
-                    //Loop through each Rank within a server
-                    Object.keys(MAIN_PLAYER_OBJECT[serverName]).forEach((rank) => {
-                        let thisPlayersGameIds = await fetchPlayersGameIds(
-                            MAIN_PLAYER_OBJECT[serverName][rank], //Puuid
-                            server //Actual server name from loop
-                        );
-
-                        //For each player, push their games Id's to the gamesId array
-                        for (let x = 0; x < thisPlayersGameIds.length; x++) {
-                            gameIds.push(thisPlayersGameIds[x])
-                        }
-
-                    })
-                })
 
             }
 
             MAIN_PLAYER_OBJECT[server][tier] = playerPuuids;
+
+
+            //Loop through servers
+            for (serverName in MAIN_PLAYER_OBJECT) {
+
+                //Loop through ranks
+                for (rankName in MAIN_PLAYER_OBJECT[serverName]) {
+
+                    //Loop through Puuids
+                    for (puuidName of MAIN_PLAYER_OBJECT[serverName][rankName]) {
+
+                        console.log(puuidName)
+                        debugger;
+
+                        let thisPlayersGameIds = await fetchPlayersGameIds(
+                            puuidName, //Puuid
+                            server //Actual server name from loop
+                        )
+
+                        console.log(thisPlayersGameIds);
+
+                        for (let n = 0; n < thisPlayersGameIds.length; n++) {
+                            gameIds.push(thisPlayersGameIds[n])
+                            console.log("Pushed", thisPlayersGameIds[n], "to gameIds")
+                        }
+                    }
+                }
+            }
+
             MAIN_GAME_OBJECT[server][tier] = gameIds;
         }
-
     }
 
-    console.log(MAIN_PLAYER_OBJECT);
+    console.log(MAIN_GAME_OBJECT);
 
-    fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/logs.txt", JSON.stringify(MAIN_PLAYER_OBJECT), 'utf8', function (err) {
+    fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_PLAYER_OBJECT.txt", JSON.stringify(MAIN_PLAYER_OBJECT), 'utf8', function (err) {
         if (err) {
             return console.log(err);
         }
 
-        console.log("The file was saved!");
+        console.log("The MAIN PLAYER OBJECT file was saved!");
+    });
+
+    fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_OBJECT.txt", JSON.stringify(MAIN_GAME_OBJECT), 'utf8', function (err) {
+        if (err) {
+            return console.log(err);
+        }
+
+        console.log("The MAIN GAME OBJECT file was saved!");
     });
 
 }
 
 async function fetchAllSummonerInformation(server, tier, division) {
-    console.log("Fetching", server, tier, division, "Summoner Information");
+    // console.log("Fetching", server, tier, division, "Summoner Information");
     let serverTierDivisionPlayerInformation;
 
     let resServerTierDivisionPlayerInformation = await fetch(
@@ -186,6 +203,7 @@ async function convertNametoPuuid(summonerName, server) {
         profile = await resPuuid.json();
     }
 
+    //console.log("Successfully ocnverted ", summonerName, "to ", profile.puuid)
     return profile.puuid;
 
 }
@@ -193,20 +211,22 @@ async function convertNametoPuuid(summonerName, server) {
 async function fetchPlayersGameIds(puuid, server) {
     //https://americas.api.riotgames.com/tft/match/v1/matches/by-puuid/
     //<puuid>/ids?count=5&api_key=RGAPI-4d0835ee-f6eb-4dd8-b7a8-4172e02e95d4
+    let gameIds;
     //DEV ONLY: count is set to 5
+    debugger;
     let resGameIds = await fetch(
-        encodeURI(`https://${serverGroups.server}.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}` + '?count=5' + '&api_key=' + RIOT_API_KEY)
+        encodeURI(`https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids?` + '?count=5' + '&api_key=' + RIOT_API_KEY)
     )
 
     if (resGameIds.status == 200) {
         //Response was OK
-        gameIds = await resPuuid.json();
+        gameIds = await resGameIds.json();
     }
 
     if (resGameIds.status == 429) {
         await timeout(121000)
         resGameIds = await fetch(
-            encodeURI(`https://${server}.api.riotgames.com/tft/summoner/v1/summoners/by-name/${summonerName}` + '?api_key=' + RIOT_API_KEY)
+            encodeURI(`https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids?` + '?count=5' + '&api_key=' + RIOT_API_KEY)
         )
         gameIds = await resGameIds.json();
     }
