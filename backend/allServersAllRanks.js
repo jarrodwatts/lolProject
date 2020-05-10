@@ -4,7 +4,7 @@ require("firebase/database");
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const RIOT_API_KEY = "RGAPI-4d0835ee-f6eb-4dd8-b7a8-4172e02e95d4"
+const RIOT_API_KEY = "RGAPI-cefb21ef-3e2f-4bce-8344-59d62dd8f73c"
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
     authDomain: "lolproject-6938d.firebaseapp.com",
@@ -50,7 +50,7 @@ const serverGroups = {
 
 const tiers = [
     "IRON",
-    // "BRONZE",
+    "BRONZE",
     // "SILVER",
     // "GOLD",
     // "PLATINUM",
@@ -65,26 +65,42 @@ const proTiers = [
 
 const divisions = [
     "I",
-    "II",
-    "III",
-    "IV"
+    // "II",
+    // "III",
+    // "IV"
 ]
 
 let MAIN_GAME_OBJECT = {};
 let MAIN_PLAYER_OBJECT = {};
-
+let MAIN_GAME_DETAIL_OBJECT = {};
 
 async function main() {
 
+    //Stores ALL SERVERS
+    MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"] = {}
+
     for (server of servers) {
 
+        //Store's player Puuids for a given server
         MAIN_PLAYER_OBJECT[server] = {};
+
+        //Stores Game Ids for a given server
         MAIN_GAME_OBJECT[server] = {};
+
+        //Stores Game Details for a given server
+        MAIN_GAME_DETAIL_OBJECT[server] = {};
+
+        //Stores ALL RANKS for a given server
+        let allRanksForServerGameDetailsObjectsArray = [];
 
         for (tier of tiers) {
 
+            //Initialize the tier for ALL_SERVERS
+            MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier] = []
+
             let playerPuuids = [];
             let gameIds = [];
+            let gameDetailObjects = [];
 
             for (division of divisions) {
                 let serverTierDivisionPlayerInformation = await fetchAllSummonerInformation(server, tier, division);
@@ -111,26 +127,40 @@ async function main() {
                     //Loop through Puuids
                     for (puuidName of MAIN_PLAYER_OBJECT[serverName][rankName]) {
 
-                        console.log(puuidName)
-                        debugger;
 
                         let thisPlayersGameIds = await fetchPlayersGameIds(
                             puuidName, //Puuid
                             server //Actual server name from loop
                         )
 
-                        console.log(thisPlayersGameIds);
-
                         for (let n = 0; n < thisPlayersGameIds.length; n++) {
                             gameIds.push(thisPlayersGameIds[n])
-                            console.log("Pushed", thisPlayersGameIds[n], "to gameIds")
+                            //console.log("Pushed", thisPlayersGameIds[n], "to gameIds")
+
+                            //Now we want to do a similar process, but convert it to game detail
+                            let gameDetail = await fetchGameDetailFromId(
+                                thisPlayersGameIds[n], //Game Id
+                                server //Server
+                            )
+
+                            gameDetailObjects.push(gameDetail);
+                            allRanksForServerGameDetailsObjectsArray.push(gameDetail);
                         }
                     }
                 }
             }
 
             MAIN_GAME_OBJECT[server][tier] = gameIds;
+            MAIN_GAME_DETAIL_OBJECT[server][tier] = gameDetailObjects;
+
+            //Now add this server's rank details to the ALL_SERVERS...
+            MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier].push(gameDetailObjects)
+
         }
+
+        //this is all ranks for one server
+        MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"] = allRanksForServerGameDetailsObjectsArray;
+
     }
 
     console.log(MAIN_GAME_OBJECT);
@@ -149,6 +179,14 @@ async function main() {
         }
 
         console.log("The MAIN GAME OBJECT file was saved!");
+    });
+
+    fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_DETAIL_OBJECT.txt", JSON.stringify(MAIN_GAME_DETAIL_OBJECT), 'utf8', function (err) {
+        if (err) {
+            return console.log(err);
+        }
+
+        console.log("The MAIN GAME DETAIL OBJECT file was saved!");
     });
 
 }
@@ -235,51 +273,42 @@ async function fetchPlayersGameIds(puuid, server) {
 
 }
 
-main();
+async function fetchGameDetailFromId(gameId, server) {
 
-//In the end... I want an object that stores: {
-//     BR1: [
-//         IRON: [
-//             compGroups: [
-//                 0: {
-//                     comps: [
-//                         {},
-//                         totalMatches: 644,
-//                     ]
-//                 }
-//             ],
-//         ],
-//         BRONZE: [
-//             compGroups: [
-//                 0: {
-//                     comps: [
-//                         {},
-//                         totalMatches: 644,
-//                     ]
-//                 }
-//             ],
-//         ],
-//         SILVER: [
-//             compGroups: [
-//                 0: {
-//                     comps: [
-//                         {},
-//                         totalMatches: 644,
-//                     ]
-//                 }
-//             ],
-//         ],
-//         ALL: [ //sum of all ranks in BR1
-//             compGroups: [
-//                 0: {
-//                     comps: [
-//                         {},
-//                         totalMatches: 644,
-//                     ]
-//                 }
-//             ],
-//         ]
-//     ] }
+    let matchDetail;
+
+    try {
+        let resMatchDetail = await fetch(
+            encodeURI(`https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/${gameId}` + '?api_key=' + RIOT_API_KEY)
+        )
+
+        if (resMatchDetail.status == 200) {
+            //Response was OK
+            matchDetail = await resMatchDetail.json();
+        }
+
+        if (resMatchDetail.status == 404) {
+            console.log("gameId ", gameId, " could not be found. Skipped.")
+        }
+
+        if (resMatchDetail.status == 429) {
+            console.log("Rate Limit Exceeded. Waiting two minutes.")
+            await timeout(121000)
+            resMatchDetail = await fetch(
+                encodeURI(`https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/${gameId}` + '?api_key=' + RIOT_API_KEY)
+            )
+            matchDetail = await resMatchDetail.json();
+        }
+
+        return matchDetail;
+    }
+
+    catch (err) {
+        console.log(err)
+    }
+}
+
+main();
 
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
