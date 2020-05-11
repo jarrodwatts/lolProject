@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
+import { Container, Typography, Box, Grid, Avatar, Paper, FormControl, Select, FormHelperText, MenuItem, InputLabel } from '@material-ui/core';
 import TraitsRow from '../src/components/SummonerPage/TraitsRow';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
@@ -34,6 +34,15 @@ const useStyles = makeStyles((theme) => ({
         width: theme.spacing(3),
         height: theme.spacing(3),
     },
+
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 120,
+    },
+    selectEmpty: {
+        marginTop: theme.spacing(2),
+    },
+
 }));
 
 function sliceCharacterString(string) {
@@ -71,7 +80,6 @@ function generateCompName(traitsArray) {
                 else {
                     compString += traitsArray[i].name + " ";
                 }
-
             }
         }
     }
@@ -89,7 +97,6 @@ function generateCompName(traitsArray) {
                     else {
                         compString += traitsArray[i].name + " ";
                     }
-
                 }
             }
         }
@@ -102,15 +109,24 @@ function generateCompName(traitsArray) {
 export default function Comps({ data }) {
 
     const classes = useStyles();
+    const [rank, setRank] = React.useState('ALL_RANKS');
+    const [server, setServer] = React.useState('ALL_SERVERS')
 
-    //Temp experiment: test how long it takes to render only 1
-    //data.length =1;
+    const handleRankChange = (event) => {
+        console.log(event.target.value)
+        setRank(event.target.value);
+    };
+
+    const handleServerhange = (event) => {
+        console.log(event.target.value)
+        setServer(event.target.value);
+    };
 
     const compGroupings = data;
     if (!compGroupings) return <div>Loading Comps...</div>
 
     else {
-        //console.log(compGroupings);
+        console.log(compGroupings);
         return (
             <div>
                 <NavBar />
@@ -125,13 +141,41 @@ export default function Comps({ data }) {
                         </Grid>
 
                         {/* Filters */}
-                        <Grid container item>
+                        <Grid container direction="row" item>
+                            <Box>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel id="rank-simple-select-label">Rank</InputLabel>
+                                    <Select
+                                        labelId="rank-simple-select-label"
+                                        id="rank-simple-select"
+                                        value={rank}
+                                        onChange={handleRankChange}
+                                    >
+                                        <MenuItem value={'ALL_RANKS'}>All Ranks</MenuItem>
+                                        <MenuItem value={'IRON'}>IRON</MenuItem>
+                                        {/* <MenuItem value={'BRONZE'}>BRONZE</MenuItem> */}
 
+                                    </Select>
+                                </FormControl>
+
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel id="server-simple-select-label">Server</InputLabel>
+                                    <Select
+                                        labelId="server-simple-select-label"
+                                        id="server-simple-select"
+                                        value={server}
+                                        onChange={handleServerhange}
+                                    >
+                                        <MenuItem value={'ALL_SERVERS'}>All Servers</MenuItem>
+                                        <MenuItem value={'BR1'}>Brazil</MenuItem>
+                                        <MenuItem value={'EUN1'}>Europe Nordic & East</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Box>
                         </Grid>
-
                         {/* Compositions */}
                         <Grid container item xs={12} direction="column" spacing={1}>
-                            {compGroupings.map((composition, key) => (
+                            {compGroupings[server][rank].map((composition, key) => (
 
                                 <Box key={key} style={{ paddingBottom: '16px' }}>
 
@@ -198,7 +242,7 @@ export default function Comps({ data }) {
                                                                 <Box>
                                                                     <Typography variant="caption">Traits</Typography>
                                                                     <Grid container direction="row">
-                                                                        {composition.comps[0].traits.map((trait, key) => (
+                                                                        {composition['comps'][0].traits.map((trait, key) => (
                                                                             <Grid item key={key}>
                                                                                 <TraitsRow trait={trait} />
                                                                             </Grid>
@@ -215,7 +259,7 @@ export default function Comps({ data }) {
                                                     <Grid item>
                                                         <Typography variant="caption">Team Composition</Typography>
                                                         <Grid container direction="row" alignItems="center" justify="center">
-                                                            {composition.comps[0].comp.map((unit, key) => (
+                                                            {composition['comps'][0].comp.map((unit, key) => (
                                                                 <Grid item key={key}>
                                                                     <Avatar
                                                                         src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
@@ -350,6 +394,7 @@ export default function Comps({ data }) {
 
                         </Grid>
 
+
                     </Grid>
                 </Container>
             </div>
@@ -388,8 +433,6 @@ export async function getServerSideProps() {
     });
 
     let data = comps;
-    // By returning { props: posts }, the Blog component
-    // will receive `posts` as a prop at build time
     return {
         props: {
             data,

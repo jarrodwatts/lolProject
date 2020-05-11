@@ -6,7 +6,7 @@ require("firebase/auth");
 require("firebase/firestore");
 const fetch = require('node-fetch');
 
-const RIOT_API_KEY = "RGAPI-cefb21ef-3e2f-4bce-8344-59d62dd8f73c"
+const RIOT_API_KEY = "RGAPI-fec5a364-3ece-4131-8cc8-65f570015985"
 
 // TODO: Replace the following with your app's Firebase project configuration
 const firebaseConfig = {

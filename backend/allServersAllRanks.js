@@ -4,7 +4,7 @@ require("firebase/database");
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const RIOT_API_KEY = "RGAPI-cefb21ef-3e2f-4bce-8344-59d62dd8f73c"
+const RIOT_API_KEY = "RGAPI-fec5a364-3ece-4131-8cc8-65f570015985"
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
     authDomain: "lolproject-6938d.firebaseapp.com",
@@ -50,7 +50,7 @@ const serverGroups = {
 
 const tiers = [
     "IRON",
-    "BRONZE",
+    // "BRONZE",
     // "SILVER",
     // "GOLD",
     // "PLATINUM",
@@ -70,6 +70,8 @@ const divisions = [
     // "IV"
 ]
 
+const CURRENT_DATA_VERSION = 4;
+
 let MAIN_GAME_OBJECT = {};
 let MAIN_PLAYER_OBJECT = {};
 let MAIN_GAME_DETAIL_OBJECT = {};
@@ -79,8 +81,9 @@ async function main() {
     //Stores ALL SERVERS
     MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"] = {}
 
-    for (server of servers) {
+    MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"]["ALL_RANKS"] = []
 
+    for (server of servers) {
         //Store's player Puuids for a given server
         MAIN_PLAYER_OBJECT[server] = {};
 
@@ -89,81 +92,92 @@ async function main() {
 
         //Stores Game Details for a given server
         MAIN_GAME_DETAIL_OBJECT[server] = {};
-
-        //Stores ALL RANKS for a given server
-        let allRanksForServerGameDetailsObjectsArray = [];
+        MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"] = [];
 
         for (tier of tiers) {
 
             //Initialize the tier for ALL_SERVERS
             MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier] = []
+            //Initialize this tier so we can push to it
+            MAIN_GAME_DETAIL_OBJECT[server][tier] = [];
 
             let playerPuuids = [];
             let gameIds = [];
-            let gameDetailObjects = [];
 
             for (division of divisions) {
                 let serverTierDivisionPlayerInformation = await fetchAllSummonerInformation(server, tier, division);
 
                 //Get player Puuid's into MAIN_PLAYER_OBJECT.
-                for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
+
+                // for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
+                for (let i = 0; i < 10; i++) {
                     //console.log("converting", serverTierDivisionPlayerInformation[i].summonerName, "to puuid")
                     let summonerPuuid = await convertNametoPuuid(serverTierDivisionPlayerInformation[i].summonerName, server)
                     playerPuuids.push(summonerPuuid)
                     //console.log("Pushed ", serverTierDivisionPlayerInformation[i].summonerName, "to player puuids arr")
                 }
 
+
             }
 
             MAIN_PLAYER_OBJECT[server][tier] = playerPuuids;
 
+            //Loop through Puuids
+            for (puuidName of playerPuuids) {
 
-            //Loop through servers
-            for (serverName in MAIN_PLAYER_OBJECT) {
+                let thisPlayersGameIds = await fetchPlayersGameIds(
+                    puuidName, //Puuid
+                    server //Actual server name from loop
+                )
 
-                //Loop through ranks
-                for (rankName in MAIN_PLAYER_OBJECT[serverName]) {
+                for (let n = 0; n < thisPlayersGameIds.length; n++) {
+                    gameIds.push(thisPlayersGameIds[n])
+                }
 
-                    //Loop through Puuids
-                    for (puuidName of MAIN_PLAYER_OBJECT[serverName][rankName]) {
+                for (let n = 0; n < gameIds.length; n++) {
+                    //Now we want to do a similar process, but for each game Id, make it a game detail objhect
+                    let gameDetail = await fetchGameDetailFromId(
+                        gameIds[n], //Game Id
+                        server //Server
+                    )
 
-
-                        let thisPlayersGameIds = await fetchPlayersGameIds(
-                            puuidName, //Puuid
-                            server //Actual server name from loop
-                        )
-
-                        for (let n = 0; n < thisPlayersGameIds.length; n++) {
-                            gameIds.push(thisPlayersGameIds[n])
-                            //console.log("Pushed", thisPlayersGameIds[n], "to gameIds")
-
-                            //Now we want to do a similar process, but convert it to game detail
-                            let gameDetail = await fetchGameDetailFromId(
-                                thisPlayersGameIds[n], //Game Id
-                                server //Server
-                            )
-
-                            gameDetailObjects.push(gameDetail);
-                            allRanksForServerGameDetailsObjectsArray.push(gameDetail);
-                        }
-                    }
+                    MAIN_GAME_DETAIL_OBJECT[server][tier].push(gameDetail);                 //e.g. BR1 IRON
+                    MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"].push(gameDetail);          //e.g. BR1 ALL_RANKS
+                    MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"]["ALL_RANKS"].push(gameDetail);   //e.g. ALL_SERVERS ALL_RANKS
+                    MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier].push(gameDetail);          //e.g. ALL_SERVERS IRON
                 }
             }
-
-            MAIN_GAME_OBJECT[server][tier] = gameIds;
-            MAIN_GAME_DETAIL_OBJECT[server][tier] = gameDetailObjects;
-
-            //Now add this server's rank details to the ALL_SERVERS...
-            MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier].push(gameDetailObjects)
-
-        }
-
-        //this is all ranks for one server
-        MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"] = allRanksForServerGameDetailsObjectsArray;
-
+        } //finish tiers loop
     }
 
-    console.log(MAIN_GAME_OBJECT);
+    //All servers games have been collected, now perform grouping algorithm on each server and each rank
+    for (server in MAIN_GAME_DETAIL_OBJECT) {
+        console.log(server)
+
+        for (rank in MAIN_GAME_DETAIL_OBJECT[server]) {
+            console.log(server, ":", rank)
+
+            //now this json[server][rank] is an array of games
+            // for (game of MAIN_GAME_DETAIL_OBJECT[server][rank]) {
+            //     if (game.metadata.data_version == CURRENT_DATA_VERSION) {
+            //Just DIRECTLY change/convert the game detail to the comp groupings... forget making a new object
+            MAIN_GAME_DETAIL_OBJECT[server][rank] = await groupCompsFromMatches(
+                MAIN_GAME_DETAIL_OBJECT[server][rank],
+                server,
+                rank,
+            )
+
+            //     }
+
+            // }
+
+        }
+    }
+
+
+
+
+
 
     fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_PLAYER_OBJECT.txt", JSON.stringify(MAIN_PLAYER_OBJECT), 'utf8', function (err) {
         if (err) {
@@ -172,7 +186,6 @@ async function main() {
 
         console.log("The MAIN PLAYER OBJECT file was saved!");
     });
-
     fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_OBJECT.txt", JSON.stringify(MAIN_GAME_OBJECT), 'utf8', function (err) {
         if (err) {
             return console.log(err);
@@ -180,7 +193,6 @@ async function main() {
 
         console.log("The MAIN GAME OBJECT file was saved!");
     });
-
     fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_DETAIL_OBJECT.txt", JSON.stringify(MAIN_GAME_DETAIL_OBJECT), 'utf8', function (err) {
         if (err) {
             return console.log(err);
@@ -188,6 +200,14 @@ async function main() {
 
         console.log("The MAIN GAME DETAIL OBJECT file was saved!");
     });
+
+    console.log("All done, trying to write to database...");
+    //finally.... Add EVERYTHING to the db
+    await firebase.database().ref('/comps').set({
+        compGroupings: MAIN_GAME_DETAIL_OBJECT
+    });
+
+    console.log("Successfully published to Datbabase.");
 
 }
 
@@ -251,7 +271,6 @@ async function fetchPlayersGameIds(puuid, server) {
     //<puuid>/ids?count=5&api_key=RGAPI-4d0835ee-f6eb-4dd8-b7a8-4172e02e95d4
     let gameIds;
     //DEV ONLY: count is set to 5
-    debugger;
     let resGameIds = await fetch(
         encodeURI(`https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids?` + '?count=5' + '&api_key=' + RIOT_API_KEY)
     )
@@ -268,6 +287,8 @@ async function fetchPlayersGameIds(puuid, server) {
         )
         gameIds = await resGameIds.json();
     }
+
+    gameIds.length = 5; //DEV ONLY: Chop it to 5
 
     return gameIds;
 
@@ -306,6 +327,326 @@ async function fetchGameDetailFromId(gameId, server) {
     catch (err) {
         console.log(err)
     }
+}
+
+async function groupCompsFromMatches(matches, server, tier) {
+    try {
+
+        //1. Create the MasterArray containing all Comps and their items
+        let masterArray = await createArrayOfAllComps(matches);
+        console.log(server, tier, "MasterArray completed")
+        //2. Create the Unique Array containing only unique comps + their winrates, and other attributes.
+        let uniqueArray = await createUniqueArrayOfComps(masterArray);
+        console.log(server, tier, "Unique Comps derived from Master.")
+        console.log(server, tier, "UniqueArray:", uniqueArray)
+        //3. Create the comp groupings with similarity algorithm
+        let compGroupings = await createCompGroupings(uniqueArray);
+        console.log(server, tier, "Comp Groupings completed.")
+        console.log(server, tier, "compGroupings:", compGroupings)
+
+        //4. Clean the results ready to pass to the API
+        let FINAL_RESULTS = await cleanResults(compGroupings);
+        console.log(server, tier, "Results cleaned.")
+        console.log(server, tier, "Final Results");
+
+        return FINAL_RESULTS;
+    }
+
+    catch (err) {
+        console.log(err);
+    }
+}
+
+async function createArrayOfAllComps(matches) {
+    let masterArray = [];
+
+    try {
+        for (let i = 0; i < matches.length; i++) {
+
+            try {
+                for (let x = 0; x < matches[i].info.participants.length; x++) {
+                    let tempArr = matches[i].info.participants[x].units.sort(function (a, b) {
+
+                        var otherX = a.character_id.toLowerCase();
+                        var otherY = b.character_id.toLowerCase();
+
+                        if (otherX < otherY) { return -1; }
+                        if (otherX > otherY) { return 1; }
+                        return 0;
+                    });
+
+
+                    let tempPlacement = matches[i].info.participants[x].placement;
+
+                    let tempObj = {
+                        comp: tempArr,
+                        traits: matches[i].info.participants[x].traits,
+                        placementsArray: [tempPlacement],
+                        winLoss: {
+                            win: 0,
+                            loss: 0
+                        },
+                        matches: 1,
+                        placement: tempPlacement
+                    }
+
+                    //5. Push the units array to master array
+                    masterArray.push(tempObj);
+                }
+            }
+
+            catch (error) { console.log(error) }
+        }
+
+        return masterArray;
+    }
+
+    catch (error) {
+        console.log(error)
+    }
+}
+
+async function createUniqueArrayOfComps(masterArray) {
+    let uniqueArray = [];
+    try {
+        for (let p = 0; p < masterArray.length; p++) {
+            let actionTaken = false;
+
+            if (uniqueArray.length == 0) {
+                let tempObj = {
+                    comp: masterArray[p].comp,
+                    traits: masterArray[p].traits,
+                    placementsArray: [masterArray[p].placement],
+                    winLoss: {
+                        win: 0,
+                        loss: 0
+                    },
+                    matches: masterArray[p].matches,
+                    averagePlacement: masterArray[p].placement,
+
+                }
+                masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
+                uniqueArray.push(tempObj)
+            }
+
+            else {
+                let thisComp = masterArray[p].comp;
+
+                for (let n = 0; n < uniqueArray.length; n++) {
+                    let comparisonComp = uniqueArray[n].comp
+
+                    if (isArrayEqual(thisComp, comparisonComp)) {
+                        masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
+                        uniqueArray[n].matches++;
+                        uniqueArray[n].placementsArray.push(masterArray[p].placement)
+
+                        uniqueArray[n].averagePlacement = (
+                            uniqueArray[n].placementsArray.reduce((a, b) => a + b) / uniqueArray[n].matches
+                        )
+                        actionTaken = true;
+                        n = uniqueArray.length;
+                    }
+                }
+
+                if (actionTaken == false) {
+                    let tempObj = {
+                        comp: masterArray[p].comp,
+                        placementsArray: [masterArray[p].placement],
+                        traits: masterArray[p].traits,
+                        winLoss: {
+                            win: 0,
+                            loss: 0
+                        },
+                        matches: 1,
+                        averagePlacement: masterArray[p].placement,
+                    }
+                    masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++;
+                    uniqueArray.push(tempObj)
+                    actionTaken = true;
+                }
+            }
+        }
+        //Calculate a winrate for each unique comp
+        for (let i = 0; i < uniqueArray.length; i++) {
+            uniqueArray[i]["winRatio"] = Math.round(uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss) * 100) / 100
+        }
+        return uniqueArray;
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+async function createCompGroupings(uniqueArray) {
+
+    let compGroupings = [];
+    let actionTaken = false;
+
+    try {
+        //Loop through each item in the uniqueArray
+        for (let i = 0; i < uniqueArray.length; i++) {
+            actionTaken = false;
+            //If we can find a suitable match in compGroupings then push it to that,
+            for (let x = 0; x < compGroupings.length; x++) {
+                //Is this comp similar in any of the comp groupings comp variations?
+                console.log(x)
+                //let temp = compGroupings[x].comps[y];
+                for (let y = 0; y < compGroupings[x].comps.length; y++) {
+
+                    if (produceSimilarity(uniqueArray[i].comp, compGroupings[x].comps[y].comp) > 74) {
+                        //True: the comps were similar... Meaning this uniqueComp was similar to a compGrouping we already have.
+                        //Add it, 
+                        compGroupings[x].comps.push(uniqueArray[i])
+
+                        //Flag so we can stop
+                        actionTaken = true;
+
+                        //and stop looping through this
+                        break;
+
+
+                    }
+                    //False (no else required): There wasn't a similar comp so we move past this comp grouping, and look inside the next comp Grouping
+                }
+                //Also stop looping through all compGroupings since we've laready done something to it
+                if (actionTaken) { break; }
+            }
+            //If we didn't find any compgroups that matched this... then we move on and create a new compGrouping
+            if (!actionTaken) {
+                let newCompGroup = {
+                    comps: [
+                        uniqueArray[i]
+                    ]
+                }
+                compGroupings.push(newCompGroup);
+            }
+        }
+        return compGroupings;
+    }
+    catch (error) {
+        console.error(error)
+    }
+}
+
+async function cleanResults(compGroupings) {
+    try {
+        //If a comp variation has less than 50 chop it
+        for (var i = compGroupings.length - 1; i >= 0; i--) {
+            for (var x = compGroupings[i].comps.length - 1; x >= 0; x--) {
+                if (compGroupings[i].comps[x].matches < 5) {
+                    compGroupings[i].comps.splice(x, 1);
+                }
+            }
+            if (compGroupings[i].comps.length == 0) {
+                compGroupings.splice(i, 1);
+            }
+        }
+
+        //Add a field to each compGrouping that is total matches
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i]["totalMatches"] = sumMatches(compGroupings[i]);
+        }
+
+        //Clean out comps with less than 50 TOTAL matches
+        for (var i = compGroupings.length - 1; i >= 0; i--) {
+            if (compGroupings[i].totalMatches < 10) {
+                compGroupings.splice(i, 1);
+            }
+        }
+
+        //Sort each compGrouping's comp by win ratio, lowest to highest
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i].comps.sort((a, b) => a.winRatio - b.winRatio);
+        }
+
+        //Sort entire compGroupings array by the first comps total matches
+        compGroupings.sort((a, b) =>
+            b.totalMatches - a.totalMatches
+        );
+
+        return compGroupings;
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+function sumMatches(compGrouping) {
+    //for each comp grouping, sum up each children's matches and add them to a sum
+    sum = 0;
+    for (let i = 0; i < compGrouping.comps.length; i++) {
+        sum += compGrouping.comps[i].matches
+    }
+    return sum;
+}
+
+function isArrayEqual(arr1, arr2) {
+
+    //Check if comps are the same length first before comparing
+    if (arr1.length == arr2.length) {
+
+        arr1 = arr1.sort(function (a, b) {
+            var x = a.character_id.toLowerCase();
+            var y = b.character_id.toLowerCase();
+            if (x < y) { return -1; }
+            if (x > y) { return 1; }
+            return 0;
+        });
+
+        arr2 = arr2.sort(function (a, b) {
+            var x = a.character_id.toLowerCase();
+            var y = b.character_id.toLowerCase();
+            if (x < y) { return -1; }
+            if (x > y) { return 1; }
+            return 0;
+        });
+
+        for (var i = 0; i < arr1.length; i++) {
+            if (arr1[i].character_id !== arr2[i].character_id)
+                return false;
+        }
+
+        return true;
+    }
+
+    else { return false; }
+}
+
+function produceSimilarity(a, b) {
+    let matched = 0;
+    let total;
+    let tempA = a;
+    let tempB = b;
+    //Grab which ever one is longer for total
+
+    //If A is longer, compare each item of b to a
+    if (tempA.length > tempB.length) {
+        total = tempA.length;
+        for (let i = 0; i < tempA.length; i++) {
+
+            let temp1 = tempA.map((champ => champ.character_id))
+            let temp2 = tempB.map((champ => champ.character_id))
+
+            if (temp1.includes(temp2[i])) {
+                matched++
+            }
+        }
+    }
+
+    //If b is longer, compare each item of a to b
+    else {
+        total = tempB.length;
+        for (let i = 0; i < tempB.length; i++) {
+            //TODO: here's an error... it's not included above.
+            let temp1 = tempA.map((champ => champ.character_id))
+            let temp2 = tempB.map((champ => champ.character_id))
+
+            if (temp2.includes(temp1[i])) {
+                matched++
+            }
+        }
+    }
+    return (matched / total) * 100
 }
 
 main();

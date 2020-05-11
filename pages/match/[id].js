@@ -11,7 +11,7 @@ import TraitsRow from '../../src/components/SummonerPage/TraitsRow';
 import ChampionTierStars from '../../src/components/SummonerPage/ChampionTierStars';
 import ChampionsItems from '../../src/components/SummonerPage/ChampionItems';
 
-const RIOT_API_KEY = "RGAPI-4d0835ee-f6eb-4dd8-b7a8-4172e02e95d4"
+const RIOT_API_KEY = "RGAPI-fec5a364-3ece-4131-8cc8-65f570015985"
 
 const useStyles = makeStyles((theme) => ({
     root: {
