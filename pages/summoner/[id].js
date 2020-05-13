@@ -15,7 +15,7 @@ import SummonerRank from '../../src/components/SummonerPage/SummonerRank';
 import Router from 'next/router';
 
 
-const RIOT_API_KEY = "RGAPI-fec5a364-3ece-4131-8cc8-65f570015985"
+const RIOT_API_KEY = "RGAPI-f73a9b84-eece-4680-bad3-5d7f0565afdb"
 
 const useStyles = makeStyles((theme) => ({
     root: {

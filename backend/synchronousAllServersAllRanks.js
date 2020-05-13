@@ -51,10 +51,10 @@ const serverGroups = {
 const tiers = [
     "IRON",
     "BRONZE",
-    "SILVER",
-    "GOLD",
-    "PLATINUM",
-    "DIAMOND"
+    // "SILVER",
+    // "GOLD",
+    // "PLATINUM",
+    // "DIAMOND"
 ]
 
 const proTiers = [
@@ -76,133 +76,201 @@ let MAIN_GAME_OBJECT = {};
 let MAIN_PLAYER_OBJECT = {};
 let MAIN_GAME_DETAIL_OBJECT = {};
 
-async function main() {
+//Stores ALL SERVERS
+MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"] = {}
+MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"]["ALL_RANKS"] = []
 
-    //Stores ALL SERVERS
-    MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"] = {}
+async function runFillForServer(server) {
+    //wait 5 secs for debug 
+    await timeout(5000)
+    //Store's player Puuids for a given server
+    MAIN_PLAYER_OBJECT[server] = {};
+    //Stores Game Ids for a given server
+    MAIN_GAME_OBJECT[server] = {};
 
-    MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"]["ALL_RANKS"] = []
+    //Stores Game Details for a given server
+    MAIN_GAME_DETAIL_OBJECT[server] = {
+        "IRON": [],
+        "BRONZE": [],
+        "SILVER": [],
+        "GOLD": [],
+        "PLATINUM": [],
+        "DIAMOND": [],
+        "ALL_RANKS": [],
+    };
 
-    for (server of servers) {
-        //Store's player Puuids for a given server
-        MAIN_PLAYER_OBJECT[server] = {};
+    for (tier of tiers) {
 
-        //Stores Game Ids for a given server
-        MAIN_GAME_OBJECT[server] = {};
+        //Initialize the tier for ALL_SERVERS
+        MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier] = []
+        //Initialize this tier so we can push to it
+        //MAIN_GAME_DETAIL_OBJECT[server][tier] = [];
 
-        //Stores Game Details for a given server
-        MAIN_GAME_DETAIL_OBJECT[server] = {};
-        MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"] = [];
+        let playerPuuids = [];
+        let gameIds = [];
 
-        for (tier of tiers) {
-
-            //Initialize the tier for ALL_SERVERS
-            MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier] = []
-            //Initialize this tier so we can push to it
-            MAIN_GAME_DETAIL_OBJECT[server][tier] = [];
-
-            let playerPuuids = [];
-            let gameIds = [];
-
-            for (division of divisions) {
-                let serverTierDivisionPlayerInformation = await fetchAllSummonerInformation(server, tier, division);
-                // for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
-                for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
-                    //Check if Puuid was found
+        for (division of divisions) {
+            let serverTierDivisionPlayerInformation = await fetchAllSummonerInformation(server, tier, division);
+            // for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
+            for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
+                //Check if Puuid was found
+                try {
                     let summonerPuuid = await convertNametoPuuid(serverTierDivisionPlayerInformation[i].summonerName, server)
                     if (summonerPuuid != "Not Found") {
-                        playerPuuids.push(summonerPuuid)
-                        //console.log("Pushed ", serverTierDivisionPlayerInformation[i].summonerName, "to player puuids arr")
+                        try {
+                            playerPuuids.push(summonerPuuid)
+                        }
+                        catch (error) {
+                            console.log(server, ":", tier, ":", division, ":", error)
+                        }
                     }
                 }
+                catch (error) {
+                    debugger;
+                    console.log(server, ":", tier, ":", division, ":", "on:", serverTierDivisionPlayerInformation[i], "error:", error)
+                }
             }
+        }
 
-            MAIN_PLAYER_OBJECT[server][tier] = playerPuuids;
+        MAIN_PLAYER_OBJECT[server][tier] = playerPuuids;
 
-            //Loop through Puuids
-            for (puuidName of playerPuuids) {
+        //Loop through Puuids
+        for (puuidName of playerPuuids) {
 
-                let thisPlayersGameIds = await fetchPlayersGameIds(
-                    puuidName, //Puuid
-                    server //Actual server name from loop
-                )
+            let thisPlayersGameIds = await fetchPlayersGameIds(
+                puuidName, //Puuid
+                server //Actual server name from loop
+            )
 
-                if (thisPlayersGameIds != "Not Found") {
-                    for (let n = 0; n < thisPlayersGameIds.length; n++) {
-                        //TODO: Check if this playerGameId is already in 
-                        gameIds.push(thisPlayersGameIds[n])
+            if (thisPlayersGameIds != "Not Found") {
+                for (let n = 0; n < thisPlayersGameIds.length; n++) {
+                    //TODO: Check if this playerGameId is already in 
+                    gameIds.push(thisPlayersGameIds[n])
 
-                        //Now we want to do a similar process, but for each game Id, make it a game detail objhect
-                        let gameDetail = await fetchGameDetailFromId(
-                            thisPlayersGameIds[n], //Game Id
-                            server //Server
-                        )
+                    //Now we want to do a similar process, but for each game Id, make it a game detail objhect
+                    let gameDetail = await fetchGameDetailFromId(
+                        thisPlayersGameIds[n], //Game Id
+                        server //Server
+                    )
 
-                        //Check if match was found
-                        if (gameDetail != "Not Found") {
+                    //Check if match was found
+                    if (gameDetail != "Not Found") {
+                        try {
                             //console.log("Pushed", gameDetail)
                             MAIN_GAME_DETAIL_OBJECT[server][tier].push(gameDetail);                 //e.g. BR1 IRON
                             MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"].push(gameDetail);          //e.g. BR1 ALL_RANKS
                             MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"]["ALL_RANKS"].push(gameDetail);   //e.g. ALL_SERVERS ALL_RANKS
                             MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier].push(gameDetail);          //e.g. ALL_SERVERS IRON
+                            console.log("Pushed game to", server, tier);
+                        }
+                        catch (error) {
+                            debugger;
+                            console.log(server, ":", tier, ": Error pushing game:", error);
                         }
                     }
                 }
             }
-        } //finish tiers loop
-    }
+        }
+    } //finish tiers loop
+
+    //gotta return something to await it...?
+    return MAIN_GAME_DETAIL_OBJECT[server];
+}
+
+async function fillAllServersInParallel() {
+
+    //do all the servers at once
+    let BR1 = runFillForServer("BR1")
+    // let EUN1 = runFillForServer("EUN1")
+    // let EUW1 = runFillForServer("EUW1")
+    // let JP1 = runFillForServer("JP1")
+    // let KR = runFillForServer("KR")
+    // let LA1 = runFillForServer("LA1")
+    // let LA2 = runFillForServer("LA2")
+    // let NA1 = runFillForServer("NA1")
+    // let OC1 = runFillForServer("OC1")
+    // let RU = runFillForServer("RU")
+    // let TR1 = runFillForServer("TR1")
+    //just add functionality directly for all?
+
+    //await the results;
+    let resultedBR1 = await BR1;
+    // let resultedEUN1 = await EUN1;
+    // let resultedEUW1 = await EUW1;
+    // let resultedJP1 = await JP1;
+    // let resultedKR = await KR;
+    // let resultedLA1 = await LA1;
+    // let resultedLA2 = await LA2;
+    // let resultedNA1 = await NA1;
+    // let resultedOC1 = await OC1;
+    // let resultedRU = await RU;
+    // let resultedBTR1 = await TR1;
 
     //All servers games have been collected, now perform grouping algorithm on each server and each rank
     for (server in MAIN_GAME_DETAIL_OBJECT) {
-        console.log(server)
 
         for (rank in MAIN_GAME_DETAIL_OBJECT[server]) {
-            console.log(server, ":", rank)
-            //Just DIRECTLY change/convert the game detail to the comp groupings... forget making a new object
-            MAIN_GAME_DETAIL_OBJECT[server][rank] = await groupCompsFromMatches(
-                MAIN_GAME_DETAIL_OBJECT[server][rank],
-                server,
-                rank,
-            )
+            console.log("Running groupComps for:", server, ":", rank);
+            try {
+                //Just DIRECTLY change/convert the game detail to the comp groupings... forget making a new object
+                MAIN_GAME_DETAIL_OBJECT[server][rank] = await groupCompsFromMatches(
+                    MAIN_GAME_DETAIL_OBJECT[server][rank],
+                    server,
+                    rank,
+                )
+            } catch (error) {
+                console.log(error);
+            }
 
         }
     }
 
-    fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_PLAYER_OBJECT.txt", JSON.stringify(MAIN_PLAYER_OBJECT), 'utf8', function (err) {
-        if (err) {
-            return console.log(err);
-        }
+    try {
+        fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_PLAYER_OBJECT.txt", JSON.stringify(MAIN_PLAYER_OBJECT), 'utf8', function (err) {
+            if (err) {
+                return console.log(err);
+            }
 
-        console.log("The MAIN PLAYER OBJECT file was saved!");
-    });
-    fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_OBJECT.txt", JSON.stringify(MAIN_GAME_OBJECT), 'utf8', function (err) {
-        if (err) {
-            return console.log(err);
-        }
+            console.log("The MAIN PLAYER OBJECT file was saved!");
+        });
+        fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_OBJECT.txt", JSON.stringify(MAIN_GAME_OBJECT), 'utf8', function (err) {
+            if (err) {
+                return console.log(err);
+            }
 
-        console.log("The MAIN GAME OBJECT file was saved!");
-    });
-    fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_DETAIL_OBJECT.txt", JSON.stringify(MAIN_GAME_DETAIL_OBJECT), 'utf8', function (err) {
-        if (err) {
-            return console.log(err);
-        }
+            console.log("The MAIN GAME OBJECT file was saved!");
+        });
+        fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_DETAIL_OBJECT.txt", JSON.stringify(MAIN_GAME_DETAIL_OBJECT), 'utf8', function (err) {
+            if (err) {
+                return console.log(err);
+            }
 
-        console.log("The MAIN GAME DETAIL OBJECT file was saved!");
-    });
+            console.log("The MAIN GAME DETAIL OBJECT file was saved!");
+        });
 
-    console.log("All done, trying to write to database...");
-    //finally.... Add EVERYTHING to the db
-    await firebase.database().ref('/comps').set({
-        compGroupings: MAIN_GAME_DETAIL_OBJECT
-    });
+    }
+    catch (error) {
+        console.log(error);
+    }
 
-    console.log("Successfully published to Datbabase.");
+    try {
+        console.log("All done, trying to write to database...");
+        //finally.... Add EVERYTHING to the db
+        await firebase.database().ref('/comps').set({
+            compGroupings: MAIN_GAME_DETAIL_OBJECT
+        });
+
+        console.log("Successfully published to Datbabase.");
+    }
+    catch (error) {
+        console.log(error);
+    }
 
 }
 
 async function fetchAllSummonerInformation(server, tier, division) {
     try {
-        // console.log("Fetching", server, tier, division, "Summoner Information");
+        console.log("Fetching", server, tier, division, "Summoner Information");
         let serverTierDivisionPlayerInformation;
 
         let resServerTierDivisionPlayerInformation = await fetch(
@@ -220,13 +288,16 @@ async function fetchAllSummonerInformation(server, tier, division) {
 
         if (resServerTierDivisionPlayerInformation.status == 429) {
             //Too many requests
-            console.log("Chilling for two minutes")
+            console.log("Chilling for two minutes on server", server)
             await timeout(121000);
             serverTierDivisionPlayerInformation = await resServerTierDivisionPlayerInformation.json();
         }
 
         //DEV ONLY: REDUCE PLAYER LIMIT TO 10
-        serverTierDivisionPlayerInformation.length = 10;
+        if (serverTierDivisionPlayerInformation.length > 9) {
+            serverTierDivisionPlayerInformation.length = 10;
+        }
+
         return serverTierDivisionPlayerInformation;
     }
     catch (error) {
@@ -322,7 +393,7 @@ async function fetchGameDetailFromId(gameId, server) {
         }
 
         if (resMatchDetail.status == 429) {
-            console.log("Rate Limit Exceeded. Waiting two minutes.")
+            console.log(server, ":Rate Limit Exceeded. Waiting two minutes.")
             await timeout(121000)
             resMatchDetail = await fetch(
                 encodeURI(`https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/${gameId}` + '?api_key=' + RIOT_API_KEY)
@@ -499,7 +570,7 @@ async function createCompGroupings(uniqueArray) {
             //If we can find a suitable match in compGroupings then push it to that,
             for (let x = 0; x < compGroupings.length; x++) {
                 //Is this comp similar in any of the comp groupings comp variations?
-                console.log(x)
+                //console.log(x)
                 //let temp = compGroupings[x].comps[y];
                 for (let y = 0; y < compGroupings[x].comps.length; y++) {
 
@@ -543,7 +614,7 @@ async function cleanResults(compGroupings) {
         //If a comp variation has less than 50 chop it
         for (var i = compGroupings.length - 1; i >= 0; i--) {
             for (var x = compGroupings[i].comps.length - 1; x >= 0; x--) {
-                if (compGroupings[i].comps[x].matches < 50) {
+                if (compGroupings[i].comps[x].matches < 10) {
                     compGroupings[i].comps.splice(x, 1);
                 }
             }
@@ -559,7 +630,7 @@ async function cleanResults(compGroupings) {
 
         //Clean out comps with less than 100 TOTAL matches
         for (var i = compGroupings.length - 1; i >= 0; i--) {
-            if (compGroupings[i].totalMatches < 100) {
+            if (compGroupings[i].totalMatches < 20) {
                 compGroupings.splice(i, 1);
             }
         }
@@ -679,8 +750,9 @@ function produceSimilarity(a, b) {
     }
 }
 
-main();
-
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+//run it
+fillAllServersInParallel();
