@@ -4,7 +4,7 @@ require("firebase/database");
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const RIOT_API_KEY = "RGAPI-f73a9b84-eece-4680-bad3-5d7f0565afdb"
+const RIOT_API_KEY = "RGAPI-20f7879b-47a6-4c74-bbf2-0908de9828a4"
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
     authDomain: "lolproject-6938d.firebaseapp.com",
@@ -65,9 +65,9 @@ const proTiers = [
 
 const divisions = [
     "I",
-    "II",
-    "III",
-    "IV"
+    // "II",
+    // "III",
+    // "IV"
 ]
 
 const CURRENT_DATA_VERSION = 4;
@@ -126,7 +126,7 @@ async function runFillForServer(server) {
                     }
                 }
                 catch (error) {
-                    debugger;
+                    //debugger;
                     console.log(server, ":", tier, ":", division, ":", "on:", serverTierDivisionPlayerInformation[i], "error:", error)
                 }
             }
@@ -164,7 +164,7 @@ async function runFillForServer(server) {
                             console.log("Pushed game to", server, tier);
                         }
                         catch (error) {
-                            debugger;
+                            //debugger;
                             console.log(server, ":", tier, ": Error pushing game:", error);
                         }
                     }
@@ -516,7 +516,8 @@ async function createUniqueArrayOfComps(masterArray) {
                 for (let n = 0; n < uniqueArray.length; n++) {
                     let comparisonComp = uniqueArray[n].comp
 
-                    if (isArrayEqual(thisComp, comparisonComp)) {
+                    //if (isArrayEqual(thisComp, comparisonComp)) {
+                    if (produceSimilarity(thisComp, comparisonComp) == 100) {
                         masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
                         uniqueArray[n].matches++;
                         uniqueArray[n].placementsArray.push(masterArray[p].placement)
@@ -570,7 +571,6 @@ async function createCompGroupings(uniqueArray) {
             //If we can find a suitable match in compGroupings then push it to that,
             for (let x = 0; x < compGroupings.length; x++) {
                 //Is this comp similar in any of the comp groupings comp variations?
-                //console.log(x)
                 //let temp = compGroupings[x].comps[y];
                 for (let y = 0; y < compGroupings[x].comps.length; y++) {
 
@@ -610,18 +610,19 @@ async function createCompGroupings(uniqueArray) {
 }
 
 async function cleanResults(compGroupings) {
+    //debugger;
     try {
-        //If a comp variation has less than 50 chop it
-        for (var i = compGroupings.length - 1; i >= 0; i--) {
-            for (var x = compGroupings[i].comps.length - 1; x >= 0; x--) {
-                if (compGroupings[i].comps[x].matches < 10) {
-                    compGroupings[i].comps.splice(x, 1);
-                }
-            }
-            if (compGroupings[i].comps.length == 0) {
-                compGroupings.splice(i, 1);
-            }
-        }
+        // //If a comp variation has less than 50 chop it
+        // for (var i = compGroupings.length - 1; i >= 0; i--) {
+        //     for (var x = compGroupings[i].comps.length - 1; x >= 0; x--) {
+        //         if (compGroupings[i].comps[x].matches < 10) {
+        //             compGroupings[i].comps.splice(x, 1);
+        //         }
+        //     }
+        //     if (compGroupings[i].comps.length == 0) {
+        //         compGroupings.splice(i, 1);
+        //     }
+        // }
 
         //Add a field to each compGrouping that is total matches
         for (let i = 0; i < compGroupings.length; i++) {
@@ -629,21 +630,30 @@ async function cleanResults(compGroupings) {
         }
 
         //Clean out comps with less than 100 TOTAL matches
-        for (var i = compGroupings.length - 1; i >= 0; i--) {
-            if (compGroupings[i].totalMatches < 20) {
-                compGroupings.splice(i, 1);
+        // for (var i = compGroupings.length - 1; i >= 0; i--) {
+        //     if (compGroupings[i].totalMatches < 20) {
+        //         compGroupings.splice(i, 1);
+        //     }
+        // }
+
+        //Sort each compGrouping's comp by matches
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i].comps.sort((a, b) => b.matches - a.matches);
+            //also chop the variations length to 5 i guess
+            if (compGroupings[i].comps.length > 5) {
+                compGroupings[i].comps.length = 5;
             }
         }
 
-        //Sort each compGrouping's comp by win ratio, lowest to highest
-        for (let i = 0; i < compGroupings.length; i++) {
-            compGroupings[i].comps.sort((a, b) => a.winRatio - b.winRatio);
-        }
-
-        //Sort entire compGroupings array by the first comps total matches
+        //Sort entire compGroupings array by total matches
         compGroupings.sort((a, b) =>
             b.totalMatches - a.totalMatches
         );
+
+
+
+        //chop compGroupings to 20
+        compGroupings.length = 20;
 
         return compGroupings;
     }
