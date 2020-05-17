@@ -7,6 +7,7 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import NavBar from '../src/components/NavBar';
+import Error from '../src/components/Error';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -153,7 +154,15 @@ export default function Comps({ data }) {
                                     >
                                         <MenuItem value={'ALL_RANKS'}>All Ranks</MenuItem>
                                         <MenuItem value={'IRON'}>IRON</MenuItem>
-                                        {/* <MenuItem value={'BRONZE'}>BRONZE</MenuItem> */}
+                                        <MenuItem value={'BRONZE'}>BRONZE</MenuItem>
+                                        <MenuItem value={'SILVER'}>SILVER</MenuItem>
+                                        <MenuItem value={'GOLD'}>GOLD</MenuItem>
+                                        <MenuItem value={'PLATINUM'}>PLATINUM</MenuItem>
+                                        <MenuItem value={'DIAMOND'}>DIAMOND</MenuItem>
+                                        {/* <MenuItem value={'MASTER'}>MASTER</MenuItem>
+                                        <MenuItem value={'GRANDMASTER'}>GRANDMASTER</MenuItem>
+                                        <MenuItem value={'CHALLENGER'}>CHALLENGER</MenuItem> */}
+
 
                                     </Select>
                                 </FormControl>
@@ -168,7 +177,16 @@ export default function Comps({ data }) {
                                     >
                                         <MenuItem value={'ALL_SERVERS'}>All Servers</MenuItem>
                                         <MenuItem value={'BR1'}>Brazil</MenuItem>
-                                        <MenuItem value={'EUN1'}>Europe Nordic & East</MenuItem>
+                                        <MenuItem value={'EUN1'}>Europe & Nordic East</MenuItem>
+                                        <MenuItem value={'EUW1'}>Europe West</MenuItem>
+                                        <MenuItem value={'JP1'}>Japan</MenuItem>
+                                        <MenuItem value={'KR'}>Korea</MenuItem>
+                                        <MenuItem value={'LA1'}>Latin America North</MenuItem>
+                                        <MenuItem value={'LA2'}>Latin America South</MenuItem>
+                                        <MenuItem value={'NA1'}>North America</MenuItem>
+                                        <MenuItem value={'OC1'}>Oceania</MenuItem>
+                                        <MenuItem value={'RU'}>Russia</MenuItem>
+                                        <MenuItem value={'TR1'}>Turkey</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Box>

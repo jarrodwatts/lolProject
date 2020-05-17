@@ -1,6 +1,7 @@
 import React from 'react';
 import { Avatar, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Error from '../Error';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -17,34 +18,41 @@ const useStyles = makeStyles((theme) => ({
 export default function ChampionItems(props) {
     const classes = useStyles();
 
-    return (
-        <Grid container alignItems="center" justify="center" item>
-            {/* //Check if the item exists ...if so render... if not ... render empty div */}
-            {props.unit.items[0] !== undefined ?
-                <Avatar
-                    src={`/assets/items/${props.unit.items[0]}.png`}
-                    className={classes.itemSize} /> :
+    try {
+        return (
+            <Grid container alignItems="center" justify="center" item>
+                {/* //Check if the item exists ...if so render... if not ... render empty div */}
+                {props.unit.items[0] !== undefined ?
+                    <Avatar
+                        src={`/assets/items/${props.unit.items[0]}.png`}
+                        className={classes.itemSize} /> :
 
-                <div />
-            }
+                    <div />
+                }
 
-            {props.unit.items[1] !== undefined ?
-                <Avatar
-                    src={`/assets/items/${props.unit.items[1]}.png`}
-                    className={classes.itemSize} /> :
+                {props.unit.items[1] !== undefined ?
+                    <Avatar
+                        src={`/assets/items/${props.unit.items[1]}.png`}
+                        className={classes.itemSize} /> :
 
-                <div />
-            }
+                    <div />
+                }
 
-            {props.unit.items[2] !== undefined ?
-                <Avatar
-                    src={`/assets/items/${props.unit.items[2]}.png`}
-                    className={classes.itemSize} /> :
+                {props.unit.items[2] !== undefined ?
+                    <Avatar
+                        src={`/assets/items/${props.unit.items[2]}.png`}
+                        className={classes.itemSize} /> :
 
-                <div />
-            }
-        </Grid>
+                    <div />
+                }
+            </Grid>
 
-    )
+        )
+    }
+    catch (error) {
+        return (
+            <Error/>
+        )
+    }
 
 }

@@ -4,7 +4,7 @@ require("firebase/database");
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const RIOT_API_KEY = "RGAPI-20f7879b-47a6-4c74-bbf2-0908de9828a4"
+const RIOT_API_KEY = "RGAPI-5a1760a7-9e9b-4d42-93f9-c92b5893d974"
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
     authDomain: "lolproject-6938d.firebaseapp.com",
@@ -51,10 +51,10 @@ const serverGroups = {
 const tiers = [
     "IRON",
     "BRONZE",
-    // "SILVER",
-    // "GOLD",
-    // "PLATINUM",
-    // "DIAMOND"
+    "SILVER",
+    "GOLD",
+    "PLATINUM",
+    "DIAMOND"
 ]
 
 const proTiers = [
@@ -65,9 +65,9 @@ const proTiers = [
 
 const divisions = [
     "I",
-    // "II",
-    // "III",
-    // "IV"
+    "II",
+    "III",
+    "IV"
 ]
 
 const CURRENT_DATA_VERSION = 4;
@@ -181,30 +181,30 @@ async function fillAllServersInParallel() {
 
     //do all the servers at once
     let BR1 = runFillForServer("BR1")
-    // let EUN1 = runFillForServer("EUN1")
-    // let EUW1 = runFillForServer("EUW1")
-    // let JP1 = runFillForServer("JP1")
-    // let KR = runFillForServer("KR")
-    // let LA1 = runFillForServer("LA1")
-    // let LA2 = runFillForServer("LA2")
-    // let NA1 = runFillForServer("NA1")
-    // let OC1 = runFillForServer("OC1")
-    // let RU = runFillForServer("RU")
-    // let TR1 = runFillForServer("TR1")
+    let EUN1 = runFillForServer("EUN1")
+    let EUW1 = runFillForServer("EUW1")
+    let JP1 = runFillForServer("JP1")
+    let KR = runFillForServer("KR")
+    let LA1 = runFillForServer("LA1")
+    let LA2 = runFillForServer("LA2")
+    let NA1 = runFillForServer("NA1")
+    let OC1 = runFillForServer("OC1")
+    let RU = runFillForServer("RU")
+    let TR1 = runFillForServer("TR1")
     //just add functionality directly for all?
 
     //await the results;
     let resultedBR1 = await BR1;
-    // let resultedEUN1 = await EUN1;
-    // let resultedEUW1 = await EUW1;
-    // let resultedJP1 = await JP1;
-    // let resultedKR = await KR;
-    // let resultedLA1 = await LA1;
-    // let resultedLA2 = await LA2;
-    // let resultedNA1 = await NA1;
-    // let resultedOC1 = await OC1;
-    // let resultedRU = await RU;
-    // let resultedBTR1 = await TR1;
+    let resultedEUN1 = await EUN1;
+    let resultedEUW1 = await EUW1;
+    let resultedJP1 = await JP1;
+    let resultedKR = await KR;
+    let resultedLA1 = await LA1;
+    let resultedLA2 = await LA2;
+    let resultedNA1 = await NA1;
+    let resultedOC1 = await OC1;
+    let resultedRU = await RU;
+    let resultedBTR1 = await TR1;
 
     //All servers games have been collected, now perform grouping algorithm on each server and each rank
     for (server in MAIN_GAME_DETAIL_OBJECT) {
@@ -412,7 +412,6 @@ async function fetchGameDetailFromId(gameId, server) {
 
 async function groupCompsFromMatches(matches, server, tier) {
     try {
-
         //1. Create the MasterArray containing all Comps and their items
         let masterArray = await createArrayOfAllComps(matches);
         console.log(server, tier, "MasterArray completed")
@@ -441,56 +440,61 @@ async function groupCompsFromMatches(matches, server, tier) {
 async function createArrayOfAllComps(matches) {
     let masterArray = [];
 
-    try {
-        for (let i = 0; i < matches.length; i++) {
+    for (let i = 0; i < matches.length; i++) {
 
-            try {
+        try {
+            //check if data is iterable
+            if (matches[i] &&
+                matches[i].info &&
+                matches[i].info.participants) {
+
                 for (let x = 0; x < matches[i].info.participants.length; x++) {
-                    let tempArr = matches[i].info.participants[x].units.sort(function (a, b) {
+                    //check if data is iterable
+                    if (matches[i].info.participants[x].units) {
+                        let tempArr = matches[i].info.participants[x].units.sort(function (a, b) {
 
-                        var otherX = a.character_id.toLowerCase();
-                        var otherY = b.character_id.toLowerCase();
+                            var otherX = a.character_id.toLowerCase();
+                            var otherY = b.character_id.toLowerCase();
 
-                        if (otherX < otherY) { return -1; }
-                        if (otherX > otherY) { return 1; }
-                        return 0;
-                    });
+                            if (otherX < otherY) { return -1; }
+                            if (otherX > otherY) { return 1; }
+                            return 0;
+                        });
 
 
-                    let tempPlacement = matches[i].info.participants[x].placement;
+                        let tempPlacement = matches[i].info.participants[x].placement;
 
-                    let tempObj = {
-                        comp: tempArr,
-                        traits: matches[i].info.participants[x].traits,
-                        placementsArray: [tempPlacement],
-                        winLoss: {
-                            win: 0,
-                            loss: 0
-                        },
-                        matches: 1,
-                        placement: tempPlacement
+                        let tempObj = {
+                            comp: tempArr,
+                            traits: matches[i].info.participants[x].traits,
+                            placementsArray: [tempPlacement],
+                            winLoss: {
+                                win: 0,
+                                loss: 0
+                            },
+                            matches: 1,
+                            placement: tempPlacement
+                        }
+
+                        //5. Push the units array to master array
+                        masterArray.push(tempObj);
                     }
-
-                    //5. Push the units array to master array
-                    masterArray.push(tempObj);
                 }
             }
-
-            catch (error) { console.log(error) }
         }
 
-        return masterArray;
+        catch (error) {
+            console.log(error)
+        }
     }
-
-    catch (error) {
-        console.log(error)
-    }
+    return masterArray;
 }
 
 async function createUniqueArrayOfComps(masterArray) {
     let uniqueArray = [];
-    try {
-        for (let p = 0; p < masterArray.length; p++) {
+
+    for (let p = 0; p < masterArray.length; p++) {
+        try {
             let actionTaken = false;
 
             if (uniqueArray.length == 0) {
@@ -514,19 +518,21 @@ async function createUniqueArrayOfComps(masterArray) {
                 let thisComp = masterArray[p].comp;
 
                 for (let n = 0; n < uniqueArray.length; n++) {
-                    let comparisonComp = uniqueArray[n].comp
+                    //check if data is iterable
+                    if (uniqueArray[n].comp) {
+                        let comparisonComp = uniqueArray[n].comp
+                        //if (isArrayEqual(thisComp, comparisonComp)) {
+                        if (produceSimilarity(thisComp, comparisonComp) == 100) {
+                            masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
+                            uniqueArray[n].matches++;
+                            uniqueArray[n].placementsArray.push(masterArray[p].placement)
 
-                    //if (isArrayEqual(thisComp, comparisonComp)) {
-                    if (produceSimilarity(thisComp, comparisonComp) == 100) {
-                        masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
-                        uniqueArray[n].matches++;
-                        uniqueArray[n].placementsArray.push(masterArray[p].placement)
-
-                        uniqueArray[n].averagePlacement = (
-                            uniqueArray[n].placementsArray.reduce((a, b) => a + b) / uniqueArray[n].matches
-                        )
-                        actionTaken = true;
-                        n = uniqueArray.length;
+                            uniqueArray[n].averagePlacement = (
+                                uniqueArray[n].placementsArray.reduce((a, b) => a + b) / uniqueArray[n].matches
+                            )
+                            actionTaken = true;
+                            n = uniqueArray.length;
+                        }
                     }
                 }
 
@@ -548,15 +554,21 @@ async function createUniqueArrayOfComps(masterArray) {
                 }
             }
         }
+
+        catch (error) {
+            console.log(error)
+        }
         //Calculate a winrate for each unique comp
         for (let i = 0; i < uniqueArray.length; i++) {
-            uniqueArray[i]["winRatio"] = Math.round(uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss) * 100) / 100
+            try {
+                uniqueArray[i]["winRatio"] = Math.round(uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss) * 100) / 100
+            }
+            catch (error) {
+                console.log(error);
+            }
         }
-        return uniqueArray;
     }
-    catch (error) {
-        console.log(error)
-    }
+    return uniqueArray;
 }
 
 async function createCompGroupings(uniqueArray) {
@@ -564,9 +576,9 @@ async function createCompGroupings(uniqueArray) {
     let compGroupings = [];
     let actionTaken = false;
 
-    try {
-        //Loop through each item in the uniqueArray
-        for (let i = 0; i < uniqueArray.length; i++) {
+    //Loop through each item in the uniqueArray
+    for (let i = 0; i < uniqueArray.length; i++) {
+        try {
             actionTaken = false;
             //If we can find a suitable match in compGroupings then push it to that,
             for (let x = 0; x < compGroupings.length; x++) {
@@ -602,39 +614,21 @@ async function createCompGroupings(uniqueArray) {
                 compGroupings.push(newCompGroup);
             }
         }
-        return compGroupings;
+        catch (error) {
+            console.error(error)
+        }
     }
-    catch (error) {
-        console.error(error)
-    }
+    return compGroupings;
+
 }
 
 async function cleanResults(compGroupings) {
     //debugger;
     try {
-        // //If a comp variation has less than 50 chop it
-        // for (var i = compGroupings.length - 1; i >= 0; i--) {
-        //     for (var x = compGroupings[i].comps.length - 1; x >= 0; x--) {
-        //         if (compGroupings[i].comps[x].matches < 10) {
-        //             compGroupings[i].comps.splice(x, 1);
-        //         }
-        //     }
-        //     if (compGroupings[i].comps.length == 0) {
-        //         compGroupings.splice(i, 1);
-        //     }
-        // }
-
         //Add a field to each compGrouping that is total matches
         for (let i = 0; i < compGroupings.length; i++) {
             compGroupings[i]["totalMatches"] = sumMatches(compGroupings[i]);
         }
-
-        //Clean out comps with less than 100 TOTAL matches
-        // for (var i = compGroupings.length - 1; i >= 0; i--) {
-        //     if (compGroupings[i].totalMatches < 20) {
-        //         compGroupings.splice(i, 1);
-        //     }
-        // }
 
         //Sort each compGrouping's comp by matches
         for (let i = 0; i < compGroupings.length; i++) {
@@ -650,10 +644,15 @@ async function cleanResults(compGroupings) {
             b.totalMatches - a.totalMatches
         );
 
-
-
         //chop compGroupings to 20
         compGroupings.length = 20;
+
+        //Sort each compGrouping's comp by unit rarity
+        for (let i = 0; i < compGroupings.length; i++) {
+            for (let x = 0; x < compGroupings[i].comps.length; x++) {
+                compGroupings[i].comps[x].comp.sort((a, b) => a.rarity - b.rarity);
+            }
+        }
 
         return compGroupings;
     }
@@ -677,45 +676,6 @@ function sumMatches(compGrouping) {
     }
 }
 
-function isArrayEqual(arr1, arr2) {
-
-    try {
-        //Check if comps are the same length first before comparing
-        if (arr1.length == arr2.length) {
-
-            arr1 = arr1.sort(function (a, b) {
-                var x = a.character_id.toLowerCase();
-                var y = b.character_id.toLowerCase();
-                if (x < y) { return -1; }
-                if (x > y) { return 1; }
-                return 0;
-            });
-
-            arr2 = arr2.sort(function (a, b) {
-                var x = a.character_id.toLowerCase();
-                var y = b.character_id.toLowerCase();
-                if (x < y) { return -1; }
-                if (x > y) { return 1; }
-                return 0;
-            });
-
-            for (var i = 0; i < arr1.length; i++) {
-                if (arr1[i].character_id !== arr2[i].character_id)
-                    return false;
-            }
-
-            return true;
-        }
-
-        else { return false; }
-    }
-
-    catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-
 function produceSimilarity(a, b) {
     let matched = 0;
 
@@ -728,24 +688,25 @@ function produceSimilarity(a, b) {
         //If A is longer, compare each item of b to a
         if (tempA.length > tempB.length) {
             total = tempA.length;
+
+            let temp1 = tempA.map((champ => champ.character_id))
+            let temp2 = tempB.map((champ => champ.character_id))
+
             for (let i = 0; i < tempA.length; i++) {
-
-                let temp1 = tempA.map((champ => champ.character_id))
-                let temp2 = tempB.map((champ => champ.character_id))
-
                 if (temp1.includes(temp2[i])) {
                     matched++
                 }
             }
         }
 
-        //If b is longer, compare each item of a to b
+        //If b is longer (or they're the same length), compare each item of a to b
         else {
             total = tempB.length;
+            
+            let temp1 = tempA.map((champ => champ.character_id))
+            let temp2 = tempB.map((champ => champ.character_id))
+
             for (let i = 0; i < tempB.length; i++) {
-                //TODO: here's an error... it's not included above.
-                let temp1 = tempA.map((champ => champ.character_id))
-                let temp2 = tempB.map((champ => champ.character_id))
 
                 if (temp2.includes(temp1[i])) {
                     matched++

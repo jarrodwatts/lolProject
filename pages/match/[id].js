@@ -10,8 +10,10 @@ import NavBar from '../../src/components/NavBar';
 import TraitsRow from '../../src/components/SummonerPage/TraitsRow';
 import ChampionTierStars from '../../src/components/SummonerPage/ChampionTierStars';
 import ChampionsItems from '../../src/components/SummonerPage/ChampionItems';
+import withWidth, { isWidthDown } from '@material-ui/core/withWidth';
+import Link from '../../src/Link'
 
-const RIOT_API_KEY = "RGAPI-20f7879b-47a6-4c74-bbf2-0908de9828a4"
+const RIOT_API_KEY = "RGAPI-5a1760a7-9e9b-4d42-93f9-c92b5893d974"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -31,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function Match({ match, players }) {
+function Match({ match, players }, props) {
     const classes = useStyles()
     console.log(match)
     console.log(players)
@@ -61,28 +63,30 @@ export default function Match({ match, players }) {
             <Container className={classes.topSpacing}>
                 <Typography style={{ paddingBottom: '16px' }} color="secondary" variant="h5">Game {match.metadata.match_id}</Typography>
 
-                <Grid container justify="center" alignItems="center" direction="column" style={{ paddingBottom: '16px' }}>
-                    <Grid container direction="row" justify="space-between">
-                        <Grid item >
+                <Grid container justify="center" alignItems="center" direction="row" style={{ paddingBottom: '16px' }}>
+
+                    <Grid container direction="row" justify="space-between" alignItems="center">
+                        <Box>
                             <Typography variant="caption">Date</Typography>
                             <Typography variant="subtitle2">{formatDate(match.info.game_datetime)}</Typography>
-                        </Grid>
+                        </Box>
 
-                        <Grid item >
+                        <Box>
                             <Typography variant="caption">Galaxy</Typography>
                             <Typography variant="subtitle2">{formatGameType(match.info.game_variation)}</Typography>
-                        </Grid>
+                        </Box>
 
-                        <Grid item >
+                        <Box>
                             <Typography variant="caption">Game Length</Typography>
                             <Typography variant="subtitle2">{formatGameLength(match.info.game_length)}</Typography>
-                        </Grid>
+                        </Box>
 
-                        <Grid item >
+                        <Box>
                             <Typography variant="caption">Set Number</Typography>
                             <Typography variant="subtitle2">{match.info.tft_set_number}</Typography>
-                        </Grid>
+                        </Box>
                     </Grid>
+
 
                     {/* Container for each player's composition */}
                     <Grid container item direction="column">
@@ -95,7 +99,7 @@ export default function Match({ match, players }) {
                                         <Grid container item direction="row" alignItems="center" justify="space-between">
 
                                             <Grid item>
-                                                <Grid container direction="row" alignItems="center">
+                                                <Grid container direction="row" alignItems="center" justify="center">
 
                                                     {/* Companion image */}
                                                     <Grid item style={{ paddingLeft: '8px' }}>
@@ -111,7 +115,9 @@ export default function Match({ match, players }) {
                                                     </Grid>
 
                                                     <Grid item style={{ paddingLeft: '16px', width: '100px' }}>
-                                                        <Typography color="primary"><b>{players[player.puuid]}</b></Typography>
+                                                        <Link href={encodeURI(`/summoner/${players[player.puuid].toString()}`)}>
+                                                            <Typography color="primary"><b>{players[player.puuid]}</b></Typography>
+                                                        </Link>
                                                     </Grid>
 
                                                     <Grid item style={{ paddingLeft: '32px', width: '125px' }}>
@@ -125,15 +131,27 @@ export default function Match({ match, players }) {
                                                     </Grid>
 
                                                     {/* Synergies / Traits */}
-                                                    <Grid item style={{ paddingLeft: '64px' }}>
-                                                        <Grid container direction="row">
-                                                            {player.traits.map((trait, key) => (
-                                                                <Grid item key={key}>
-                                                                    <TraitsRow trait={trait} />
-                                                                </Grid>
-                                                            ))}
+                                                    {!isWidthDown('sm', props.width) ?
+                                                        <Grid item style={{ paddingLeft: '64px' }}>
+                                                            <Grid container direction="row">
+                                                                {player.traits.map((trait, key) => (
+                                                                    <Grid item key={key}>
+                                                                        <TraitsRow trait={trait} />
+                                                                    </Grid>
+                                                                ))}
+                                                            </Grid>
+                                                        </Grid> :
+
+                                                        <Grid item>
+                                                            <Grid container direction="row">
+                                                                {player.traits.map((trait, key) => (
+                                                                    <Grid item key={key}>
+                                                                        <TraitsRow trait={trait} />
+                                                                    </Grid>
+                                                                ))}
+                                                            </Grid>
                                                         </Grid>
-                                                    </Grid>
+                                                    }
 
                                                 </Grid>
                                             </Grid>
@@ -141,7 +159,7 @@ export default function Match({ match, players }) {
 
                                             {/* Champs */}
                                             <Grid item >
-                                                <Grid container direction="row" alignItems="flex-start" spacing={1}>
+                                                <Grid container direction="row" alignItems="flex-start" justify="center" spacing={1}>
 
                                                     {player.units.map((unit, key) => (
                                                         //I dont know why but if i delete the below grid it fucking goes vertically
@@ -177,7 +195,7 @@ export default function Match({ match, players }) {
                     <Grid container spacing={3} style={{ paddingTop: '16px' }}>
 
                         {/* Left Column */}
-                        <Grid item container direction="column" xs={6} spacing={1}>
+                        <Grid item container direction="column" xs={12} sm={12} md={6} spacing={1}>
                             <Paper className={classes.paper}>
                                 <Typography color="secondary" style={{ paddingBottom: '8px' }}><b>Player Elimination Timeline</b></Typography>
                                 <Chart
@@ -220,7 +238,7 @@ export default function Match({ match, players }) {
 
 
                         {/* Right Column */}
-                        <Grid item container direction="column" xs={6} spacing={1}>
+                        <Grid item container direction="column" xs={12} sm={12} md={6} spacing={1}>
                             <Paper className={classes.paper}>
                                 {/* This is gonna be like most used traits or something... */}
                                 {sortedChampsCalculator(match)}
@@ -444,3 +462,5 @@ export async function getServerSideProps(context) {
 
 
 }
+
+export default withWidth()(Match)

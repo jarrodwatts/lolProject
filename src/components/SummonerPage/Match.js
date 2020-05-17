@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography, Paper, Box, Grid, Avatar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Error from '../Error';
 
 //Component Imports
 import ChampionRow from './ChampionRow';
@@ -103,76 +104,82 @@ export default function Match(props) {
 
     const classes = useStyles();
 
-    return (
-        <Paper className={classes.paper}>
-            <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
+    try {
+        return (
+            <Paper className={classes.paper}>
+                <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
 
-                <Grid item>
-                    <Grid container direction="row" alignItems="center">
-                        {/* Strip of Color TODO: Make these dynamic */}
-                        <Grid item>
-                            <Box style={{ backgroundColor: '#EBB352', width: '4px', color: '#EBB352', height: '100%' }}>|</Box>
-                        </Grid>
-
-                        {/* Companion image */}
-                        <Grid item style={{ paddingLeft: '8px' }}>
-                            {/* temp blitz: TODO: replace with companion icon */}
-                            <Avatar src={`/assets/champions/blitzcrank.png`} />
-                        </Grid>
-
-                        {/* Placement and Type */}
-                        <Grid item style={{ paddingLeft: '16px' }}>
-                            <Box>
-                                <Typography><b>{formatPlacement(findPlacement(props.match, props.profile.puuid))}</b></Typography>
-                            </Box>
-                        </Grid>
-
-                        {/* Synergies / Traits */}
-                        <Grid item style={{ paddingLeft: '64px' }}>
-                            <Grid container direction="row">
-                                {props.match.info.participants[getParticipantsIndex(props.match, props.profile.puuid)].traits.map((trait, key) => (
-                                    <Grid item key={key}>
-                                        <TraitsRow trait={trait} />
-                                    </Grid>
-                                ))}
+                    <Grid item>
+                        <Grid container direction="row" alignItems="center">
+                            {/* Strip of Color TODO: Make these dynamic */}
+                            <Grid item>
+                                <Box style={{ backgroundColor: '#EBB352', width: '4px', color: '#EBB352', height: '100%' }}>|</Box>
                             </Grid>
-                        </Grid>
 
-                    </Grid>
-                </Grid>
+                            {/* Companion image */}
+                            <Grid item style={{ paddingLeft: '8px' }}>
+                                {/* temp blitz: TODO: replace with companion icon */}
+                                <Avatar src={`/assets/champions/blitzcrank.png`} />
+                            </Grid>
 
+                            {/* Placement and Type */}
+                            <Grid item style={{ paddingLeft: '16px' }}>
+                                <Box>
+                                    <Typography><b>{formatPlacement(findPlacement(props.match, props.profile.puuid))}</b></Typography>
+                                </Box>
+                            </Grid>
 
-                {/* Champs */}
-                <Grid item >
-                    <Grid container direction="row" alignItems="flex-start" spacing={1}>
-
-                        {props.match.info.participants[getParticipantsIndex(props.match, props.profile.puuid)].units.map((unit, key) => (
-                            //I dont know why but if i delete the below grid it fucking goes vertically
-                            <Grid item key={key}>
-                                <Grid container direction="row" item>
-                                    <Grid item>
-
-                                        {/* Stars */}
-                                        <Grid container alignItems="center" justify="center" item direction="row">
-                                            <ChampionTierStars unit={unit} />
+                            {/* Synergies / Traits */}
+                            <Grid item style={{ paddingLeft: '64px' }}>
+                                <Grid container direction="row">
+                                    {props.match.info.participants[getParticipantsIndex(props.match, props.profile.puuid)].traits.map((trait, key) => (
+                                        <Grid item key={key}>
+                                            <TraitsRow trait={trait} />
                                         </Grid>
-
-                                        {/* Champ Images  */}
-                                        {renderChamp(unit, classes)}
-
-                                        {/* Items  */}
-                                        <ChampionsItems unit={unit} />
-
-                                    </Grid>
+                                    ))}
                                 </Grid>
                             </Grid>
-                        ))}
+
+                        </Grid>
+                    </Grid>
+
+
+                    {/* Champs */}
+                    <Grid item >
+                        <Grid container direction="row" alignItems="flex-start" spacing={1}>
+
+                            {props.match.info.participants[getParticipantsIndex(props.match, props.profile.puuid)].units.map((unit, key) => (
+                                //I dont know why but if i delete the below grid it fucking goes vertically
+                                <Grid item key={key}>
+                                    <Grid container direction="row" item>
+                                        <Grid item>
+
+                                            {/* Stars */}
+                                            <Grid container alignItems="center" justify="center" item direction="row">
+                                                <ChampionTierStars unit={unit} />
+                                            </Grid>
+
+                                            {/* Champ Images  */}
+                                            {renderChamp(unit, classes)}
+
+                                            {/* Items  */}
+                                            <ChampionsItems unit={unit} />
+
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            ))}
+                        </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
-        </Paper>
-    )
-
+            </Paper>
+        )
+    }
+    catch (error) {
+        return (
+            <Error />
+        )
+    }
 }
 
 

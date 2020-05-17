@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography, Paper, Box, Grid, Avatar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Error from '../Error';
 
 function sortedChampsCalculator(matchDetailsArray, profile) {
     let total = [];
@@ -83,10 +84,18 @@ const useStyles = makeStyles((theme) => ({
 export default function FavouriteChampions(props) {
     const classes = useStyles();
 
-    return (
-        <Paper className={classes.paper}>
-            {sortedChampsCalculator(props.matchDetailsArray, props.profile)}
-        </Paper>
-    )
+    try {
+        return (
+            <Paper className={classes.paper}>
+                {sortedChampsCalculator(props.matchDetailsArray, props.profile)}
+            </Paper>
+        )
+    }
+
+    catch (error) {
+        return (
+            <Error />
+        )
+    }
 
 }

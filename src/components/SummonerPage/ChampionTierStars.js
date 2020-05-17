@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography, Paper, Grid, Avatar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Error from '../Error';
 
 
 function renderStars(unit, classes) {
@@ -38,11 +39,17 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ChampionTierStars(props) {
     const classes = useStyles();
-
-    return (
-        <Grid item>
-            {renderStars(props.unit, classes)}
-        </Grid>
-    )
+    try {
+        return (
+            <Grid item>
+                {renderStars(props.unit, classes)}
+            </Grid>
+        )
+    }
+    catch (error) {
+        return (
+            <Error />
+        )
+    }
 
 }

@@ -1,6 +1,7 @@
 import { makeStyles } from '@material-ui/core/styles';
 import NavBar from '../src/components/NavBar';
 import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
+import Error from '../src/components/Error';
 
 // import ChampionStats from '../public/assets/data/championStats.json';
 // import ChampionDetails from '../public/assets/data/championDetails.json';
@@ -34,9 +35,11 @@ export default function Items() {
 
     const classes = useStyles();
 
+
     return (
         <div>
             <NavBar />
         </div>
     )
+
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography, Paper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Error from '../Error';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -12,10 +13,16 @@ const useStyles = makeStyles((theme) => ({
 export default function SeasonWins(props) {
     const classes = useStyles();
 
-    return (
-        <Paper className={classes.paper}>
-            <Typography>Season Wins: <b>{props.wins}</b></Typography>
-        </Paper>
-    )
-
+    try {
+        return (
+            <Paper className={classes.paper}>
+                <Typography>Season Wins: <b>{props.wins}</b></Typography>
+            </Paper>
+        )
+    }
+    catch (error) {
+        return (
+            <Error />
+        )
+    }
 }

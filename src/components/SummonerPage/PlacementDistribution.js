@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography, Paper, Box, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Error from '../Error';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -88,10 +89,18 @@ export default function PlacementDistribution(props) {
 
     const classes = useStyles();
 
-    return (
-        <Paper className={classes.paper}>
-            {placementDistributionHandler(props.matchDetailsArray, props.profile)}
-        </Paper>
-    )
+    try {
+        return (
+            <Paper className={classes.paper}>
+                {placementDistributionHandler(props.matchDetailsArray, props.profile)}
+            </Paper>
+        )
+    }
+
+    catch (error) {
+        return (
+            <Error />
+        )
+    }
 
 }

@@ -15,7 +15,7 @@ import SummonerRank from '../../src/components/SummonerPage/SummonerRank';
 import Router from 'next/router';
 
 
-const RIOT_API_KEY = "RGAPI-20f7879b-47a6-4c74-bbf2-0908de9828a4"
+const RIOT_API_KEY = "RGAPI-5a1760a7-9e9b-4d42-93f9-c92b5893d974"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -85,7 +85,7 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
                 <Grid container spacing={3}>
 
                     {/* Left Column */}
-                    <Grid item container direction="column" xs={3} spacing={1}>
+                    <Grid item container direction="column" md={3} sm={12} xs={12} spacing={1}>
 
                         {/* Summoner Name */}
                         <Grid item>
@@ -115,7 +115,7 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
                     </Grid>
 
                     {/* Right Column */}
-                    <Grid container item xs={9} direction="column" spacing={1}>
+                    <Grid container item xs={12} sm={12} md={9} direction="column" spacing={1}>
 
                         {matchDetailsArray.map((match, key) => (
                             <Box key={key} style={{ paddingBottom: '16px' }}>
@@ -176,10 +176,7 @@ export async function getServerSideProps(context) {
         matchDetailsArray.push(matchDetails)
     }
 
-    //console.log(`Fetched match details: ${matchDetailsArray}`);
-
     //4. Get Profile Details, using encryptedSummonerId
-    //https://oc1.api.riotgames.com/tft/league/v1/entries/by-summoner/gJgBREkCeTdA6jBXWU7C5JZgBT6ZrnxYSe7vZCs2ggMp-OE
     const encryptedSummonerId = profile.id;
     const resLeague = await fetch(
         `https://oc1.api.riotgames.com/tft/league/v1/entries/by-summoner/${encryptedSummonerId}` + '?api_key=' + RIOT_API_KEY

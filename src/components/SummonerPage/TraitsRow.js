@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Grid, Avatar, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Error from '../Error';
 
 function renderSynergy(trait, classes) {
     switch (trait.style) {
@@ -126,10 +127,17 @@ const useStyles = makeStyles((theme) => ({
 export default function TraitsRow(props) {
     const classes = useStyles();
 
-    return (
-        <div>
-            {renderSynergy(props.trait, classes)}
-        </div>
-    )
+    try {
+        return (
+            <div>
+                {renderSynergy(props.trait, classes)}
+            </div>
+        )
+    }
+    catch (error) {
+        return (
+            <Error />
+        )
+    }
 
 }

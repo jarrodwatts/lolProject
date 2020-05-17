@@ -2,6 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import NavBar from '../src/components/NavBar';
 import { Container, Typography, Box, Grid, Avatar, Paper, } from '@material-ui/core';
+import Error from '../src/components/Error';
 
 import ChampionStats from '../public/assets/data/championStats.json';
 import ChampionDetails from '../public/assets/data/championDetails.json';
@@ -39,53 +40,44 @@ export default function Champions() {
 
     //console.log("championStats", championStats)
     //console.log("championDetails", championDetails)
+        return (
+            <div>
+                <NavBar />
+                {/* // Main Container */}
+                <Container className={classes.topSpacing}>
 
-    return (
-        <div>
-            <NavBar />
-            {/* // Main Container */}
-            <Container className={classes.topSpacing}>
+                    <Grid container spacing={3} direction="column">
 
-                <Grid container spacing={3} direction="column">
+                        {/* Heading and subtitle */}
+                        <Grid container item direction="column" justify="center" alignItems="center">
+                            <Typography variant="h2">LOLPROJECT</Typography>
+                            <Typography variant="h5">Teamfight Tactics Champions</Typography>
+                        </Grid>
 
-                    {/* Heading and subtitle */}
-                    <Grid container item direction="column" justify="center" alignItems="center">
-                        <Typography variant="h2">LOLPROJECT</Typography>
-                        <Typography variant="h5">Teamfight Tactics Champions</Typography>
+                        {/* Filters */}
+                        <Grid container item>
+
+                        </Grid>
+
+                        {/* Champions */}
+                        <Grid container item direction="row" spacing={2} justify="center" alignItems="center">
+                            {championsArray.map((champ, key) => (
+                                <Grid item key={key}>
+                                    <Paper>
+                                        {renderChampCard(champ, classes)}
+                                    </Paper>
+                                </Grid>
+                            ))}
+                        </Grid>
+
                     </Grid>
-
-                    {/* Filters */}
-                    <Grid container item>
-
-                    </Grid>
-
-                    {/* Champions */}
-                    <Grid container item direction="row" spacing={2} justify="center" alignItems="center">
-                        {championsArray.map((champ, key) => (
-                            <Grid item key={key}>
-                                <Paper>
-                                    {renderChampCard(champ, classes)}
-                                </Paper>
-                            </Grid>
-                        ))}
-                    </Grid>
-
-                </Grid>
-            </Container>
-
-
-
-        </div>
-    )
+                </Container>
+            </div>
+        )
 }
 
 function renderChampCard(champ, classes) {
     return (
-
-
-
-
-
         <Grid container direction="column" style={{ position: 'relative' }}>
             <img
                 style={{
