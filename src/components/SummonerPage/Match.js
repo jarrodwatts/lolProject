@@ -8,6 +8,7 @@ import ChampionRow from './ChampionRow';
 import TraitsRow from './TraitsRow';
 import ChampionTierStars from './ChampionTierStars';
 import ChampionsItems from './ChampionItems';
+import PlacementStrip from './PlacementStrip';
 
 function getParticipantsIndex(match, puuid) {
     for (let i = 0; i < match.info.participants.length; i++) {
@@ -113,7 +114,7 @@ export default function Match(props) {
                         <Grid container direction="row" alignItems="center">
                             {/* Strip of Color TODO: Make these dynamic */}
                             <Grid item>
-                                <Box style={{ backgroundColor: '#EBB352', width: '4px', color: '#EBB352', height: '100%' }}>|</Box>
+                                <PlacementStrip placement={formatPlacement(findPlacement(props.match, props.profile.puuid))}/>
                             </Grid>
 
                             {/* Companion image */}
@@ -176,6 +177,7 @@ export default function Match(props) {
         )
     }
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

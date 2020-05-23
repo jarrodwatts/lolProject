@@ -98,6 +98,7 @@ export default function PlacementDistribution(props) {
     }
 
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

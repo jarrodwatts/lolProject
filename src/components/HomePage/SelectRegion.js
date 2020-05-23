@@ -47,6 +47,7 @@ export default function SimpleMenu() {
         );
     }
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

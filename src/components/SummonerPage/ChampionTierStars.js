@@ -47,6 +47,7 @@ export default function ChampionTierStars(props) {
         )
     }
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

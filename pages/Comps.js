@@ -54,25 +54,9 @@ function generateCompName(traitsArray) {
     //Get the most satisfied traits names
     let compString = "";
     let compsAppended = 0;
-
-    for (let i = 0; i < traitsArray.length; i++) {
-        if (traitsArray[i].tier_current == traitsArray[i].tier_total && traitsArray[i].num_units > 2 || traitsArray[i].tier_current == traitsArray[i].tier_total && traitsArray[i].name == "Sniper") {
-            compsAppended++
-            //then check if it starts with SET and chop it accordingly
-            if (traitsArray[i].name.startsWith("Set")) {
-                compString += traitsArray[i].name.substr(5) + " ";
-            }
-            else {
-                compString += traitsArray[i].name + " ";
-            }
-
-        }
-    }
-
-    //If the comp still doesn't have a name then we gotta settle for second place
-    if (compsAppended < 3) {
+    try {
         for (let i = 0; i < traitsArray.length; i++) {
-            if (traitsArray[i].tier_current == (traitsArray[i].tier_total - 1) && traitsArray[i].tier_current != 0) {
+            if (traitsArray[i].tier_current == traitsArray[i].tier_total && traitsArray[i].num_units > 2 || traitsArray[i].tier_current == traitsArray[i].tier_total && traitsArray[i].name == "Sniper") {
                 compsAppended++
                 //then check if it starts with SET and chop it accordingly
                 if (traitsArray[i].name.startsWith("Set")) {
@@ -81,15 +65,15 @@ function generateCompName(traitsArray) {
                 else {
                     compString += traitsArray[i].name + " ";
                 }
+
             }
         }
-    }
 
-    //If the comp still doesn't have a name then we gotta settle for second place
-    if (compsAppended < 2) {
-        for (let i = 0; i < traitsArray.length; i++) {
-            if (compsAppended < 3) {
-                if (traitsArray[i].tier_current == (traitsArray[i].tier_total - 2) && traitsArray[i].tier_current != 0) {
+
+        //If the comp still doesn't have a name then we gotta settle for second place
+        if (compsAppended < 3) {
+            for (let i = 0; i < traitsArray.length; i++) {
+                if (traitsArray[i].tier_current == (traitsArray[i].tier_total - 1) && traitsArray[i].tier_current != 0) {
                     compsAppended++
                     //then check if it starts with SET and chop it accordingly
                     if (traitsArray[i].name.startsWith("Set")) {
@@ -101,9 +85,124 @@ function generateCompName(traitsArray) {
                 }
             }
         }
+
+        //If the comp still doesn't have a name then we gotta settle for second place
+        if (compsAppended < 2) {
+            for (let i = 0; i < traitsArray.length; i++) {
+                if (compsAppended < 3) {
+                    if (traitsArray[i].tier_current == (traitsArray[i].tier_total - 2) && traitsArray[i].tier_current != 0) {
+                        compsAppended++
+                        //then check if it starts with SET and chop it accordingly
+                        if (traitsArray[i].name.startsWith("Set")) {
+                            compString += traitsArray[i].name.substr(5) + " ";
+                        }
+                        else {
+                            compString += traitsArray[i].name + " ";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    catch (error) {
+        console.log(error)
     }
 
     return compString;
+}
+
+function renderChamp(unit, classes) {
+    let rarityColour = "#6c757d" //default grey
+
+    switch (unit.rarity) {
+        case 1: //2*
+            rarityColour = "#28a745"
+            break;
+
+        case 2: //3*
+            rarityColour = "#007bff"
+            break;
+
+        case 3: //4*
+            rarityColour = "#6f42c1"
+            break;
+
+        case 4: //5*
+            rarityColour = "#ffc107"
+            break;
+
+    }
+
+    //convert to rgb for shadow
+    let rarityColourRgb = rarityColour.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i
+        , (m, r, g, b) => '#' + r + r + g + g + b + b)
+        .substring(1).match(/.{2}/g)
+        .map(x => parseInt(x, 16))
+
+    return (
+        <Avatar
+            src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
+            className={classes.large}
+            style={{
+                border: 2,
+                borderStyle: 'solid',
+                borderColor: rarityColour,
+                boxShadow: `0 3px 5px 2px rgba(${rarityColourRgb[0]}, ${rarityColourRgb[1]}, ${rarityColourRgb[2]}, .4)`
+            }}
+
+        />
+    )
+}
+
+async function fetchNewDataFromDataBase(server, rank) {
+    console.log("trying to get", rank, server, "from fetchnewdatafromdb")
+    const firebase = require("firebase");
+    // Call an external API endpoint to get posts.
+    if (!firebase.apps.length) {
+        // Initialize Cloud Firestore through Firebase
+        firebase.initializeApp({
+            apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
+            authDomain: "lolproject-6938d.firebaseapp.com",
+            databaseURL: "https://lolproject-6938d.firebaseio.com",
+            projectId: "lolproject-6938d",
+            storageBucket: "lolproject-6938d.appspot.com",
+            messagingSenderId: "681416986021",
+            appId: "1:681416986021:web:33705f6e1da5b886016c4c",
+            measurementId: "G-MQDG4DGTK6"
+        });
+    }
+
+    let comps = {};
+    // Get a reference to the database service
+    var db = firebase.database();
+
+    let data;
+
+    await db.ref(`/comps/compGroupings/${server}/${rank}`).once('value').then(function (snapshot) {
+        //console.log(snapshot.val());
+        comps = snapshot.val();
+        data = comps;
+    })
+
+    //filter
+    for (let compObject in data) {
+        //clean unmappable data
+        for (let i = 0; i < data[compObject].comps.length; i++) {
+            try {
+                if (!data[compObject].comps[i].comp) {
+                    //remove this cos we cant map it
+                    data.splice(compObject, 1);
+                }
+            }
+
+            catch (error) {
+                console.log("Error in cleaning empty comps", error)
+            }
+        }
+    }
+
+    return data;
 
 }
 
@@ -113,17 +212,23 @@ export default function Comps({ data }) {
     const [rank, setRank] = React.useState('ALL_RANKS');
     const [server, setServer] = React.useState('ALL_SERVERS')
 
-    const handleRankChange = (event) => {
-        console.log(event.target.value)
+    const [currentServerRankCompData, setCurrentServerRankCompData] = React.useState(data);
+
+    async function handleRankChange(event) {
         setRank(event.target.value);
+        //console.log("calling fetchnewdatafromdb within handlerankchange", server, event.target.value)
+        let newData = await fetchNewDataFromDataBase(server, event.target.value)
+        setCurrentServerRankCompData(newData);
     };
 
-    const handleServerhange = (event) => {
-        console.log(event.target.value)
+    async function handleServerhange(event) {
         setServer(event.target.value);
+        let newData = await fetchNewDataFromDataBase(event.target.value, rank)
+        setCurrentServerRankCompData(newData);
     };
 
-    const compGroupings = data;
+    let compGroupings = currentServerRankCompData;
+
     if (!compGroupings) return <div>Loading Comps...</div>
 
     else {
@@ -142,7 +247,11 @@ export default function Comps({ data }) {
                         </Grid>
 
                         {/* Filters */}
-                        <Grid container direction="row" item>
+                        <Grid container direction="column" item>
+
+                            <Box>
+                                <Typography color="primary"><b>Filters</b></Typography>
+                            </Box>
                             <Box>
                                 <FormControl className={classes.formControl}>
                                     <InputLabel id="rank-simple-select-label">Rank</InputLabel>
@@ -153,15 +262,15 @@ export default function Comps({ data }) {
                                         onChange={handleRankChange}
                                     >
                                         <MenuItem value={'ALL_RANKS'}>All Ranks</MenuItem>
-                                        <MenuItem value={'IRON'}>IRON</MenuItem>
-                                        <MenuItem value={'BRONZE'}>BRONZE</MenuItem>
-                                        <MenuItem value={'SILVER'}>SILVER</MenuItem>
-                                        <MenuItem value={'GOLD'}>GOLD</MenuItem>
-                                        <MenuItem value={'PLATINUM'}>PLATINUM</MenuItem>
-                                        <MenuItem value={'DIAMOND'}>DIAMOND</MenuItem>
-                                        {/* <MenuItem value={'MASTER'}>MASTER</MenuItem>
-                                        <MenuItem value={'GRANDMASTER'}>GRANDMASTER</MenuItem>
-                                        <MenuItem value={'CHALLENGER'}>CHALLENGER</MenuItem> */}
+                                        <MenuItem value={'IRON'}>Iron</MenuItem>
+                                        <MenuItem value={'BRONZE'}>Bronze</MenuItem>
+                                        <MenuItem value={'SILVER'}>Silver</MenuItem>
+                                        <MenuItem value={'GOLD'}>Gold</MenuItem>
+                                        <MenuItem value={'PLATINUM'}>Platinum</MenuItem>
+                                        <MenuItem value={'DIAMOND'}>Diamond</MenuItem>
+                                        <MenuItem value={'MASTER'}>Master</MenuItem>
+                                        <MenuItem value={'GRANDMASTER'}>Grandmaster</MenuItem>
+                                        <MenuItem value={'CHALLENGER'}>Challenger</MenuItem>
 
 
                                     </Select>
@@ -191,32 +300,29 @@ export default function Comps({ data }) {
                                 </FormControl>
                             </Box>
                         </Grid>
+
                         {/* Compositions */}
                         <Grid container item xs={12} direction="column" spacing={1}>
-                            {compGroupings[server][rank].map((composition, key) => (
+                            {compGroupings.map((composition, key) => (
 
                                 <Box key={key} style={{ paddingBottom: '16px' }}>
 
                                     {/* Begin individual Composition Papers */}
                                     <Grid item>
                                         <Paper className={classes.paper}>
+
                                             <Grid container direction="row" item justify="flex-start">
                                                 <Typography color="primary">{generateCompName(composition.comps[0].traits)}</Typography>
                                             </Grid>
+
                                             <Grid container direction="column" spacing={2}>
                                                 <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
 
                                                     <Grid item>
                                                         <Grid container direction="row" alignItems="center">
 
-                                                            {/* Companion image */}
-                                                            <Grid item style={{ paddingLeft: '8px' }}>
-                                                                {/* temp blitz: TODO: replace with companion icon */}
-                                                                <Avatar src={`/assets/champions/blitzcrank.png`} />
-                                                            </Grid>
-
                                                             {/* Placement and Type */}
-                                                            <Grid item style={{ paddingLeft: '16px' }}>
+                                                            <Grid item>
                                                                 <Box>
                                                                     <Typography variant="caption">Win Ratio</Typography>
                                                                     <Typography><b>{parseFloat(composition.comps[0].winRatio) * 100 + "%"}</b></Typography>
@@ -279,9 +385,7 @@ export default function Comps({ data }) {
                                                         <Grid container direction="row" alignItems="center" justify="center">
                                                             {composition['comps'][0].comp.map((unit, key) => (
                                                                 <Grid item key={key}>
-                                                                    <Avatar
-                                                                        src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
-                                                                        className={classes.large} />
+                                                                    {renderChamp(unit, classes)}
                                                                 </Grid>
                                                             ))}
                                                         </Grid>
@@ -379,9 +483,7 @@ export default function Comps({ data }) {
                                                                                         <Grid container direction="row" alignItems="center" justify="center">
                                                                                             {comp.comp.map((unit, key) => (
                                                                                                 <Grid item key={key}>
-                                                                                                    <Avatar
-                                                                                                        src={`/assets/champions/${sliceCharacterString(unit.character_id)}.png`}
-                                                                                                        className={classes.large} />
+                                                                                                    {renderChamp(unit, classes)}
                                                                                                 </Grid>
                                                                                             ))}
                                                                                         </Grid>
@@ -422,8 +524,6 @@ export default function Comps({ data }) {
 
 export async function getServerSideProps() {
     const firebase = require("firebase");
-    // Required for side-effects
-    require("firebase/database");
     // Call an external API endpoint to get posts.
     if (!firebase.apps.length) {
         // Initialize Cloud Firestore through Firebase
@@ -439,21 +539,39 @@ export async function getServerSideProps() {
         });
     }
 
-    let comps = [];
-    debugger;
+    let comps = {};
     // Get a reference to the database service
     var db = firebase.database();
 
-    await firebase.database().ref('/').once('value').then(function (snapshot) {
+    let data;
+    await db.ref('/comps/compGroupings/ALL_SERVERS/ALL_RANKS').once('value').then(function (snapshot) {
         //console.log(snapshot.val());
-        comps = snapshot.val().comps.compGroupings;
-        // ...
+        comps = snapshot.val();
+        data = comps;
+
     });
 
-    let data = comps;
+    //filter
+    for (let compObject in data) {
+        //clean unmappable data
+        for (let i = 0; i < data[compObject].comps.length; i++) {
+            try {
+                if (!data[compObject].comps[i].comp) {
+                    //remove this cos we cant map it
+                    data.splice(compObject, 1);
+                }
+            }
+
+            catch (error) {
+                console.log("Error in cleaning empty comps", error)
+            }
+        }
+    }
+
     return {
         props: {
             data,
         },
     }
+
 }

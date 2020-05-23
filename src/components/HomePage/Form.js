@@ -56,6 +56,7 @@ export default class Form extends React.Component {
             )
         }
         catch (error) {
+            console.log(error);
             return (
                 <Error />
             )

@@ -21,6 +21,7 @@ export default function SummonerName(props) {
         )
     }
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

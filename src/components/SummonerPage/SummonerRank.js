@@ -29,6 +29,7 @@ export default function SummonerRank(props) {
         )
     }
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

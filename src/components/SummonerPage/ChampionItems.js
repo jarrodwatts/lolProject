@@ -50,6 +50,7 @@ export default function ChampionItems(props) {
         )
     }
     catch (error) {
+        console.log(error);
         return (
             <Error/>
         )

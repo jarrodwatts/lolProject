@@ -93,6 +93,7 @@ export default function FavouriteChampions(props) {
     }
 
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

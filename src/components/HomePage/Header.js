@@ -19,6 +19,7 @@ export default function Header() {
         )
     }
     catch (error) {
+        console.log(error);
         return(
             <Error/>
         )

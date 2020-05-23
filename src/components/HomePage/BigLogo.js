@@ -16,6 +16,7 @@ export default function BigLogo() {
     }
     
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

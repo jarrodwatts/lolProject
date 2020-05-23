@@ -21,6 +21,7 @@ export default function SeasonWins(props) {
         )
     }
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

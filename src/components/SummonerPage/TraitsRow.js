@@ -135,6 +135,7 @@ export default function TraitsRow(props) {
         )
     }
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

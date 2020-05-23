@@ -4,7 +4,7 @@ require("firebase/database");
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const RIOT_API_KEY = "RGAPI-5a1760a7-9e9b-4d42-93f9-c92b5893d974"
+const RIOT_API_KEY = "RGAPI-5ed5f9bd-e028-4304-b3fa-274fb30f504f"
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
     authDomain: "lolproject-6938d.firebaseapp.com",
@@ -50,24 +50,23 @@ const serverGroups = {
 
 const tiers = [
     "IRON",
-    "BRONZE",
-    "SILVER",
-    "GOLD",
-    "PLATINUM",
-    "DIAMOND"
-]
+    // "BRONZE",
+    // "SILVER",
+    // "GOLD",
+    // "PLATINUM",
+    // "DIAMOND",
 
-const proTiers = [
-    "master",
-    "grandmaster",
-    "challenger",
+    //pro tiers
+    "MASTER",
+    "GRANDMASTER",
+    "CHALLENGER",
 ]
 
 const divisions = [
     "I",
-    "II",
-    "III",
-    "IV"
+    // "II",
+    // "III",
+    // "IV"
 ]
 
 const CURRENT_DATA_VERSION = 4;
@@ -96,6 +95,9 @@ async function runFillForServer(server) {
         "GOLD": [],
         "PLATINUM": [],
         "DIAMOND": [],
+        "MASTER": [],
+        "GRANDMASTER": [],
+        "CHALLENGER": [],
         "ALL_RANKS": [],
     };
 
@@ -110,26 +112,56 @@ async function runFillForServer(server) {
         let gameIds = [];
 
         for (division of divisions) {
-            let serverTierDivisionPlayerInformation = await fetchAllSummonerInformation(server, tier, division);
-            // for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
-            for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
-                //Check if Puuid was found
-                try {
-                    let summonerPuuid = await convertNametoPuuid(serverTierDivisionPlayerInformation[i].summonerName, server)
-                    if (summonerPuuid != "Not Found") {
-                        try {
-                            playerPuuids.push(summonerPuuid)
-                        }
-                        catch (error) {
-                            console.log(server, ":", tier, ":", division, ":", error)
+
+            //for pro leagues, the url is different and the response is different and there is only one division
+            if (tier == "MASTER" || tier == "GRANDMASTER" || tier == "CHALLENGER") {
+
+                let serverTierDivisionPlayerInformation = await fetchAllSummonerInformationForProDivision(server, tier);
+                for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
+                    //Check if Puuid was found
+                    try {
+                        let summonerPuuid = await convertNametoPuuid(serverTierDivisionPlayerInformation[i].summonerName, server)
+                        if (summonerPuuid != "Not Found") {
+                            try {
+                                playerPuuids.push(summonerPuuid)
+                            }
+                            catch (error) {
+                                console.log(server, ":", tier, ":", division, ":", error)
+                            }
                         }
                     }
+                    catch (error) {
+                        //debugger;
+                        console.log(server, ":", tier, "on:", serverTierDivisionPlayerInformation[i], "error:", error)
+                    }
                 }
-                catch (error) {
-                    //debugger;
-                    console.log(server, ":", tier, ":", division, ":", "on:", serverTierDivisionPlayerInformation[i], "error:", error)
+                //break division loop since there is only one division
+                break;
+            }
+
+            else {
+
+                let serverTierDivisionPlayerInformation = await fetchAllSummonerInformation(server, tier, division);
+                for (let i = 0; i < serverTierDivisionPlayerInformation.length; i++) {
+                    //Check if Puuid was found
+                    try {
+                        let summonerPuuid = await convertNametoPuuid(serverTierDivisionPlayerInformation[i].summonerName, server)
+                        if (summonerPuuid != "Not Found") {
+                            try {
+                                playerPuuids.push(summonerPuuid)
+                            }
+                            catch (error) {
+                                console.log(server, ":", tier, ":", division, ":", error)
+                            }
+                        }
+                    }
+                    catch (error) {
+                        //debugger;
+                        console.log(server, ":", tier, ":", division, ":", "on:", serverTierDivisionPlayerInformation[i], "error:", error)
+                    }
                 }
             }
+
         }
 
         MAIN_PLAYER_OBJECT[server][tier] = playerPuuids;
@@ -181,30 +213,29 @@ async function fillAllServersInParallel() {
 
     //do all the servers at once
     let BR1 = runFillForServer("BR1")
-    let EUN1 = runFillForServer("EUN1")
-    let EUW1 = runFillForServer("EUW1")
-    let JP1 = runFillForServer("JP1")
-    let KR = runFillForServer("KR")
-    let LA1 = runFillForServer("LA1")
-    let LA2 = runFillForServer("LA2")
-    let NA1 = runFillForServer("NA1")
-    let OC1 = runFillForServer("OC1")
-    let RU = runFillForServer("RU")
-    let TR1 = runFillForServer("TR1")
-    //just add functionality directly for all?
+    // let EUN1 = runFillForServer("EUN1")
+    // let EUW1 = runFillForServer("EUW1")
+    // let JP1 = runFillForServer("JP1")
+    // let KR = runFillForServer("KR")
+    // let LA1 = runFillForServer("LA1")
+    // let LA2 = runFillForServer("LA2")
+    // let NA1 = runFillForServer("NA1")
+    // let OC1 = runFillForServer("OC1")
+    // let RU = runFillForServer("RU")
+    // let TR1 = runFillForServer("TR1")
 
     //await the results;
     let resultedBR1 = await BR1;
-    let resultedEUN1 = await EUN1;
-    let resultedEUW1 = await EUW1;
-    let resultedJP1 = await JP1;
-    let resultedKR = await KR;
-    let resultedLA1 = await LA1;
-    let resultedLA2 = await LA2;
-    let resultedNA1 = await NA1;
-    let resultedOC1 = await OC1;
-    let resultedRU = await RU;
-    let resultedBTR1 = await TR1;
+    // let resultedEUN1 = await EUN1;
+    // let resultedEUW1 = await EUW1;
+    // let resultedJP1 = await JP1;
+    // let resultedKR = await KR;
+    // let resultedLA1 = await LA1;
+    // let resultedLA2 = await LA2;
+    // let resultedNA1 = await NA1;
+    // let resultedOC1 = await OC1;
+    // let resultedRU = await RU;
+    // let resultedTR1 = await TR1;
 
     //All servers games have been collected, now perform grouping algorithm on each server and each rank
     for (server in MAIN_GAME_DETAIL_OBJECT) {
@@ -257,7 +288,7 @@ async function fillAllServersInParallel() {
         console.log("All done, trying to write to database...");
         //finally.... Add EVERYTHING to the db
         await firebase.database().ref('/comps').set({
-            compGroupings: MAIN_GAME_DETAIL_OBJECT
+            compGroupings: JSON.parse(JSON.stringify(MAIN_GAME_DETAIL_OBJECT))
         });
 
         console.log("Successfully published to Datbabase.");
@@ -305,6 +336,45 @@ async function fetchAllSummonerInformation(server, tier, division) {
     }
 }
 
+//copied function for pro leagues
+async function fetchAllSummonerInformationForProDivision(server, tier) {
+    try {
+        console.log("Fetching", server, "Summoner Information for", tier);
+        let serverTierDivisionPlayerInformation;
+
+        let resServerTierDivisionPlayerInformation = await fetch(
+            //         https://oc1      .api.riotgames.com/tft/league/v1/challenger?api_key=RGAPI-5ed5f9bd-e028-4304-b3fa-274fb30f504f
+            encodeURI(`https://${server.toLowerCase()}.api.riotgames.com/tft/league/v1/${tier.toLowerCase()}` + '?api_key=' + RIOT_API_KEY)
+        )
+
+        if (resServerTierDivisionPlayerInformation.status == 200) {
+            serverTierDivisionPlayerInformation = await resServerTierDivisionPlayerInformation.json();
+        }
+
+        if (resServerTierDivisionPlayerInformation.status == 404) {
+            //Something not found
+            console.error("Recieved a 404 response on: ", server, tier)
+        }
+
+        if (resServerTierDivisionPlayerInformation.status == 429) {
+            //Too many requests
+            console.log("Chilling for two minutes on server", server)
+            await timeout(121000);
+            serverTierDivisionPlayerInformation = await resServerTierDivisionPlayerInformation.json();
+        }
+
+        //DEV ONLY: REDUCE PLAYER LIMIT TO 10
+        if (serverTierDivisionPlayerInformation['entries'].length > 9) {
+            serverTierDivisionPlayerInformation['entries'].length = 10;
+        }
+
+        return serverTierDivisionPlayerInformation['entries'];
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
 async function convertNametoPuuid(summonerName, server) {
 
     try {
@@ -315,7 +385,7 @@ async function convertNametoPuuid(summonerName, server) {
         )
 
         if (resPuuid.status == 200) {
-            //Response was OK
+            //Response was OKfunction
             profile = await resPuuid.json();
         }
 
@@ -491,13 +561,35 @@ async function createArrayOfAllComps(matches) {
 }
 
 async function createUniqueArrayOfComps(masterArray) {
-    let uniqueArray = [];
+
+    let uniqueDictionary = {};
 
     for (let p = 0; p < masterArray.length; p++) {
         try {
-            let actionTaken = false;
+            //1. Grab comp units to strip them
 
-            if (uniqueArray.length == 0) {
+            let thisCompsUnitsArray = masterArray[p].comp.map((champ => champ.character_id))
+
+            //...are they sorted?...
+
+            //2. Stringify it
+            let stringifyThisCompsUnitsArray = JSON.stringify(thisCompsUnitsArray);
+
+            //3. Ask if this exists (it won't here) ... if it does : add to it, if it doesn't: MAKE it.
+            if (uniqueDictionary[stringifyThisCompsUnitsArray]) {
+                //True:
+                uniqueDictionary[stringifyThisCompsUnitsArray].placementsArray.push(masterArray[p].placement) //placements
+                masterArray[p].placement == 1 ? uniqueDictionary[stringifyThisCompsUnitsArray].winLoss.win++ : uniqueDictionary[stringifyThisCompsUnitsArray].winLoss.loss++ //winLoss
+
+                uniqueDictionary[stringifyThisCompsUnitsArray].matches++ //matches
+
+                uniqueDictionary[stringifyThisCompsUnitsArray].averagePlacement = (
+                    uniqueDictionary[stringifyThisCompsUnitsArray].placementsArray.reduce((a, b) => a + b) / uniqueDictionary[stringifyThisCompsUnitsArray].matches //average placement
+                )
+            }
+
+            else {
+                //False:
                 let tempObj = {
                     comp: masterArray[p].comp,
                     traits: masterArray[p].traits,
@@ -511,63 +603,18 @@ async function createUniqueArrayOfComps(masterArray) {
 
                 }
                 masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++
-                uniqueArray.push(tempObj)
-            }
-
-            else {
-                let thisComp = masterArray[p].comp;
-
-                for (let n = 0; n < uniqueArray.length; n++) {
-                    //check if data is iterable
-                    if (uniqueArray[n].comp) {
-                        let comparisonComp = uniqueArray[n].comp
-                        //if (isArrayEqual(thisComp, comparisonComp)) {
-                        if (produceSimilarity(thisComp, comparisonComp) == 100) {
-                            masterArray[p].placement == 1 ? uniqueArray[n].winLoss.win++ : uniqueArray[n].winLoss.loss++
-                            uniqueArray[n].matches++;
-                            uniqueArray[n].placementsArray.push(masterArray[p].placement)
-
-                            uniqueArray[n].averagePlacement = (
-                                uniqueArray[n].placementsArray.reduce((a, b) => a + b) / uniqueArray[n].matches
-                            )
-                            actionTaken = true;
-                            n = uniqueArray.length;
-                        }
-                    }
-                }
-
-                if (actionTaken == false) {
-                    let tempObj = {
-                        comp: masterArray[p].comp,
-                        placementsArray: [masterArray[p].placement],
-                        traits: masterArray[p].traits,
-                        winLoss: {
-                            win: 0,
-                            loss: 0
-                        },
-                        matches: 1,
-                        averagePlacement: masterArray[p].placement,
-                    }
-                    masterArray[p].placement == 1 ? tempObj.winLoss.win++ : tempObj.winLoss.loss++;
-                    uniqueArray.push(tempObj)
-                    actionTaken = true;
-                }
+                uniqueDictionary[stringifyThisCompsUnitsArray] = tempObj
             }
         }
 
         catch (error) {
-            console.log(error)
-        }
-        //Calculate a winrate for each unique comp
-        for (let i = 0; i < uniqueArray.length; i++) {
-            try {
-                uniqueArray[i]["winRatio"] = Math.round(uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss) * 100) / 100
-            }
-            catch (error) {
-                console.log(error);
-            }
+            console.log(error);
         }
     }
+
+    //convert it to array?
+    let uniqueArray = Object.keys(uniqueDictionary).map(i => uniqueDictionary[i])
+    //return uniqueDictionary;
     return uniqueArray;
 }
 
@@ -630,6 +677,16 @@ async function cleanResults(compGroupings) {
             compGroupings[i]["totalMatches"] = sumMatches(compGroupings[i]);
         }
 
+        //Add a field to each compGrouping that is top 4 rate
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i]["topFourRate"] = createCompGroupingTopFourRate(compGroupings[i]);
+        }
+
+        //Add a field to each compGrouping that is win rate
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i]["winRate"] = createCompGroupingWinRate(compGroupings[i]);
+        }
+
         //Sort each compGrouping's comp by matches
         for (let i = 0; i < compGroupings.length; i++) {
             compGroupings[i].comps.sort((a, b) => b.matches - a.matches);
@@ -644,6 +701,18 @@ async function cleanResults(compGroupings) {
             b.totalMatches - a.totalMatches
         );
 
+        //chop out empty comps
+        for (let i = 0; i < compGroupings.length; i++) {
+            for (let x = 0; x < compGroupings[i].comps.length; x++) {
+                if (compGroupings[i].comps[x].comp == [] ||
+                    compGroupings[i].comps[x].comp == undefined //empty comps
+                ) {
+                    //splice it out of the array
+                    compGroupings[i].comps[x].splice(x, 1)
+                }
+            }
+        }
+
         //chop compGroupings to 20
         compGroupings.length = 20;
 
@@ -654,8 +723,28 @@ async function cleanResults(compGroupings) {
             }
         }
 
+        //Remove empty comps from dodgy data im guessing
+        //for (let server in compGroupings) {
+        for (let p = 0; p < compGroupings.length; p++) {
+            for (let i = 0; i < compGroupings[p].comps.length; i++) {
+                //clean unmappable data
+                try {
+                    if (!compGroupings[p].comps[i].comp) {
+                        //remove this cos we cant map it
+                        compGroupings[p].splice(i, 1);
+                        console.log("spliced", server, rank, i)
+                    }
+                }
+                catch (error) {
+                    console.log("Error in cleaning empty comps", error)
+                }
+
+            }
+        }
+
         return compGroupings;
     }
+
     catch (error) {
         console.log(error)
     }
@@ -664,11 +753,57 @@ async function cleanResults(compGroupings) {
 function sumMatches(compGrouping) {
     //for each comp grouping, sum up each children's matches and add them to a sum
     try {
-        sum = 0;
+        let sum = 0;
         for (let i = 0; i < compGrouping.comps.length; i++) {
             sum += compGrouping.comps[i].matches
         }
         return sum;
+    }
+    catch (error) {
+        console.log(error);
+        return 0;
+    }
+}
+
+function createCompGroupingTopFourRate(compGrouping) {
+    //for each comp grouping, sum up each children's matches and add them to a sum
+    try {
+        let numOfTopFours = 0;
+        let numOfMatches = 0;
+        for (let i = 0; i < compGrouping.comps.length; i++) {
+            for (let x = 0; x < compGrouping.comps[i].placementsArray.length; x++) {
+                //is placement array x a win
+                if (compGrouping.comps[i].placementsArray[x] < 5) {
+                    numOfTopFours++;
+                }
+                numOfMatches++;
+                //compGrouping.comps[i].placementsArray[x] < 5 ? (() => { numOfTopFours++; numOfMatches++; }) : (() => { numOfMatches++; })
+            }
+        }
+
+        return Math.round((numOfTopFours / numOfMatches) * 100);
+    }
+    catch (error) {
+        console.log(error);
+        return 0;
+    }
+}
+
+function createCompGroupingWinRate(compGrouping) {
+    //for each comp grouping, sum up each children's matches and add them to a sum
+    try {
+        let numOfWins = 0;
+        let numOfMatches = 0;
+        for (let i = 0; i < compGrouping.comps.length; i++) {
+            for (let x = 0; x < compGrouping.comps[i].placementsArray.length; x++) {
+                if (compGrouping.comps[i].placementsArray[x] == 1) {
+                    numOfWins++;
+                }
+                numOfMatches++;
+            }
+        }
+
+        return Math.round((numOfWins / numOfMatches) * 100);
     }
     catch (error) {
         console.log(error);
@@ -702,7 +837,7 @@ function produceSimilarity(a, b) {
         //If b is longer (or they're the same length), compare each item of a to b
         else {
             total = tempB.length;
-            
+
             let temp1 = tempA.map((champ => champ.character_id))
             let temp2 = tempB.map((champ => champ.character_id))
 

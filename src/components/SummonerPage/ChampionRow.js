@@ -20,6 +20,7 @@ export default function ChampionRow(props) {
         )
     }
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )

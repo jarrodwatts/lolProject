@@ -11,6 +11,7 @@ export default function BigSearch() {
         )
     }
     catch (error) {
+        console.log(error);
         return (
             <Error />
         )
