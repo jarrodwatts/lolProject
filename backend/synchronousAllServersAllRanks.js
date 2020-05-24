@@ -4,7 +4,7 @@ require("firebase/database");
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const RIOT_API_KEY = "RGAPI-5ed5f9bd-e028-4304-b3fa-274fb30f504f"
+const RIOT_API_KEY = "RGAPI-98d3b5a2-7f0a-4a3e-b94c-27c1499e0220";
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
     authDomain: "lolproject-6938d.firebaseapp.com",
@@ -614,7 +614,13 @@ async function createUniqueArrayOfComps(masterArray) {
 
     //convert it to array?
     let uniqueArray = Object.keys(uniqueDictionary).map(i => uniqueDictionary[i])
-    //return uniqueDictionary;
+
+    //Calculate a winrate for each unique comp
+    for (let i = 0; i < uniqueArray.length; i++) {
+        uniqueArray[i]["winRatio"] = Math.round(uniqueArray[i].winLoss.win / (uniqueArray[i].winLoss.win + uniqueArray[i].winLoss.loss) * 100) / 100
+    }
+
+    //return unqiueArray;
     return uniqueArray;
 }
 
@@ -685,6 +691,11 @@ async function cleanResults(compGroupings) {
         //Add a field to each compGrouping that is win rate
         for (let i = 0; i < compGroupings.length; i++) {
             compGroupings[i]["winRate"] = createCompGroupingWinRate(compGroupings[i]);
+        }
+
+        //Add a field for each compGroupings average placement
+        for (let i = 0; i < compGroupings.length; i++) {
+            compGroupings[i]["averagePlacement"] = createCompAveragePlacement(compGroupings[i]);
         }
 
         //Sort each compGrouping's comp by matches
@@ -805,6 +816,26 @@ function createCompGroupingWinRate(compGrouping) {
 
         return Math.round((numOfWins / numOfMatches) * 100);
     }
+    catch (error) {
+        console.log(error);
+        return 0;
+    }
+}
+
+function createCompAveragePlacement(compGrouping) {
+    try {
+        let sumToDivide = 0;
+        let numOfMatches = 0;
+
+        for (let i = 0; i < compGrouping.comps.length; i++) {
+            for (let x = 0; x < compGrouping.comps[i].placementsArray.length; x++) {
+                sumToDivide += compGrouping.comps[i].placementsArray[x];
+                numOfMatches++;
+            }
+        }
+        return Math.round((sumToDivide / numOfMatches) * 100) / 100;
+    }
+
     catch (error) {
         console.log(error);
         return 0;

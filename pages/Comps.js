@@ -321,35 +321,27 @@ export default function Comps({ data }) {
                                                     <Grid item>
                                                         <Grid container direction="row" alignItems="center">
 
-                                                            {/* Placement and Type */}
+                                                            {/* Matches */}
                                                             <Grid item>
                                                                 <Box>
-                                                                    <Typography variant="caption">Win Ratio</Typography>
-                                                                    <Typography><b>{parseFloat(composition.comps[0].winRatio) * 100 + "%"}</b></Typography>
+                                                                    <Typography variant="caption">Matches</Typography>
+                                                                    <Typography><b>{composition.totalMatches}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
-                                                            {/* Matches */}
+                                                            {/* Placement and Type */}
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
-                                                                    <Typography variant="caption">Matches</Typography>
-                                                                    <Typography><b>{composition.comps[0].matches}</b></Typography>
+                                                                    <Typography variant="caption">Win Rate</Typography>
+                                                                    <Typography><b>{parseFloat(composition.winRate) + "%"}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
                                                             {/* Wins */}
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
-                                                                    <Typography variant="caption">Wins</Typography>
-                                                                    <Typography><b>{composition.comps[0].winLoss.win}</b></Typography>
-                                                                </Box>
-                                                            </Grid>
-
-                                                            {/* Losses */}
-                                                            <Grid item style={{ paddingLeft: '16px' }}>
-                                                                <Box>
-                                                                    <Typography variant="caption">Losses</Typography>
-                                                                    <Typography><b>{composition.comps[0].winLoss.loss}</b></Typography>
+                                                                    <Typography variant="caption">Top 4 Rate</Typography>
+                                                                    <Typography><b>{composition.topFourRate  + "%"}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
@@ -357,7 +349,7 @@ export default function Comps({ data }) {
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
                                                                     <Typography variant="caption">Average Placement</Typography>
-                                                                    <Typography><b>{Math.round(composition.comps[0].averagePlacement * 100) / 100}</b></Typography>
+                                                                    <Typography><b>{composition.averagePlacement}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 

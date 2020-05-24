@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { Box } from '@material-ui/core';
 import Error from '../Error';
 
 const useStyles = makeStyles((theme) => ({
@@ -29,7 +30,7 @@ export default function SeasonWins(props) {
 function renderPlacementStrip(placement) {
     let backgroundColor = generateBackgroundColor(placement);
 
-    <Box style={{ backgroundColor: { backgroundColor }, width: '4px', color: '#EBB352', height: '100%' }}>|</Box>
+    return(<Box style={{ backgroundColor: { backgroundColor }, width: '4px', color: {backgroundColor}, height: '100%' }}>|</Box>)
 }
 
 function generateBackgroundColor(placement) {
