@@ -50,11 +50,11 @@ const serverGroups = {
 
 const tiers = [
     "IRON",
-    // "BRONZE",
-    // "SILVER",
-    // "GOLD",
-    // "PLATINUM",
-    // "DIAMOND",
+    "BRONZE",
+    "SILVER",
+    "GOLD",
+    "PLATINUM",
+    "DIAMOND",
 
     //pro tiers
     "MASTER",
@@ -213,29 +213,29 @@ async function fillAllServersInParallel() {
 
     //do all the servers at once
     let BR1 = runFillForServer("BR1")
-    // let EUN1 = runFillForServer("EUN1")
-    // let EUW1 = runFillForServer("EUW1")
-    // let JP1 = runFillForServer("JP1")
-    // let KR = runFillForServer("KR")
-    // let LA1 = runFillForServer("LA1")
-    // let LA2 = runFillForServer("LA2")
-    // let NA1 = runFillForServer("NA1")
-    // let OC1 = runFillForServer("OC1")
-    // let RU = runFillForServer("RU")
-    // let TR1 = runFillForServer("TR1")
+    let EUN1 = runFillForServer("EUN1")
+    let EUW1 = runFillForServer("EUW1")
+    let JP1 = runFillForServer("JP1")
+    let KR = runFillForServer("KR")
+    let LA1 = runFillForServer("LA1")
+    let LA2 = runFillForServer("LA2")
+    let NA1 = runFillForServer("NA1")
+    let OC1 = runFillForServer("OC1")
+    let RU = runFillForServer("RU")
+    let TR1 = runFillForServer("TR1")
 
     //await the results;
     let resultedBR1 = await BR1;
-    // let resultedEUN1 = await EUN1;
-    // let resultedEUW1 = await EUW1;
-    // let resultedJP1 = await JP1;
-    // let resultedKR = await KR;
-    // let resultedLA1 = await LA1;
-    // let resultedLA2 = await LA2;
-    // let resultedNA1 = await NA1;
-    // let resultedOC1 = await OC1;
-    // let resultedRU = await RU;
-    // let resultedTR1 = await TR1;
+    let resultedEUN1 = await EUN1;
+    let resultedEUW1 = await EUW1;
+    let resultedJP1 = await JP1;
+    let resultedKR = await KR;
+    let resultedLA1 = await LA1;
+    let resultedLA2 = await LA2;
+    let resultedNA1 = await NA1;
+    let resultedOC1 = await OC1;
+    let resultedRU = await RU;
+    let resultedTR1 = await TR1;
 
     //All servers games have been collected, now perform grouping algorithm on each server and each rank
     for (server in MAIN_GAME_DETAIL_OBJECT) {
@@ -255,48 +255,6 @@ async function fillAllServersInParallel() {
 
         }
     }
-
-    try {
-        fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_PLAYER_OBJECT.txt", JSON.stringify(MAIN_PLAYER_OBJECT), 'utf8', function (err) {
-            if (err) {
-                return console.log(err);
-            }
-
-            console.log("The MAIN PLAYER OBJECT file was saved!");
-        });
-        fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_OBJECT.txt", JSON.stringify(MAIN_GAME_OBJECT), 'utf8', function (err) {
-            if (err) {
-                return console.log(err);
-            }
-
-            console.log("The MAIN GAME OBJECT file was saved!");
-        });
-        fs.writeFile("C:/Users/New/Documents/GitHub/lolProject/backend/logs/MAIN_GAME_DETAIL_OBJECT.txt", JSON.stringify(MAIN_GAME_DETAIL_OBJECT), 'utf8', function (err) {
-            if (err) {
-                return console.log(err);
-            }
-
-            console.log("The MAIN GAME DETAIL OBJECT file was saved!");
-        });
-
-    }
-    catch (error) {
-        console.log(error);
-    }
-
-    try {
-        console.log("All done, trying to write to database...");
-        //finally.... Add EVERYTHING to the db
-        await firebase.database().ref('/comps').set({
-            compGroupings: JSON.parse(JSON.stringify(MAIN_GAME_DETAIL_OBJECT))
-        });
-
-        console.log("Successfully published to Datbabase.");
-    }
-    catch (error) {
-        console.log(error);
-    }
-
 }
 
 async function fetchAllSummonerInformation(server, tier, division) {
@@ -498,6 +456,10 @@ async function groupCompsFromMatches(matches, server, tier) {
         let FINAL_RESULTS = await cleanResults(compGroupings);
         console.log(server, tier, "Results cleaned.")
         console.log(server, tier, "Final Results");
+
+        //5. Write to the Database
+        let WRITE_TO_DATABASE = await writeResultsToDatabase(compGroupings, server, tier);
+        console.log(server, tier, ": Wrote to Database")
 
         return FINAL_RESULTS;
     }
@@ -759,6 +721,35 @@ async function cleanResults(compGroupings) {
     catch (error) {
         console.log(error)
     }
+}
+
+async function writeResultsToDatabase(compGroupings, server, tier) {
+    try {
+        console.log("Trying to write", server, tier, "to database");
+
+        await firebase.database().ref(`/comps/${server}/${tier}`).set(
+            JSON.parse(JSON.stringify(compGroupings)),
+
+            //second parameter is a callback
+            function (error) {
+                if (error) {
+                    //the write failed...
+                    console.log("The write to dataabse for ", server, tier, "failed... error:", error)
+                }
+                else {
+                    //Data saved successfully
+                    console.log("Successfully wrote data for ", server, tier);
+                }
+            }
+        );
+    }
+
+    catch (error) {
+        console.log(error);
+    }
+
+
+
 }
 
 function sumMatches(compGrouping) {

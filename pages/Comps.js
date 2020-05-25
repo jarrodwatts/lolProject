@@ -8,6 +8,21 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import NavBar from '../src/components/NavBar';
 import Error from '../src/components/Error';
+const firebase = require("firebase");
+
+if (!firebase.apps.length) {
+    // Initialize Cloud Firestore through Firebase
+    firebase.initializeApp({
+        apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
+        authDomain: "lolproject-6938d.firebaseapp.com",
+        databaseURL: "https://lolproject-6938d.firebaseio.com",
+        projectId: "lolproject-6938d",
+        storageBucket: "lolproject-6938d.appspot.com",
+        messagingSenderId: "681416986021",
+        appId: "1:681416986021:web:33705f6e1da5b886016c4c",
+        measurementId: "G-MQDG4DGTK6"
+    });
+}
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -156,30 +171,13 @@ function renderChamp(unit, classes) {
 }
 
 async function fetchNewDataFromDataBase(server, rank) {
-    console.log("trying to get", rank, server, "from fetchnewdatafromdb")
-    const firebase = require("firebase");
-    // Call an external API endpoint to get posts.
-    if (!firebase.apps.length) {
-        // Initialize Cloud Firestore through Firebase
-        firebase.initializeApp({
-            apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
-            authDomain: "lolproject-6938d.firebaseapp.com",
-            databaseURL: "https://lolproject-6938d.firebaseio.com",
-            projectId: "lolproject-6938d",
-            storageBucket: "lolproject-6938d.appspot.com",
-            messagingSenderId: "681416986021",
-            appId: "1:681416986021:web:33705f6e1da5b886016c4c",
-            measurementId: "G-MQDG4DGTK6"
-        });
-    }
-
     let comps = {};
     // Get a reference to the database service
     var db = firebase.database();
 
     let data;
 
-    await db.ref(`/comps/compGroupings/${server}/${rank}`).once('value').then(function (snapshot) {
+    await db.ref(`/comps/${server}/${rank}`).once('value').then(function (snapshot) {
         //console.log(snapshot.val());
         comps = snapshot.val();
         data = comps;
@@ -215,7 +213,7 @@ export default function Comps({ data }) {
     const [currentServerRankCompData, setCurrentServerRankCompData] = React.useState(data);
 
     async function handleRankChange(event) {
-        setRank(event.target.value);
+        await setRank(event.target.value);
         //console.log("calling fetchnewdatafromdb within handlerankchange", server, event.target.value)
         let newData = await fetchNewDataFromDataBase(server, event.target.value)
         setCurrentServerRankCompData(newData);
@@ -341,7 +339,7 @@ export default function Comps({ data }) {
                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                 <Box>
                                                                     <Typography variant="caption">Top 4 Rate</Typography>
-                                                                    <Typography><b>{composition.topFourRate  + "%"}</b></Typography>
+                                                                    <Typography><b>{composition.topFourRate + "%"}</b></Typography>
                                                                 </Box>
                                                             </Grid>
 
@@ -536,7 +534,7 @@ export async function getServerSideProps() {
     var db = firebase.database();
 
     let data;
-    await db.ref('/comps/compGroupings/ALL_SERVERS/ALL_RANKS').once('value').then(function (snapshot) {
+    await db.ref('/comps/ALL_SERVERS/ALL_RANKS').once('value').then(function (snapshot) {
         //console.log(snapshot.val());
         comps = snapshot.val();
         data = comps;
