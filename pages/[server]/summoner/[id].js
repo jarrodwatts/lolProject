@@ -4,17 +4,17 @@ import fetch from 'isomorphic-unfetch';
 import { makeStyles } from '@material-ui/core/styles';
 
 //Import Components
-import NavBar from '../../src/components/NavBar';
-import FavouriteChampions from '../../src/components/SummonerPage/FavouriteChampions';
-import Match from '../../src/components/SummonerPage/Match';
-import PlacementDistribution from '../../src/components/SummonerPage/PlacementDistribution';
-import SeasonWins from '../../src/components/SummonerPage/SeasonWins';
-import SummonerName from '../../src/components/SummonerPage/SummonerName';
-import SummonerRank from '../../src/components/SummonerPage/SummonerRank';
+import NavBar from '../../../src/components/NavBar';
+import FavouriteChampions from '../../../src/components/SummonerPage/FavouriteChampions';
+import Match from '../../../src/components/SummonerPage/Match';
+import PlacementDistribution from '../../../src/components/SummonerPage/PlacementDistribution';
+import SeasonWins from '../../../src/components/SummonerPage/SeasonWins';
+import SummonerName from '../../../src/components/SummonerPage/SummonerName';
+import SummonerRank from '../../../src/components/SummonerPage/SummonerRank';
 
 import Router from 'next/router';
 
-const RIOT_API_KEY = "RGAPI-98d3b5a2-7f0a-4a3e-b94c-27c1499e0220"
+const RIOT_API_KEY = "RGAPI-08e60dda-161f-4138-aa61-af107b2529b8"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -71,9 +71,9 @@ function navigateToMatch(match) {
     Router.push('/match/[id]', ('/match/' + match.metadata.match_id))
 }
 
-function Summoner({ profile, matches, matchDetailsArray, league }) {
+function Summoner({ profile, matchDetailsArray, league }) {
     const classes = useStyles();
-    console.log(matchDetailsArray)
+    //console.log(matchDetailsArray)
 
     return (
         <div>
@@ -139,12 +139,31 @@ function Summoner({ profile, matches, matchDetailsArray, league }) {
 
 export async function getServerSideProps(context) {
     //Fetch data from external API
+    const serverGroups = {
+        "BR1": 'Americas',
+        "EUN1": 'Europe',
+        "EUW1": 'Europe',
+        "JP1": 'Asia',
+        "KR": 'Asia',
+        "LA1": 'Americas',
+        "LA2": 'Americas',
+        "NA1": 'Americas',
+        "OC1": 'Americas',
+        "RU": 'Europe',
+        "TR1": 'Europe',
+    }
 
     //1. Get Profile
     /** Profile Schema: id, accountId, puuid, profileIconId, revisionDate, summonerLevel, */
-    const { id } = context.query;
+    //console.log(context.query);
+
+    const server = context.query.server.toUpperCase();
+    const id = context.query.id;
+
+    //console.log("FIND", server)
+
     const resProfile = await fetch(
-        `https://oc1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${id}` + '?api_key=' + RIOT_API_KEY
+        `https://${server}.api.riotgames.com/tft/summoner/v1/summoners/by-name/${id}` + '?api_key=' + RIOT_API_KEY
     );
     const profile = await resProfile.json();
     //console.log(`Fetched profile: ${profile.id}`);
@@ -154,7 +173,7 @@ export async function getServerSideProps(context) {
     /** Matches Schema: Array of Match ID's */
     const puuid = profile.puuid;
     const resMatches = await fetch(
-        `https://americas.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids` + '?api_key=' + RIOT_API_KEY
+        `https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids` + '?api_key=' + RIOT_API_KEY
     );
     const matches = await resMatches.json();
     //console.log(`Fetched matches: ${matches}`);
@@ -167,8 +186,7 @@ export async function getServerSideProps(context) {
     // for (let i = 0; i < matches.length; i++) {
     for (let i = 0; i < 5; i++) {
         let resMatchDetails = await fetch(
-            `https://americas.api.riotgames.com/tft/match/v1/matches/${matches[i]}` + '?api_key=' + RIOT_API_KEY
-
+            `https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/${matches[i]}` + '?api_key=' + RIOT_API_KEY
         );
 
         let matchDetails = await resMatchDetails.json();
@@ -178,16 +196,14 @@ export async function getServerSideProps(context) {
     //4. Get Profile Details, using encryptedSummonerId
     const encryptedSummonerId = profile.id;
     const resLeague = await fetch(
-        `https://oc1.api.riotgames.com/tft/league/v1/entries/by-summoner/${encryptedSummonerId}` + '?api_key=' + RIOT_API_KEY
+        `https://${server}.api.riotgames.com/tft/league/v1/entries/by-summoner/${encryptedSummonerId}` + '?api_key=' + RIOT_API_KEY
     );
     const league = await resLeague.json();
     //console.log(`Fetched league: ${league}`);
 
-
     return {
         props: {
             profile,
-            matches,
             matchDetailsArray,
             league,
         }

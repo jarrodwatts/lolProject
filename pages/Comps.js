@@ -55,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
         margin: theme.spacing(1),
         minWidth: 120,
     },
+
     selectEmpty: {
         marginTop: theme.spacing(2),
     },
@@ -240,8 +241,8 @@ export default function Comps({ data }) {
                     <Grid container spacing={3} direction="column" >
                         {/* Heading and subtitle */}
                         <Grid container item direction="column" justify="center" alignItems="center">
-                            <Typography variant="h2">TFTPROJECT</Typography>
-                            <Typography variant="h5">Teamfight Tactics Compositions</Typography>
+                            <Typography variant="h2">NOPIVOT</Typography>
+                            <Typography variant="h6">Teamfight Tactics Compositions</Typography>
                         </Grid>
 
                         {/* Filters */}

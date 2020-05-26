@@ -44,14 +44,14 @@ export default class Index extends React.Component {
       <div>
         <NavBar />
 
-          <Grid container spacing={3} justify="center" alignItems="center" style={{ height: '65vh', }}>
-            <Grid item>
-              {/* Big Logo Component */}
-              <BigLogo />
-              {/* Component with Search Bar, Region Selector, and Search Icon */}
-              <BigSearch />
-            </Grid>
-          </Grid>
+        <Grid container direction="column" spacing={3} justify="center" alignItems="center" style={{ height: '65vh', }}>
+
+          {/* Big Logo Component */}
+          <BigLogo />
+          {/* Component with Search Bar, Region Selector, and Search Icon */}
+          <BigSearch />
+
+        </Grid>
       </div>
     );
   }

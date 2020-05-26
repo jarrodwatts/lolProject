@@ -50,7 +50,7 @@ function NavBar(props) {
                         <Grid container direction="row" alignItems="center" className={classes.title}>
                             <Typography variant="h6" >
                                 <Link href="/" style={{ color: '#fff' }}>
-                                    TFTProject
+                                NOPIVOT
                             </Link>
                             </Typography>
 
@@ -78,7 +78,7 @@ function NavBar(props) {
                         <Grid container direction="row" alignItems="center" justify="space-between" className={classes.title}>
                             <Typography variant="h6" >
                                 <Link href="/" style={{ color: '#fff', paddingLeft: '8px' }}>
-                                    TFTProject
+                                    NOPIVOT
                                 </Link>
                             </Typography>
 

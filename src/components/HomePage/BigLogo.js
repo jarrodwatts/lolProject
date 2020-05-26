@@ -6,15 +6,12 @@ export default function BigLogo() {
 
     try {
         return (
-            <div>
-                {/* TODO: Temp Text replace with logo */}
                 <Typography variant="h2" component="h2" style={{ padding: '16px' }}>
-                    TFTPROJECT
-            </Typography>
-            </div>
+                    NOPIVOT
+                </Typography>
         )
     }
-    
+
     catch (error) {
         console.log(error);
         return (

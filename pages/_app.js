@@ -63,7 +63,7 @@ export default function MyApp({ Component, pageProps }) {
         (
           <React.Fragment>
             <Head>
-              <title>TFTPROJECT</title>
+              <title>NOPIVOT</title>
               <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
             </Head>
 
