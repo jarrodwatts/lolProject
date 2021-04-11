@@ -10,14 +10,14 @@ const RIOT_API_KEY = process.env.RIOT_API_KEY
 
 // TODO: Replace the following with your app's Firebase project configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
-    authDomain: "lolproject-6938d.firebaseapp.com",
-    databaseURL: "https://lolproject-6938d.firebaseio.com",
-    projectId: "lolproject-6938d",
-    storageBucket: "lolproject-6938d.appspot.com",
-    messagingSenderId: "681416986021",
-    appId: "1:681416986021:web:33705f6e1da5b886016c4c",
-    measurementId: "G-MQDG4DGTK6"
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain:  process.env.FIREBASE_AUTH_DOMAIN,
+    databaseURL:  process.env.FIREBASE_DATABASE_URL,
+    projectId:  process.env.FIREBASE_PROJECT_ID,
+    storageBucket:  process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId:  process.env.FIREBASE_APP_ID,
+    measurementId:  process.env.FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
