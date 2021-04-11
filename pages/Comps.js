@@ -193,6 +193,10 @@ async function fetchNewDataFromDataBase(server, rank) {
                     //remove this cos we cant map it
                     data.splice(compObject, 1);
                 }
+                // //do the same for traits
+                // if (!data[compObject].comps[i].traits) {
+                //     data.splice(compObject, 1);
+                // }
             }
 
             catch (error) {
@@ -310,9 +314,9 @@ export default function Comps({ data }) {
                                     <Grid item>
                                         <Paper className={classes.paper}>
 
-                                            <Grid container direction="row" item justify="flex-start">
+                                            {/* <Grid container direction="row" item justify="flex-start">
                                                 <Typography color="primary">{generateCompName(composition.comps[0].traits)}</Typography>
-                                            </Grid>
+                                            </Grid> */}
 
                                             <Grid container direction="column" spacing={2}>
                                                 <Grid container item direction="row" alignItems="center" justify="space-between" spacing={3}>
@@ -353,7 +357,7 @@ export default function Comps({ data }) {
                                                             </Grid>
 
                                                             {/* Synergies / Traits */}
-                                                            <Grid item style={{ paddingLeft: '64px' }}>
+                                                            {/* <Grid item style={{ paddingLeft: '64px' }}>
                                                                 <Box>
                                                                     <Typography variant="caption">Traits</Typography>
                                                                     <Grid container direction="row">
@@ -364,7 +368,7 @@ export default function Comps({ data }) {
                                                                         ))}
                                                                     </Grid>
                                                                 </Box>
-                                                            </Grid>
+                                                            </Grid> */}
 
                                                         </Grid>
                                                     </Grid>
@@ -406,19 +410,7 @@ export default function Comps({ data }) {
                                                                                         <Grid container direction="row" alignItems="center">
 
                                                                                             {/* Companion image */}
-                                                                                            <Grid item style={{ paddingLeft: '8px' }}>
-                                                                                                {/* temp blitz: TODO: replace with companion icon */}
-                                                                                                <Avatar src={`/assets/champions/blitzcrank.png`} />
-                                                                                            </Grid>
-
-                                                                                            {/* Placement and Type */}
-                                                                                            <Grid item style={{ paddingLeft: '16px' }}>
-                                                                                                <Box>
-                                                                                                    <Typography variant="caption">Win Ratio</Typography>
-                                                                                                    <Typography><b>{parseFloat(comp.winRatio) * 100 + "%"}</b></Typography>
-                                                                                                </Box>
-                                                                                            </Grid>
-
+                                                                                            
                                                                                             {/* Matches */}
                                                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                                                 <Box>
@@ -427,19 +419,19 @@ export default function Comps({ data }) {
                                                                                                 </Box>
                                                                                             </Grid>
 
-                                                                                            {/* Wins */}
+                                                                                            {/* Win Rate */}
                                                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                                                 <Box>
-                                                                                                    <Typography variant="caption">Wins</Typography>
-                                                                                                    <Typography><b>{comp.winLoss.win}</b></Typography>
+                                                                                                    <Typography variant="caption">Win Ratio</Typography>
+                                                                                                    <Typography><b>{parseFloat(Math.round(comp.winRate)) + "%"}</b></Typography>
                                                                                                 </Box>
                                                                                             </Grid>
 
-                                                                                            {/* Losses */}
+                                                                                            {/* TopFour Rate */}
                                                                                             <Grid item style={{ paddingLeft: '16px' }}>
                                                                                                 <Box>
-                                                                                                    <Typography variant="caption">Losses</Typography>
-                                                                                                    <Typography><b>{comp.winLoss.loss}</b></Typography>
+                                                                                                    <Typography variant="caption">Top Four Ratio</Typography>
+                                                                                                    <Typography><b>{parseFloat(Math.round(comp.topFourRate)) + "%"}</b></Typography>
                                                                                                 </Box>
                                                                                             </Grid>
 
@@ -455,13 +447,13 @@ export default function Comps({ data }) {
                                                                                             <Grid item style={{ paddingLeft: '64px' }}>
                                                                                                 <Box>
                                                                                                     <Typography variant="caption">Traits</Typography>
-                                                                                                    <Grid container direction="row">
+                                                                                                    {/* <Grid container direction="row">
                                                                                                         {comp.traits.map((trait, key) => (
                                                                                                             <Grid item key={key}>
                                                                                                                 <TraitsRow trait={trait} />
                                                                                                             </Grid>
                                                                                                         ))}
-                                                                                                    </Grid>
+                                                                                                    </Grid> */}
                                                                                                 </Box>
                                                                                             </Grid>
 
@@ -551,6 +543,12 @@ export async function getServerSideProps() {
                     //remove this cos we cant map it
                     data.splice(compObject, 1);
                 }
+
+                //do the same for traits
+                // if (!data[compObject].comps[i].traits) {
+                //     data.splice(compObject, 1);
+                // }
+
             }
 
             catch (error) {

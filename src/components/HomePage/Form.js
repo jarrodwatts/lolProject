@@ -3,13 +3,16 @@ import { Typography, Button, TextField, Grid, FormControl, Select, MenuItem, Inp
 import Router from 'next/router';
 import Error from '../Error'
 
-
 export default class Form extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             value: '',
             server: '',
+            summonerBorderColor: '',
+            summonerBorderStyle: '',
+            serverBorderColor: '',
+            serverBorderStyle: '',
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -28,9 +31,25 @@ export default class Form extends React.Component {
 
     handleSubmit(event) {
         //next.js navigation using router
-        Router.push('/[server]/summoner/[id]', ('/' + this.state.server.toLowerCase() + '/summoner/' + this.state.value.toLowerCase()))
-        event.preventDefault();
-        console.log('/' + this.state.server + '/summoner/' + this.state.value)
+
+        if (!this.state.server) {
+            event.preventDefault();
+            this.setState({ serverBorderColor: '#F76C6C' })
+            this.setState({ serverBorderStyle: 'groove' })
+        }
+
+        if (!this.state.value) {
+            event.preventDefault();
+            this.setState({ summonerBorderColor: '#F76C6C' })
+            this.setState({ summonerBorderStyle: 'groove' })
+        }
+
+        if (this.state.value && this.state.server) {
+            event.preventDefault();
+            Router.push('/[server]/summoner/[id]', ('/' + this.state.server.toLowerCase() + '/summoner/' + this.state.value.toLowerCase()))
+            console.log('/' + this.state.server + '/summoner/' + this.state.value)
+        }
+
     }
 
     render() {
@@ -50,7 +69,10 @@ export default class Form extends React.Component {
                                         paddingTop: '16px',
                                         height: '100%',
                                         color: '#fff',
-                                        width: '100%'
+                                        width: '100%',
+                                        border: 2,
+                                        borderStyle: this.state.summonerBorderStyle,
+                                        borderColor: this.state.summonerBorderColor
                                     }}
                                 >
                                 </TextField>
@@ -59,6 +81,9 @@ export default class Form extends React.Component {
                             <Grid item>
                                 <FormControl style={{
                                     minWidth: 120,
+                                    border: 2,
+                                    borderStyle: this.state.summonerBorderStyle,
+                                    borderColor: this.state.summonerBorderColor
                                 }}>
                                     <InputLabel id="rank-simple-select-label">Server</InputLabel>
                                     <Select

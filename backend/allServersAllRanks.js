@@ -4,7 +4,7 @@ require("firebase/database");
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const RIOT_API_KEY = "RGAPI-08e60dda-161f-4138-aa61-af107b2529b8"
+const RIOT_API_KEY = process.env.RIOT_API_KEY
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
     authDomain: "lolproject-6938d.firebaseapp.com",
@@ -71,6 +71,7 @@ const divisions = [
 ]
 
 const CURRENT_DATA_VERSION = 4;
+const CURRENT_PATCH = "Version 10.12";
 
 let MAIN_GAME_OBJECT = {};
 let MAIN_PLAYER_OBJECT = {};
@@ -141,10 +142,14 @@ async function main() {
                         //Check if match was found
                         if (gameDetail != "Not Found") {
                             //console.log("Pushed", gameDetail)
-                            MAIN_GAME_DETAIL_OBJECT[server][tier].push(gameDetail);                 //e.g. BR1 IRON
-                            MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"].push(gameDetail);          //e.g. BR1 ALL_RANKS
-                            MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"]["ALL_RANKS"].push(gameDetail);   //e.g. ALL_SERVERS ALL_RANKS
-                            MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier].push(gameDetail);          //e.g. ALL_SERVERS IRON
+                            //Add another check for version
+                            if (info.game_version.includes(CURRENT_PATCH)) {
+
+                                MAIN_GAME_DETAIL_OBJECT[server][tier].push(gameDetail);                 //e.g. BR1 IRON
+                                MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"].push(gameDetail);          //e.g. BR1 ALL_RANKS
+                                MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"]["ALL_RANKS"].push(gameDetail);   //e.g. ALL_SERVERS ALL_RANKS
+                                MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier].push(gameDetail);          //e.g. ALL_SERVERS IRON
+                            }
                         }
                     }
                 }

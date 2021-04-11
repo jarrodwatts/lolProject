@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Typography, Box, Grid } from '@material-ui/core';
+import { Container, Typography, Box, Grid, Button } from '@material-ui/core';
 import fetch from 'isomorphic-unfetch';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -14,7 +14,7 @@ import SummonerRank from '../../../src/components/SummonerPage/SummonerRank';
 
 import Router from 'next/router';
 
-const RIOT_API_KEY = "RGAPI-08e60dda-161f-4138-aa61-af107b2529b8"
+const RIOT_API_KEY = process.env.RIOT_API_KEY
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -71,70 +71,110 @@ function navigateToMatch(match) {
     Router.push('/match/[id]', ('/match/' + match.metadata.match_id))
 }
 
-function Summoner({ profile, matchDetailsArray, league }) {
+function Summoner({ profile, matchDetailsArray, league, error }) {
     const classes = useStyles();
     //console.log(matchDetailsArray)
+    console.log("profile:", error)
+    console.log("matchDetailsArray:", matchDetailsArray)
+    console.log("league:", league)
+    console.log("error:", error)
 
-    return (
-        <div>
-            <NavBar />
+    if (!league.length == 0) {
+        return (
+            <div>
+                <NavBar />
 
-            {/* // Main Container */}
-            <Container className={classes.topSpacing}>
-                <Grid container spacing={3}>
+                {/* // Main Container */}
+                <Container className={classes.topSpacing}>
+                    <Grid container spacing={3}>
 
-                    {/* Left Column */}
-                    <Grid item container direction="column" md={3} sm={12} xs={12} spacing={1}>
+                        {/* Left Column */}
+                        <Grid item container direction="column" md={3} sm={12} xs={12} spacing={1}>
 
-                        {/* Summoner Name */}
-                        <Grid item>
-                            <SummonerName name={league[0].summonerName} />
+                            {/* Summoner Name */}
+                            <Grid item>
+                                <SummonerName name={league[0].summonerName} />
+                            </Grid>
+
+                            {/* Summoner Rank */}
+                            <Grid item>
+                                <SummonerRank tier={league[0].tier} rank={league[0].rank} />
+                            </Grid>
+
+                            {/* Season Wins */}
+                            <Grid item>
+                                <SeasonWins wins={league[0].wins} />
+                            </Grid>
+
+                            {/* Placement Distribution */}
+                            <Grid item>
+                                <PlacementDistribution matchDetailsArray={matchDetailsArray} profile={profile} />
+                            </Grid>
+
+                            {/* Favourite Champions */}
+                            <Grid item>
+                                <FavouriteChampions matchDetailsArray={matchDetailsArray} profile={profile} />
+                            </Grid>
+
                         </Grid>
 
-                        {/* Summoner Rank */}
-                        <Grid item>
-                            <SummonerRank tier={league[0].tier} rank={league[0].rank} />
-                        </Grid>
+                        {/* Right Column */}
+                        <Grid container item xs={12} sm={12} md={9} direction="column" spacing={1}>
 
-                        {/* Season Wins */}
-                        <Grid item>
-                            <SeasonWins wins={league[0].wins} />
-                        </Grid>
+                            {matchDetailsArray.map((match, key) => (
+                                <Box key={key} style={{ paddingBottom: '16px' }}>
+                                    <Typography variant="caption">{formatGameType(match.info)}</Typography>
 
-                        {/* Placement Distribution */}
-                        <Grid item>
-                            <PlacementDistribution matchDetailsArray={matchDetailsArray} profile={profile} />
-                        </Grid>
+                                    {/* Begin individual Match Papers */}
+                                    <Grid item
+                                        onClick={() => navigateToMatch(match)}
+                                        className={classes.matchHover}
+                                    >
+                                        <Match match={match} profile={profile} />
+                                    </Grid>
+                                </Box>
+                            ))}
 
-                        {/* Favourite Champions */}
-                        <Grid item>
-                            <FavouriteChampions matchDetailsArray={matchDetailsArray} profile={profile} />
                         </Grid>
+                    </Grid>
+                </Container>
+            </div>
+        )
+    }
+    else {
+        //Player Not Found Error
+        return (
+            <div>
+                <NavBar />
+
+                {/* // Main Container */}
+                <Container className={classes.topSpacing}>
+                    <Grid container direction="column" alignItems="center" justify="center" spacing={3} style={{ width: '100%', height: '100%' }}>
+                        <Typography color="secondary" variant="h3" style={{ paddingBottom: '16px' }}>
+                            Profile Not Found
+                        </Typography>
+
+                        <Typography >
+                            We couldn't find that profile :(
+                        </Typography>
+
+                        <Typography style={{ paddingBottom: '16px' }}>
+                            Or it may not have played any games recently...
+                        </Typography>
+
+                        <Typography style={{ paddingBottom: '4px' }}>
+                            Want to try search again?
+                        </Typography>
+
+                        <Button onClick={() => Router.push('/')}>
+                            Go Back
+                        </Button>
 
                     </Grid>
-
-                    {/* Right Column */}
-                    <Grid container item xs={12} sm={12} md={9} direction="column" spacing={1}>
-
-                        {matchDetailsArray.map((match, key) => (
-                            <Box key={key} style={{ paddingBottom: '16px' }}>
-                                <Typography variant="caption">{formatGameType(match.info)}</Typography>
-
-                                {/* Begin individual Match Papers */}
-                                <Grid item
-                                    onClick={() => navigateToMatch(match)}
-                                    className={classes.matchHover}
-                                >
-                                    <Match match={match} profile={profile} />
-                                </Grid>
-                            </Box>
-                        ))}
-
-                    </Grid>
-                </Grid>
-            </Container>
-        </div>
-    )
+                </Container>
+            </div>
+        )
+    }
 }
 
 export async function getServerSideProps(context) {
@@ -160,12 +200,17 @@ export async function getServerSideProps(context) {
     const server = context.query.server.toUpperCase();
     const id = context.query.id;
 
-    //console.log("FIND", server)
+    //set a bunch of undefineds so we can return error if user not found
+    let profile = null;
+    let matchDetailsArray = null;
+    let league = null;
+    let matches = null;
+    let error = null;
 
     const resProfile = await fetch(
         `https://${server}.api.riotgames.com/tft/summoner/v1/summoners/by-name/${id}` + '?api_key=' + RIOT_API_KEY
     );
-    const profile = await resProfile.json();
+    profile = await resProfile.json();
     //console.log(`Fetched profile: ${profile.id}`);
 
 
@@ -175,16 +220,15 @@ export async function getServerSideProps(context) {
     const resMatches = await fetch(
         `https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids` + '?api_key=' + RIOT_API_KEY
     );
-    const matches = await resMatches.json();
-    //console.log(`Fetched matches: ${matches}`);
+    matches = await resMatches.json();
 
 
     //3. Get match details, using match ID
     /** Match Schema:  A lot */
-    let matchDetailsArray = [];
+    matchDetailsArray = [];
 
     // for (let i = 0; i < matches.length; i++) {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
         let resMatchDetails = await fetch(
             `https://${serverGroups[server]}.api.riotgames.com/tft/match/v1/matches/${matches[i]}` + '?api_key=' + RIOT_API_KEY
         );
@@ -198,21 +242,21 @@ export async function getServerSideProps(context) {
     const resLeague = await fetch(
         `https://${server}.api.riotgames.com/tft/league/v1/entries/by-summoner/${encryptedSummonerId}` + '?api_key=' + RIOT_API_KEY
     );
-    const league = await resLeague.json();
-    //console.log(`Fetched league: ${league}`);
+    league = await resLeague.json();
 
     return {
         props: {
             profile,
             matchDetailsArray,
             league,
+            error,
         }
     };
 }
 
+
 //HELPER FUNCTIONS
 //TODO: Move these out of here
-
 function formatUnixDate(date) {
     var dateString = new Date(date).toLocaleDateString("en-US")
     var timeString = new Date(date).toLocaleTimeString("en-US")

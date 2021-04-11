@@ -13,7 +13,7 @@ import ChampionsItems from '../../src/components/SummonerPage/ChampionItems';
 import withWidth, { isWidthDown } from '@material-ui/core/withWidth';
 import Link from '../../src/Link'
 
-const RIOT_API_KEY = "RGAPI-08e60dda-161f-4138-aa61-af107b2529b8"
+const RIOT_API_KEY = process.env.RIOT_API_KEY
 
 const useStyles = makeStyles((theme) => ({
     root: {

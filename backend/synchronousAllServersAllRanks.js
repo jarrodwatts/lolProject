@@ -4,7 +4,7 @@ require("firebase/database");
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const RIOT_API_KEY = "RGAPI-08e60dda-161f-4138-aa61-af107b2529b8";
+const RIOT_API_KEY = process.env.RIOT_API_KEY
 const firebaseConfig = {
     apiKey: "AIzaSyDRFR4EiyUwJJ1S2Bqdihqp7XgR7H4sDRA",
     authDomain: "lolproject-6938d.firebaseapp.com",
@@ -49,16 +49,16 @@ const serverGroups = {
 }
 
 const tiers = [
-    "IRON",
-    "BRONZE",
-    "SILVER",
-    "GOLD",
-    "PLATINUM",
-    "DIAMOND",
+    // "IRON",
+    // "BRONZE",
+    // "SILVER",
+    // "GOLD",
+    // "PLATINUM",
+    // "DIAMOND",
 
-    //pro tiers
-    "MASTER",
-    "GRANDMASTER",
+    // //pro tiers
+    //"MASTER",
+    //"GRANDMASTER",
     "CHALLENGER",
 ]
 
@@ -70,6 +70,7 @@ const divisions = [
 ]
 
 const CURRENT_DATA_VERSION = 4;
+const CURRENT_PATCH = "Version 10.14";
 
 let MAIN_GAME_OBJECT = {};
 let MAIN_PLAYER_OBJECT = {};
@@ -89,14 +90,14 @@ async function runFillForServer(server) {
 
     //Stores Game Details for a given server
     MAIN_GAME_DETAIL_OBJECT[server] = {
-        "IRON": [],
-        "BRONZE": [],
-        "SILVER": [],
-        "GOLD": [],
-        "PLATINUM": [],
-        "DIAMOND": [],
-        "MASTER": [],
-        "GRANDMASTER": [],
+        //"IRON": [],
+        //"BRONZE": [],
+        //"SILVER": [],
+        //"GOLD": [],
+        //"PLATINUM": [],
+        //"DIAMOND": [],
+        //"MASTER": [],
+        //"GRANDMASTER": [],
         "CHALLENGER": [],
         "ALL_RANKS": [],
     };
@@ -188,12 +189,15 @@ async function runFillForServer(server) {
                     //Check if match was found
                     if (gameDetail != "Not Found") {
                         try {
-                            //console.log("Pushed", gameDetail)
-                            MAIN_GAME_DETAIL_OBJECT[server][tier].push(gameDetail);                 //e.g. BR1 IRON
-                            MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"].push(gameDetail);          //e.g. BR1 ALL_RANKS
-                            MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"]["ALL_RANKS"].push(gameDetail);   //e.g. ALL_SERVERS ALL_RANKS
-                            MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier].push(gameDetail);          //e.g. ALL_SERVERS IRON
-                            console.log("Pushed game to", server, tier);
+                            if (gameDetail.info.game_version.includes(CURRENT_PATCH)) {
+
+                                //console.log("Pushed", gameDetail)
+                                MAIN_GAME_DETAIL_OBJECT[server][tier].push(gameDetail);                 //e.g. BR1 IRON
+                                MAIN_GAME_DETAIL_OBJECT[server]["ALL_RANKS"].push(gameDetail);          //e.g. BR1 ALL_RANKS
+                                MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"]["ALL_RANKS"].push(gameDetail);   //e.g. ALL_SERVERS ALL_RANKS
+                                MAIN_GAME_DETAIL_OBJECT["ALL_SERVERS"][tier].push(gameDetail);          //e.g. ALL_SERVERS IRON
+                                console.log("Pushed game to", server, tier);
+                            }
                         }
                         catch (error) {
                             //debugger;
@@ -283,9 +287,9 @@ async function fetchAllSummonerInformation(server, tier, division) {
         }
 
         //DEV ONLY: REDUCE PLAYER LIMIT TO 10
-        if (serverTierDivisionPlayerInformation.length > 9) {
-            serverTierDivisionPlayerInformation.length = 10;
-        }
+        // if (serverTierDivisionPlayerInformation.length > 9) {
+        //     serverTierDivisionPlayerInformation.length = 10;
+        // }
 
         return serverTierDivisionPlayerInformation;
     }
@@ -301,7 +305,6 @@ async function fetchAllSummonerInformationForProDivision(server, tier) {
         let serverTierDivisionPlayerInformation;
 
         let resServerTierDivisionPlayerInformation = await fetch(
-            //         https://oc1      .api.riotgames.com/tft/league/v1/challenger?api_key=RGAPI-5ed5f9bd-e028-4304-b3fa-274fb30f504f
             encodeURI(`https://${server.toLowerCase()}.api.riotgames.com/tft/league/v1/${tier.toLowerCase()}` + '?api_key=' + RIOT_API_KEY)
         )
 
@@ -322,9 +325,9 @@ async function fetchAllSummonerInformationForProDivision(server, tier) {
         }
 
         //DEV ONLY: REDUCE PLAYER LIMIT TO 10
-        if (serverTierDivisionPlayerInformation['entries'].length > 9) {
-            serverTierDivisionPlayerInformation['entries'].length = 10;
-        }
+        // if (serverTierDivisionPlayerInformation['entries'].length > 9) {
+        //     serverTierDivisionPlayerInformation['entries'].length = 10;
+        // }
 
         return serverTierDivisionPlayerInformation['entries'];
     }
@@ -650,9 +653,23 @@ async function cleanResults(compGroupings) {
             compGroupings[i]["topFourRate"] = createCompGroupingTopFourRate(compGroupings[i]);
         }
 
+        //Add field for each comp grouping variation
+        for (let i = 0; i < compGroupings.length; i++) {
+            for (let x = 0; x < compGroupings[i].comps.length; x++) {
+                compGroupings[i].comps[x]["topFourRate"] = createCompVariationTopFourRate(compGroupings[i].comps[x].placementsArray)
+            }
+        }
+
         //Add a field to each compGrouping that is win rate
         for (let i = 0; i < compGroupings.length; i++) {
             compGroupings[i]["winRate"] = createCompGroupingWinRate(compGroupings[i]);
+        }
+
+        //Add field for each comp group variation for win rate
+        for (let i = 0; i < compGroupings.length; i++) {
+            for (let x = 0; x < compGroupings[i].comps.length; x++) {
+                compGroupings[i].comps[x]["winRate"] = createCompVariationWinRate(compGroupings[i].comps[x].placementsArray)
+            }
         }
 
         //Add a field for each compGroupings average placement
@@ -679,6 +696,15 @@ async function cleanResults(compGroupings) {
             for (let x = 0; x < compGroupings[i].comps.length; x++) {
                 if (compGroupings[i].comps[x].comp == [] ||
                     compGroupings[i].comps[x].comp == undefined //empty comps
+                ) {
+                    //splice it out of the array
+                    compGroupings[i].comps[x].splice(x, 1)
+                }
+
+                //same for traits
+                if (compGroupings[i].comps[x].traits == [] ||
+                    compGroupings[i].comps[x].traits == undefined ||
+                    !compGroupings[i].comps[x].traits
                 ) {
                     //splice it out of the array
                     compGroupings[i].comps[x].splice(x, 1)
@@ -746,10 +772,8 @@ async function writeResultsToDatabase(compGroupings, server, tier) {
 
     catch (error) {
         console.log(error);
+        return 0;
     }
-
-
-
 }
 
 function sumMatches(compGrouping) {
@@ -813,6 +837,26 @@ function createCompGroupingWinRate(compGrouping) {
     }
 }
 
+function createCompVariationWinRate(placementsArray) {
+    try {
+        let numOfTopFours = 0;
+        let numOfMatches = 0;
+
+        for (let i = 0; i < placementsArray.length; i++) {
+            if (placementsArray[i] == 1) {
+                numOfTopFours++;
+            }
+            numOfMatches++;
+        }
+
+        return Math.round((numOfTopFours / numOfMatches) * 100);
+    }
+    catch (error) {
+        console.log(error)
+        return 0;
+    }
+}
+
 function createCompAveragePlacement(compGrouping) {
     try {
         let sumToDivide = 0;
@@ -830,6 +874,25 @@ function createCompAveragePlacement(compGrouping) {
     catch (error) {
         console.log(error);
         return 0;
+    }
+}
+
+function createCompVariationTopFourRate(placementsArray) {
+    try {
+        let numOfWins = 0;
+        let numOfMatches = 0;
+
+        for (let i = 0; i < placementsArray.length; i++) {
+            if (placementsArray[i] < 5) {
+                numOfWins++;
+            }
+            numOfMatches++;
+        }
+
+        return Math.round((numOfWins / numOfMatches) * 100);
+    }
+    catch (error) {
+
     }
 }
 
