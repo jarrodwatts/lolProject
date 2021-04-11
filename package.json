@@ -1,23 +1,22 @@
 {
   "name": "nextjs",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "private": true,
   "dependencies": {
     "@material-ui/core": "latest",
-    "@material-ui/icons": "^4.9.1",
+    "@material-ui/icons": "latest",
     "clsx": "latest",
-    "firebase": "^7.14.2",
-    "firebase-admin": "^8.11.0",
-    "isomorphic-unfetch": "^3.0.0",
-    "mongodb": "^3.5.6",
-    "next": "^9.3.6",
-    "node-fetch": "^2.6.0",
+    "firebase": "latest",
+    "firebase-admin": "latest",
+    "isomorphic-unfetch": "latest",
+    "next": "latest",
+    "node-fetch": "latest",
     "prop-types": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "react-google-charts": "^3.0.15",
-    "react-loading": "^2.0.3",
-    "swr": "^0.2.0"
+    "react-google-charts": "latest",
+    "react-loading": "latest",
+    "swr": "latest"
   },
   "scripts": {
     "dev": "next",
